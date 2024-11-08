@@ -1,0 +1,322 @@
+import 'dart:ui';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Blue background container with "JIR APPLICATION" text
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(87),
+                bottomRight: Radius.circular(87),
+              ),
+              child: Container(
+                height: 308.0,
+                color: Color(0xFF45557B),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 25.0, left: 25.0),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "JIR APPLICATION",
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Transform.translate(
+              offset: Offset(0, -170),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        height: 250.0,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/cerah.png'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/cerah_berawan.png', // Path to weather icon
+                                  width: 50,
+                                  height: 37,
+                                ),
+                                Text(
+                                  "Cerah Berawan",
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                Text(
+                                  "32°",
+                                  style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                Text(
+                                  "Jakarta Barat",
+                                  style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: -30.0,
+                      right: -10.0,
+                      child: CircleAvatar(
+                        radius: 35,
+                        backgroundColor: Colors.white,
+                        child: Image.asset(
+                          'assets/images/path.png',
+                          width: 45,
+                          height: 45,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Transform.translate(
+              offset: Offset(0, -140),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Material(
+                  elevation: 5,
+                  borderRadius: BorderRadius.circular(50),
+                  shadowColor: Colors.grey.withOpacity(0.5),
+                  child: TextField(
+                    style: GoogleFonts.inter(
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Search . . .',
+                      hintStyle: GoogleFonts.inter(
+                          fontSize: 15.0,
+                          color: Colors.black,
+                          fontStyle: FontStyle.italic),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(
+                            bottom: 5.0, top: 5.0, left: 18.0, right: 15.0),
+                        child: Image.asset(
+                          'assets/images/search.png',
+                          height: 25,
+                          width: 25,
+                        ),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Color(0xFFEDEDED),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Transform.translate(
+              offset: Offset(0, -100),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: GridView.count(
+                  crossAxisCount: 4,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: [
+                    featureIcon(
+                      onPressed: () => print('Navigating to Pantau Banjir'),
+                      imagePath: 'assets/images/pantau_banjir.png',
+                      label: 'Pantau Banjir',
+                    ),
+                    featureIcon(
+                      onPressed: () => print('Navigating to Pantau Kerumunan'),
+                      imagePath: 'assets/images/pantau_kerumunan.png',
+                      label: 'Pantau Kerumunan',
+                    ),
+                    featureIcon(
+                      onPressed: () => print('Navigating to Taman'),
+                      imagePath: 'assets/images/Laporan.png',
+                      label: 'Laporan',
+                    ),
+                    featureIcon(
+                      onPressed: () => print('Navigating to Taman'),
+                      imagePath: 'assets/images/taman.png',
+                      label: 'Taman',
+                    ),
+                    featureIcon(
+                      onPressed: () => print('Navigating to Taman'),
+                      imagePath: 'assets/images/location.png',
+                      label: 'lokasi',
+                    ),
+                    featureIcon(
+                      onPressed: () => print('Navigating to Taman'),
+                      imagePath: 'assets/images/taman.png',
+                      label: 'Taman',
+                    ),
+                    featureIcon(
+                      onPressed: () => print('Navigating to Taman'),
+                      imagePath: 'assets/images/cctv.png',
+                      label: 'CCTV',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Transform.translate(
+              offset: Offset(0, -100),
+              child: Container(
+                child: Image.asset('assets/images/line2.png'),
+              ),
+            ),
+            SizedBox(height: 16),
+            Transform.translate(
+              offset: Offset(0, -80),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      "WARNING",
+                      style: GoogleFonts.inter(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 20.0),
+                    warningBox("Curah Hujan Tinggi Berpotensi Banjir"),
+                    warningBox("Aksi Demo Para Demonstran"),
+                  ],
+                ),
+              ),
+            ),
+
+            SizedBox(height: 16),
+            Container(
+              margin: EdgeInsets.all(16),
+              height: 150,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget featureIcon(
+      {required VoidCallback onPressed,
+      String? imagePath,
+      IconData? icon,
+      required String label}) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Material(
+            elevation: 5,
+            borderRadius: BorderRadius.circular(30),
+            shadowColor: Colors.grey.withOpacity(1.0),
+            child: CircleAvatar(
+              radius: 30,
+              backgroundColor: Color(0xFFEAEFF3),
+              child: imagePath != null
+                  ? Image.asset(imagePath, width: 30, height: 30)
+                  : Icon(icon, size: 30),
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 12, color: Color(0xFF355469)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget warningBox(String text) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Color(0xFFFFD205),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.warning, color: Colors.red),
+          SizedBox(width: 8),
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

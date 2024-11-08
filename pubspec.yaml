@@ -70,6 +70,22 @@ flutter:
   - assets/images/person.png
   - assets/images/line.png
   - assets/images/cerah.png
+  - assets/images/cerah_berawan.png
+  - assets/images/path.png
+  - assets/images/search.png
+  - assets/images/button_menu.png
+  - assets/images/pantau_banjir.png
+  - assets/images/pantau_kerumunan.png
+  - assets/images/taman.png
+  - assets/images/laporan.png
+  - assets/images/location.png
+  - assets/images/cctv.png
+  - assets/images/line2.png
+  - assets/images/settings.png
+  - assets/images/about.png
+  - assets/images/privacypolicy.png
+  - assets/images/termsofservice.png
+  - assets/images/logout.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smartcitys/pages/auth/login.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
-import 'package:smartcitys/pages/home/menu.dart';
+import 'package:smartcitys/helper/menu.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,9 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Login Page',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(),
       home: Menu(),
     );
   }
