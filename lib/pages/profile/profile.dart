@@ -60,33 +60,35 @@ class ProfilePage extends StatelessWidget {
             ],
           ),
           SizedBox(height: 60),
-          // Menu Pengaturan
           Expanded(
-            child: ListView(
-              children: [
-                ProfileMenuItem(
-                  icon: Image.asset('assets/images/settings.png', width: 24),
-                  text: "Settings",
-                ),
-                ProfileMenuItem(
-                  icon: Image.asset('assets/images/about.png', width: 24),
-                  text: "About JIR",
-                ),
-                ProfileMenuItem(
-                  icon:
-                      Image.asset('assets/images/privacypolicy.png', width: 24),
-                  text: "Privacy Policy",
-                ),
-                ProfileMenuItem(
-                  icon: Image.asset('assets/images/termsofservice.png',
-                      width: 24),
-                  text: "Terms Of Service",
-                ),
-                ProfileMenuItem(
-                  icon: Image.asset('assets/images/logout.png', width: 24),
-                  text: "Logout",
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: ListView(
+                children: [
+                  ProfileMenuItem(
+                    icon: Image.asset('assets/images/settings.png', width: 24),
+                    text: "Settings",
+                  ),
+                  ProfileMenuItem(
+                    icon: Image.asset('assets/images/about.png', width: 24),
+                    text: "About JIR",
+                  ),
+                  ProfileMenuItem(
+                    icon: Image.asset('assets/images/privacypolicy.png',
+                        width: 24),
+                    text: "Privacy Policy",
+                  ),
+                  ProfileMenuItem(
+                    icon: Image.asset('assets/images/termsofservice.png',
+                        width: 24),
+                    text: "Terms Of Service",
+                  ),
+                  ProfileMenuItem(
+                    icon: Image.asset('assets/images/logout.png', width: 24),
+                    text: "Logout",
+                  ),
+                ],
+              ),
             ),
           ),
         ],
