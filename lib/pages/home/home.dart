@@ -9,8 +9,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _animationController;
 
   @override
@@ -19,7 +18,7 @@ class _HomePageState extends State<HomePage>
 
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 60),
+      duration: Duration(seconds: 2),
     )..repeat(reverse: true);
   }
 
@@ -186,7 +185,7 @@ class _HomePageState extends State<HomePage>
                   ),
                 ),
                 Transform.translate(
-                  offset: Offset(0, -130),
+                  offset: Offset(0, -110.0),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: GridView.count(
@@ -271,7 +270,7 @@ class _HomePageState extends State<HomePage>
               ],
             ),
           ),
-          // Robot di pojok kanan bawah, mengikuti scrolling
+          
           AnimatedBuilder(
             animation: Listenable.merge([_animationController]),
             builder: (context, child) {
@@ -283,8 +282,7 @@ class _HomePageState extends State<HomePage>
                 child: GestureDetector(
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content: Text('Hello! I’m your assistant robot!')),
+                      const SnackBar(content: Text('tes')),
                     );
                   },
                   child: Image.asset(

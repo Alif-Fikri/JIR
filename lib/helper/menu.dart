@@ -10,7 +10,7 @@ class Menu extends StatefulWidget {
 }
 
 class _MenuState extends State<Menu> {
-  int _selectedIndex = 2;
+  int _selectedIndex = 3;
 
   final List<Widget> _pages = [
     HomePage(),

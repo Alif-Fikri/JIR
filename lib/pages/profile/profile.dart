@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/pages/profile/settings/settings_page.dart';
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -68,24 +69,59 @@ class ProfilePage extends StatelessWidget {
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/settings.png', width: 24),
                     text: "Settings",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SettingsPage(),
+                        ),
+                      );
+                    },
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/about.png', width: 24),
                     text: "About JIR",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AboutPage(),
+                        ),
+                      );
+                    },
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/privacypolicy.png',
                         width: 24),
                     text: "Privacy Policy",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PrivacyPolicyPage(),
+                        ),
+                      );
+                    },
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/termsofservice.png',
                         width: 24),
                     text: "Terms Of Service",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TermsOfServicePage(),
+                        ),
+                      );
+                    },
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/logout.png', width: 24),
                     text: "Logout",
+                    onTap: () {
+                      // Tambahkan logika logout di sini
+                    },
                   ),
                 ],
               ),
@@ -100,32 +136,64 @@ class ProfilePage extends StatelessWidget {
 class ProfileMenuItem extends StatelessWidget {
   final Widget icon;
   final String text;
+  final VoidCallback onTap; // Tambahkan callback untuk navigasi
 
   const ProfileMenuItem({
     required this.icon,
     required this.text,
+    required this.onTap, // Wajib untuk fungsi navigasi
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListTile(
-          leading: icon,
-          title: Text(
-            text,
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF435482),
+        GestureDetector(
+          onTap: onTap, // Gunakan GestureDetector untuk menangani klik
+          child: ListTile(
+            leading: icon,
+            title: Text(
+              text,
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF435482),
+              ),
             ),
           ),
-          onTap: () {
-            // Tambahkan navigasi atau logika lainnya di sini
-          },
         ),
         Divider(color: Color(0xffDEDEDE)),
       ],
+    );
+  }
+}
+
+class AboutPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('About JIR')),
+      body: Center(child: Text('About JIR Page')),
+    );
+  }
+}
+
+class PrivacyPolicyPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Privacy Policy')),
+      body: Center(child: Text('Privacy Policy Page')),
+    );
+  }
+}
+
+class TermsOfServicePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Terms Of Service')),
+      body: Center(child: Text('Terms Of Service Page')),
     );
   }
 }

@@ -87,6 +87,8 @@ flutter:
   - assets/images/termsofservice.png
   - assets/images/logout.png
   - assets/images/robot.png
+  - assets/images/delete.png
+  - assets/images/change.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
