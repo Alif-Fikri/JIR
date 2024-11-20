@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/pages/profile/about.dart';
+import 'package:smartcitys/pages/profile/privacy_policy.dart';
 import 'package:smartcitys/pages/profile/settings/settings_page.dart';
+import 'package:smartcitys/pages/profile/terms_of_service.dart';
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -98,7 +101,7 @@ class ProfilePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PrivacyPolicyPage(),
+                          builder: (context) => PrivacyPolicy(),
                         ),
                       );
                     },
@@ -111,7 +114,7 @@ class ProfilePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TermsOfServicePage(),
+                          builder: (context) => TermsOfService(),
                         ),
                       );
                     },
@@ -168,32 +171,3 @@ class ProfileMenuItem extends StatelessWidget {
   }
 }
 
-class AboutPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('About JIR')),
-      body: Center(child: Text('About JIR Page')),
-    );
-  }
-}
-
-class PrivacyPolicyPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Privacy Policy')),
-      body: Center(child: Text('Privacy Policy Page')),
-    );
-  }
-}
-
-class TermsOfServicePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Terms Of Service')),
-      body: Center(child: Text('Terms Of Service Page')),
-    );
-  }
-}
