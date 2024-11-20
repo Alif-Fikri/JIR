@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/pages/profile/settings/change_password_page.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -49,7 +50,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Color(0xff45557B))),
               trailing: Icon(Icons.arrow_forward_ios),
               onTap: () {
-                // Tambahkan navigasi untuk mengganti password di sini
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ChangePasswordPage()));
               },
             ),
             Divider(color: Color(0xffDEDEDE)),
@@ -75,26 +79,31 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               TextField(
                 decoration: InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Please insert your Password',
-                  labelStyle: GoogleFonts.inter(
-                      fontSize: 14, fontStyle: FontStyle.italic),
-                  hintStyle: GoogleFonts.inter(fontSize: 14),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                    labelText: 'Password',
+                    hintText: 'Please insert your Password',
+                    labelStyle: GoogleFonts.inter(
+                        fontSize: 14, fontStyle: FontStyle.italic),
+                    hintStyle: GoogleFonts.inter(
+                        fontSize: 14, fontWeight: FontWeight.w500),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible =
+                              !_isPasswordVisible; // Toggle visibilitas
+                        });
+                      },
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible =
-                            !_isPasswordVisible; // Toggle visibilitas
-                      });
-                    },
-                  ),
-                  border: OutlineInputBorder(),
-                ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.red),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red)),
+                    border: OutlineInputBorder()),
                 obscureText: !_isPasswordVisible, // Atur visibilitas teks
               ),
               SizedBox(height: 10),
