@@ -57,7 +57,7 @@ class _SignupPageState extends State<SignupPage> {
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color:
-                          Colors.black, // Warna teks yang diketik oleh pengguna
+                          Colors.black, 
                     ),
                     decoration: InputDecoration(
                       filled: true,
@@ -126,7 +126,7 @@ class _SignupPageState extends State<SignupPage> {
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color:
-                          Colors.black, // Warna teks yang diketik oleh pengguna
+                          Colors.black, 
                     ),
                     obscureText: true,
                     decoration: InputDecoration(

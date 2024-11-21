@@ -3,118 +3,138 @@ import 'package:google_fonts/google_fonts.dart';
 
 class NotificationPage extends StatefulWidget {
   @override
-  _NotificationPageState createState() => _NotificationPageState();
+  State<NotificationPage> createState() => _NotificationPageState();
 }
 
 class _NotificationPageState extends State<NotificationPage> {
-  bool isNotificationPageEnabled = true;
-
-  void toggleNotificationPage() {
-    setState(() {
-      isNotificationPageEnabled = !isNotificationPageEnabled;
-    });
-  }
-
-  Widget NotificationPageCard(
-      IconData icon, String title, String message, String timeAgo) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      color: Colors.blueGrey[50],
-      child: Padding(
-        padding: EdgeInsets.all(12.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: Colors.blue, size: 30),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    message,
-                    style: GoogleFonts.inter(fontSize: 14),
-                  ),
-                  SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Text(
-                      timeAgo,
-                      style:
-                          GoogleFonts.inter(fontSize: 12, color: Colors.grey),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Notifikasi',
-          style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            // Add back navigation
+            Navigator.pop(context);
           },
         ),
+        title: Text(
+          'Notifikasi',
+          style: GoogleFonts.inter(
+            fontSize: 20,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(
-                isNotificationPageEnabled ? Icons.toggle_on : Icons.toggle_off,
-                color: isNotificationPageEnabled ? Colors.orange : Colors.grey),
-            onPressed: toggleNotificationPage,
+            icon: Icon(Icons.delete, color: Colors.black),
+            onPressed: () {
+              // Tambahkan logika untuk menghapus semua notifikasi
+            },
           ),
         ],
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
       ),
       body: ListView(
+        padding: EdgeInsets.all(16),
         children: [
-          NotificationPageCard(
-            Icons.warning,
-            'Peringatan Potensi Banjir di Area Anda',
-            'Hati-hati! Curah hujan tinggi diprediksi pada 14:00 WIB di area Anda. Waspadai genangan air dan cari jalur alternatif.',
-            '1 hari yang lalu',
+          const NotificationItem(
+            icon: 'assets/images/peringatan.png',
+            title: 'Peringatan Potensi Banjir di Area Anda',
+            message:
+                'Hati-hati! Curah hujan tinggi diprediksi pada 14:00 WIB di area Anda. Waspadai genangan air dan cari jalur alternatif.',
+            time: '1 hari yang lalu',
           ),
-          NotificationPageCard(
-            Icons.warning,
-            'Peringatan Aksi Demo di Lokasi Terdekat',
-            'Aksi demo besar terdeteksi di sekitar Kantor Gubernur. Hindari area tersebut untuk menghindari kemacetan dan risiko keamanan.',
-            '1 hari yang lalu',
+          NotificationItem(
+            icon: 'assets/images/info.png',
+            title: 'Peringatan Aksi Demo di Lokasi Terdekat',
+            message:
+                'Aksi demo besar terdeteksi di sekitar Kantor Gubernur. Hindari area tersebut untuk menghindari kemacetan dan risiko keamanan.',
+            time: '1 hari yang lalu',
           ),
-          NotificationPageCard(
-            Icons.info,
-            'Nikmati Udara Segar di Taman Hijau',
-            'Cuaca cerah hari ini. Kunjungi Taman Kota di dekat Anda untuk berolahraga atau bersantai.',
-            '1 hari yang lalu',
+          NotificationItem(
+            icon: 'assets/images/suhu.png',
+            title: 'Prakiraan Cuaca Hari Ini',
+            message:
+                'Cuaca hari ini cerah dengan suhu 30°C. Pastikan Anda tetap terhidrasi jika beraktivitas di luar ruangan.',
+            time: '1 hari yang lalu',
           ),
-          NotificationPageCard(
-            Icons.thermostat,
-            'Prakiraan Cuaca Hari Ini',
-            'Cuaca hari ini cerah dengan suhu 30°C. Pastikan Anda tetap terhidrasi jika beraktivitas di luar ruangan.',
-            '1 hari yang lalu',
+        ],
+      ),
+    );
+  }
+}
+
+class NotificationItem extends StatelessWidget {
+  final String icon; // Path ke gambar
+  final String title;
+  final String message;
+  final String time;
+
+  const NotificationItem({
+    required this.icon,
+    required this.title,
+    required this.message,
+    required this.time,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Gambar kustom sebagai ikon
+          Image.asset(
+            icon, // Path gambar
+            width: 40,
+            height: 40,
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  time,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Checkbox(
+            value: false,
+            onChanged: (value) {
+              // Tambahkan logika untuk checkbox
+            },
           ),
         ],
       ),

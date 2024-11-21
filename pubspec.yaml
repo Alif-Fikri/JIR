@@ -85,6 +85,9 @@ flutter:
     - assets/images/robot.png
     - assets/images/delete.png
     - assets/images/change.png
+    - assets/images/peringatan.png
+    - assets/images/info.png
+    - assets/images/suhu.png
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
     # For details regarding adding assets from package dependencies, see
