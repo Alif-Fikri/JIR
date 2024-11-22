@@ -65,7 +65,7 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
           NotificationItem(
             icon: 'assets/images/suhu.png',
-            title: 'Prakiraan Cuaca Hari Ini',
+            title: 'Perkiraan Cuaca Hari Ini',
             message:
                 'Cuaca hari ini cerah dengan suhu 30°C. Pastikan Anda tetap terhidrasi jika beraktivitas di luar ruangan.',
             time: '1 hari yang lalu',
@@ -96,12 +96,13 @@ class NotificationItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xff435482).withOpacity(0.1),
+        color: const Color(0xff435482).withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Bagian Icon dan Checkbox
           Column(
             children: [
               Image.asset(
@@ -109,10 +110,10 @@ class NotificationItem extends StatelessWidget {
                 width: 24,
                 height: 24,
               ),
-              const SizedBox(height: 45.0),
+              const SizedBox(height: 40.0),
               Checkbox(
                 value: true,
-                activeColor: Color(0xff435482),
+                activeColor: const Color(0xff435482),
                 onChanged: (value) {
                   // Tambahkan logika untuk checkbox
                 },
@@ -120,10 +121,13 @@ class NotificationItem extends StatelessWidget {
             ],
           ),
           const SizedBox(width: 16),
+
+          // Bagian Konten
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Judul Notifikasi
                 Text(
                   title,
                   style: GoogleFonts.inter(
@@ -133,28 +137,33 @@ class NotificationItem extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
+
+                // Pesan Notifikasi
                 Text(
                   message,
                   style: GoogleFonts.inter(
-                      fontSize: 14,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                  ),
+                ),
+
+                // Spasi tambahan untuk memastikan waktu tetap di bawah
+                const SizedBox(height: 12),
+
+                // Waktu Notifikasi
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    time,
+                    style: const TextStyle(
+                      fontSize: 12,
                       color: Colors.black,
-                      fontWeight: FontWeight.w400),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SizedBox(height: 80.0),
-              Text(
-                time,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.black,
-                ),
-              ),
-            ],
           ),
         ],
       ),

@@ -13,7 +13,7 @@ class LogoutDialog {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(15),
           ),
           title: Text(
             'Log Out?',
@@ -27,36 +27,51 @@ class LogoutDialog {
             'Are you sure want to logout?',
             style: GoogleFonts.inter(
               fontSize: 16,
-              color: Colors.black87,
+              color: Colors.black,
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); 
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF435482),
-                textStyle: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            Container(
+              height: 31.0,
+              width: 89.0,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: Color(0xff4B5C82)),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  textStyle: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                child: const Text('Cancel'),
               ),
-              child: const Text('Cancel'),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog
-                onLogout(); // Panggil fungsi logout
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF435482),
-                textStyle: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            Container(
+              height: 31.0,
+              width: 89.0,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Color(0xff4B5C82), width: 1.5)),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  onLogout();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF435482),
+                  textStyle: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                child: const Text('Log Out'),
               ),
-              child: const Text('Log Out'),
             ),
           ],
         );
