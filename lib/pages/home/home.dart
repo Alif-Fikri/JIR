@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -18,7 +20,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
   }
 
@@ -39,13 +41,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               children: [
                 // Konten halaman
                 ClipRRect(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(87),
                     bottomRight: Radius.circular(87),
                   ),
                   child: Container(
                     height: 308.0,
-                    color: Color(0xFF45557B),
+                    color: const Color(0xFF45557B),
                     child: Padding(
                       padding: const EdgeInsets.only(top: 25.0, left: 25.0),
                       child: Align(
@@ -63,7 +65,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ),
                 Transform.translate(
-                  offset: Offset(0, -170),
+                  offset: const Offset(0, -170),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Stack(
@@ -73,7 +75,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(20),
                           child: Container(
                             height: 250.0,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               image: DecorationImage(
                                 image: AssetImage('assets/images/cerah.png'),
                                 fit: BoxFit.cover,
@@ -85,7 +87,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           bottom: 8,
                           left: 8,
                           child: Container(
-                            padding: EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.4),
                               borderRadius: BorderRadius.circular(15),
@@ -145,7 +147,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ),
                 Transform.translate(
-                  offset: Offset(0, -140),
+                  offset: const Offset(0, -140),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Material(
@@ -178,20 +180,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Color(0xFFEDEDED),
+                          fillColor: const Color(0xFFEDEDED),
                         ),
                       ),
                     ),
                   ),
                 ),
                 Transform.translate(
-                  offset: Offset(0, -110.0),
+                  offset: const Offset(0, -110.0),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: GridView.count(
                       crossAxisCount: 4,
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       mainAxisSpacing: 30.0,
                       children: [
                         featureIcon(
@@ -230,14 +232,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ),
                 Transform.translate(
-                  offset: Offset(0, -100),
+                  offset: const Offset(0, -100),
                   child: Container(
                     child: Image.asset('assets/images/line2.png'),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Transform.translate(
-                  offset: Offset(0, -80),
+                  offset: const Offset(0, -80),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
@@ -250,22 +252,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             color: Colors.black,
                           ),
                         ),
-                        SizedBox(height: 20.0),
+                        const SizedBox(height: 20.0),
                         warningBox("Curah Hujan Tinggi Berpotensi Banjir"),
                         warningBox("Aksi Demo Para Demonstran"),
                       ],
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Container(
-                  margin: EdgeInsets.all(16),
+                  margin: const EdgeInsets.all(16),
                   height: 150,
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Center(),
+                  child: const Center(),
                 ),
               ],
             ),
@@ -315,22 +317,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             shadowColor: Colors.grey.withOpacity(1.0),
             child: CircleAvatar(
               radius: 30,
-              backgroundColor: Color(0xFFEAEFF3),
+              backgroundColor: const Color(0xFFEAEFF3),
               child: imagePath != null
                   ? Image.asset(imagePath, width: 30, height: 30)
                   : Icon(icon, size: 30),
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Flexible(
-            // Wraps the text in a flexible widget
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 70),
+              constraints: const BoxConstraints(maxWidth: 70),
               child: Text(
                 label,
                 textAlign: TextAlign.center,
                 style:
-                    GoogleFonts.inter(fontSize: 11, color: Color(0xFF355469)),
+                    GoogleFonts.inter(fontSize: 11, color: const Color(0xFF355469)),
                 softWrap: true,
                 overflow: TextOverflow.visible,
               ),
@@ -343,18 +344,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Widget warningBox(String text) {
     return Container(
-      margin: EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xFFFFD205),
+        color: const Color(0xFFFFD205),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.warning, color: Colors.red),
-          SizedBox(width: 8),
+          const Icon(Icons.warning, color: Colors.red),
+          const SizedBox(width: 8),
           Text(
             text,
             style: GoogleFonts.inter(

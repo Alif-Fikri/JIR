@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/pages/auth/login.dart';
 
 class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
+
   @override
   _SignupPageState createState() => _SignupPageState();
 }
@@ -35,7 +37,7 @@ class _SignupPageState extends State<SignupPage> {
                   color: Colors.grey,
                 ),
                 const SizedBox(height: 20),
-                Container(
+                SizedBox(
                   width: fixedWidth,
                   child: Align(
                     alignment: Alignment.centerLeft,
@@ -49,7 +51,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Container(
+                SizedBox(
                   width: fixedWidth, // Set lebar tetap untuk field input
                   height: fixedHeight,
                   child: TextField(
@@ -84,7 +86,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 25),
-                Container(
+                SizedBox(
                   width: fixedWidth,
                   height: fixedHeight,
                   child: TextField(
@@ -118,7 +120,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 25),
-                Container(
+                SizedBox(
                   width: fixedWidth,
                   height: fixedHeight,
                   child: TextField(
@@ -153,7 +155,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 25),
-                Container(
+                SizedBox(
                   width: fixedWidth, // Set lebar tetap untuk field input
                   height: fixedHeight,
                   child: TextField(
@@ -221,7 +223,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ),
                 const SizedBox(height: 10),
-                Container(
+                SizedBox(
                   width: fixedWidth,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,7 +266,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 25),
-                Container(
+                SizedBox(
                   width: fixedWidth,
                   height: fixedHeight,
                   child: ElevatedButton(

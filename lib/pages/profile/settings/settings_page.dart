@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/pages/profile/settings/change_password_page.dart';
 
 class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
@@ -14,10 +16,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: const Text('Settings'),
         titleTextStyle: GoogleFonts.inter(
             fontWeight: FontWeight.w700, color: Colors.white, fontSize: 24),
-        backgroundColor: Color(0xff45557B),
+        backgroundColor: const Color(0xff45557B),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
@@ -33,10 +35,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xff45557B))),
+                      color: const Color(0xff45557B))),
               onTap: () => _showDeleteAccountDialog(context),
             ),
-            Divider(color: Color(0xffDEDEDE)),
+            const Divider(color: Color(0xffDEDEDE)),
             ListTile(
               leading: Image.asset(
                 'assets/images/change.png',
@@ -47,8 +49,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xff45557B))),
-              trailing: Icon(Icons.arrow_forward_ios),
+                      color: const Color(0xff45557B))),
+              trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
                 Navigator.push(
                     context,
@@ -56,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         builder: (context) => ChangePasswordPage()));
               },
             ),
-            Divider(color: Color(0xffDEDEDE)),
+            const Divider(color: Color(0xffDEDEDE)),
           ],
         ),
       ),
@@ -98,26 +100,26 @@ class _SettingsPageState extends State<SettingsPage> {
                         });
                       },
                     ),
-                    enabledBorder: OutlineInputBorder(
+                    enabledBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.red),
                     ),
-                    focusedBorder: OutlineInputBorder(
+                    focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.red)),
-                    border: OutlineInputBorder()),
+                    border: const OutlineInputBorder()),
                 obscureText: !_isPasswordVisible, // Atur visibilitas teks
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Container(
                     height: 35.0,
                     width: 280.0,
-                    color: Color(0xffFFE3E3),
-                    padding: EdgeInsets.all(5.0),
+                    color: const Color(0xffFFE3E3),
+                    padding: const EdgeInsets.all(5.0),
                     child: Row(
                       children: [
-                        Icon(Icons.warning, color: Colors.red, size: 20),
-                        SizedBox(width: 5),
+                        const Icon(Icons.warning, color: Colors.red, size: 20),
+                        const SizedBox(width: 5),
                         Expanded(
                           child: Text(
                             "You're about to delete your account. This action cannot be \nundone. All data will be lost.",
@@ -141,11 +143,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xff323232)),
+                    color: const Color(0xff323232)),
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
+              style: TextButton.styleFrom(backgroundColor: const Color(0xffE62525)),
+              onPressed: () {
+                // Tambahkan logika penghapusan akun di sini
+                Navigator.of(context).pop();
+              },
               child: Text(
                 'Delete',
                 style: GoogleFonts.inter(
@@ -153,11 +160,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     fontSize: 14,
                     fontWeight: FontWeight.w500),
               ),
-              style: TextButton.styleFrom(backgroundColor: Color(0xffE62525)),
-              onPressed: () {
-                // Tambahkan logika penghapusan akun di sini
-                Navigator.of(context).pop();
-              },
             ),
           ],
         );

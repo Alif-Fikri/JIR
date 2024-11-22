@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -30,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
               color: Colors.grey,
             ),
             const SizedBox(height: 20),
-            Container(
+            SizedBox(
               width: fixedWidth, // Lebar tetap untuk keselarasan
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -44,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 20),
-            Container(
+            SizedBox(
               width: fixedWidth, // Set lebar tetap untuk field input
               height: fixedHeight,
               child: TextField(
@@ -78,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 10),
-            Container(
+            SizedBox(
               width: fixedWidth, // Set lebar tetap untuk field input
               height: fixedHeight,
               child: TextField(
@@ -141,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             const SizedBox(height: 20),
-            Container(
+            SizedBox(
               width: fixedWidth, // Set lebar tetap untuk tombol Sign In
               height: fixedHeight,
               child: ElevatedButton(
@@ -171,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 10),
-            Container(
+            SizedBox(
               width: fixedWidth,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -243,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
                     color: Colors.black.withOpacity(0.2), // Warna bayangan
                     spreadRadius: 1,
                     blurRadius: 5,
-                    offset: Offset(0, 5), // Posisi bayangan
+                    offset: const Offset(0, 5), // Posisi bayangan
                   ),
                 ],
               ),

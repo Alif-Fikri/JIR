@@ -1,24 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/pages/auth/login.dart';
 import 'package:smartcitys/pages/profile/about.dart';
 import 'package:smartcitys/pages/profile/privacy_policy.dart';
 import 'package:smartcitys/pages/profile/settings/settings_page.dart';
 import 'package:smartcitys/pages/profile/terms_of_service.dart';
 
+class LogoutDialog {
+  static void show(BuildContext context, VoidCallback onLogout) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Log Out?',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          content: Text(
+            'Are you sure want to logout?',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); 
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF435482),
+                textStyle: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Tutup dialog
+                onLogout(); // Panggil fungsi logout
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF435482),
+                textStyle: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              child: const Text('Log Out'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  void handleLogout(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Header dengan gambar latar belakang dan informasi profil
           Stack(
             alignment: Alignment.center,
             children: [
               Container(
                 height: 200,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xFF3B5998),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(50),
@@ -49,7 +117,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
+              const Positioned(
                 bottom: -50,
                 child: CircleAvatar(
                   radius: 50,
@@ -63,7 +131,7 @@ class ProfilePage extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 60),
+          const SizedBox(height: 60),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -123,7 +191,9 @@ class ProfilePage extends StatelessWidget {
                     icon: Image.asset('assets/images/logout.png', width: 24),
                     text: "Logout",
                     onTap: () {
-                      // Tambahkan logika logout di sini
+                      LogoutDialog.show(context, () {
+                        handleLogout(context); // Fungsi logout
+                      });
                     },
                   ),
                 ],
@@ -139,12 +209,13 @@ class ProfilePage extends StatelessWidget {
 class ProfileMenuItem extends StatelessWidget {
   final Widget icon;
   final String text;
-  final VoidCallback onTap; // Tambahkan callback untuk navigasi
+  final VoidCallback onTap;
 
   const ProfileMenuItem({
+    super.key,
     required this.icon,
     required this.text,
-    required this.onTap, // Wajib untuk fungsi navigasi
+    required this.onTap,
   });
 
   @override
@@ -152,7 +223,7 @@ class ProfileMenuItem extends StatelessWidget {
     return Column(
       children: [
         GestureDetector(
-          onTap: onTap, // Gunakan GestureDetector untuk menangani klik
+          onTap: onTap,
           child: ListTile(
             leading: icon,
             title: Text(
@@ -160,14 +231,13 @@ class ProfileMenuItem extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF435482),
+                color: const Color(0xFF435482),
               ),
             ),
           ),
         ),
-        Divider(color: Color(0xffDEDEDE)),
+        const Divider(color: Color(0xffDEDEDE)),
       ],
     );
   }
 }
-

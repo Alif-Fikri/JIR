@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ChangePasswordPage extends StatelessWidget {
+  const ChangePasswordPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Change Password'),
+        title: const Text('Change Password'),
         titleTextStyle: GoogleFonts.inter(
             fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
-        backgroundColor: Color(0xff45557B),
+        backgroundColor: const Color(0xff45557B),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
@@ -18,7 +20,7 @@ class ChangePasswordPage extends StatelessWidget {
             TextField(
               decoration: InputDecoration(
                 labelText: 'New Password',
-                suffixIcon: Icon(Icons.visibility_off),
+                suffixIcon: const Icon(Icons.visibility_off),
                                 hintStyle: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -27,21 +29,21 @@ class ChangePasswordPage extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: Colors.black),
-                enabledBorder: OutlineInputBorder(
+                enabledBorder: const OutlineInputBorder(
                     borderSide:
                         BorderSide(color: Color(0xff45557B), width: 2.0)),
-                focusedBorder: OutlineInputBorder(
+                focusedBorder: const OutlineInputBorder(
                     borderSide:
                         BorderSide(color: Color(0xff45557B), width: 3.0)),
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             TextField(
               decoration: InputDecoration(
                 labelText: 'Confirm New Password',
-                suffixIcon: Icon(Icons.visibility_off),
+                suffixIcon: const Icon(Icons.visibility_off),
                 hintStyle: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -51,22 +53,22 @@ class ChangePasswordPage extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
                 ),
-                enabledBorder: OutlineInputBorder(
+                enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xff45557B), width: 2.0),
                 ),
-                focusedBorder: OutlineInputBorder(
+                focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xff45557B), width: 3.0),
                 ),
                 border:
-                    OutlineInputBorder(), // Tetap gunakan ini untuk memastikan ada border default
+                    const OutlineInputBorder(), // Tetap gunakan ini untuk memastikan ada border default
               ),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
-              style: ButtonStyle(),
+              style: const ButtonStyle(),
               onPressed: () {},
-              child: Text('Update Password'),
+              child: const Text('Update Password'),
             ),
           ],
         ),

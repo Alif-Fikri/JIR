@@ -5,12 +5,14 @@ import 'package:smartcitys/pages/notifications/notification.dart';
 import 'package:smartcitys/pages/profile/profile.dart';
 
 class Menu extends StatefulWidget {
+  const Menu({super.key});
+
   @override
   _MenuState createState() => _MenuState();
 }
 
 class _MenuState extends State<Menu> {
-  int _selectedIndex = 2;
+  int _selectedIndex = 3;
 
   final List<Widget> _pages = [
     HomePage(),
@@ -36,7 +38,7 @@ class _MenuState extends State<Menu> {
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(canvasColor: Colors.white),
         child: BottomNavigationBar(
-          items: [
+          items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(
                 icon: Icon(Icons.format_list_bulleted), label: 'Aktivitas'),
@@ -45,8 +47,8 @@ class _MenuState extends State<Menu> {
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Color(0xffE45835),
-          unselectedItemColor: Color(0xff1A1A1A),
+          selectedItemColor: const Color(0xffE45835),
+          unselectedItemColor: const Color(0xff1A1A1A),
           selectedLabelStyle: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w400,
@@ -60,6 +62,8 @@ class _MenuState extends State<Menu> {
 
 // Contoh halaman AktivitasPage
 class AktivitasPage extends StatelessWidget {
+  const AktivitasPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(

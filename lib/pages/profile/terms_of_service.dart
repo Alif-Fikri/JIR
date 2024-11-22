@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class TermsOfService extends StatelessWidget {
+  const TermsOfService({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Terms Of Service'),
+        title: const Text('Terms Of Service'),
         titleTextStyle: GoogleFonts.inter(
           fontWeight: FontWeight.bold,
           fontSize: 20,
           color: Colors.white,
         ),
-        backgroundColor: Color(0xff45557B),
+        backgroundColor: const Color(0xff45557B),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -33,7 +35,7 @@ class TermsOfService extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: SingleChildScrollView(
                 child: Text(

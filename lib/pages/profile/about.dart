@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AboutPage extends StatelessWidget {
+  const AboutPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('About JIR'),
+        title: const Text('About JIR'),
         titleTextStyle: GoogleFonts.inter(
           fontWeight: FontWeight.bold,
           fontSize: 20,
           color: Colors.white,
         ),
-        backgroundColor: Color(0xff45557B),
+        backgroundColor: const Color(0xff45557B),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -33,7 +35,7 @@ class AboutPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: SingleChildScrollView(
                 child: Text(

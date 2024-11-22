@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NotificationPage extends StatefulWidget {
+  const NotificationPage({super.key});
+
   @override
   State<NotificationPage> createState() => _NotificationPageState();
 }
@@ -10,11 +12,12 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
+        elevation: 0, // Menghilangkan shadow default AppBar
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -23,24 +26,30 @@ class _NotificationPageState extends State<NotificationPage> {
           'Notifikasi',
           style: GoogleFonts.inter(
             fontSize: 20,
-            color: Colors.black,
+            color: const Color(0xff435482),
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.delete, color: Colors.black),
+            icon: const Icon(Icons.delete, color: Colors.black),
             onPressed: () {
               // Tambahkan logika untuk menghapus semua notifikasi
             },
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(2.0), // Ketebalan garis
+          child: Container(
+            color: const Color(0xff51669D),
+            height: 2.0,
+          ),
+        ),
       ),
       body: ListView(
-        padding: EdgeInsets.all(16),
-        children: [
-          const NotificationItem(
+        padding: const EdgeInsets.all(16),
+        children: const [
+          NotificationItem(
             icon: 'assets/images/peringatan.png',
             title: 'Peringatan Potensi Banjir di Area Anda',
             message:
@@ -68,12 +77,13 @@ class _NotificationPageState extends State<NotificationPage> {
 }
 
 class NotificationItem extends StatelessWidget {
-  final String icon; // Path ke gambar
+  final String icon;
   final String title;
   final String message;
   final String time;
 
   const NotificationItem({
+    super.key,
     required this.icon,
     required this.title,
     required this.message,
@@ -83,58 +93,68 @@ class NotificationItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      padding: EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Color(0xff435482).withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Gambar kustom sebagai ikon
-          Image.asset(
-            icon, // Path gambar
-            width: 40,
-            height: 40,
+          Column(
+            children: [
+              Image.asset(
+                icon,
+                width: 24,
+                height: 24,
+              ),
+              const SizedBox(height: 45.0),
+              Checkbox(
+                value: true,
+                activeColor: Color(0xff435482),
+                onChanged: (value) {
+                  // Tambahkan logika untuk checkbox
+                },
+              ),
+            ],
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   message,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  time,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400),
                 ),
               ],
             ),
           ),
-          Checkbox(
-            value: false,
-            onChanged: (value) {
-              // Tambahkan logika untuk checkbox
-            },
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SizedBox(height: 80.0),
+              Text(
+                time,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.black,
+                ),
+              ),
+            ],
           ),
         ],
       ),
