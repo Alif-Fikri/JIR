@@ -4,7 +4,6 @@ import 'package:smartcitys/pages/auth/signup.dart';
 import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/profile/settings/settings_page.dart';
 
-
 void main() {
   runApp(MyApp());
 }
@@ -17,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Login Page',
       theme: ThemeData(),
-      home: Menu(),
+      home: SignupPage(),
     );
   }
 }

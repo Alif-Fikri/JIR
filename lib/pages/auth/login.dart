@@ -1,7 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,8 +14,52 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool isPasswordIncorrect = false; // Untuk menampilkan pesan error
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool isPasswordIncorrect = false;
   String errorMessage = '';
+
+  Future<void> _login() async {
+    const url = 'http://localhost:8000/auth/login';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        }),
+      );
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: (context) => Menu()));
+      } else if (response.statusCode == 401) {
+        setState(() {
+          isPasswordIncorrect = true;
+          errorMessage = 'Invalid email or password';
+        });
+      } else {
+        setState(() {
+          isPasswordIncorrect = true;
+          errorMessage = 'Server Error. Please try again later.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isPasswordIncorrect = true;
+        errorMessage = 'Unable to connect to server.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             SizedBox(
-              width: fixedWidth, // Lebar tetap untuk keselarasan
+              width: fixedWidth,
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -47,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             SizedBox(
-              width: fixedWidth, // Set lebar tetap untuk field input
+              width: fixedWidth,
               height: fixedHeight,
               child: TextField(
                 style: GoogleFonts.inter(
@@ -81,13 +128,13 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 10),
             SizedBox(
-              width: fixedWidth, // Set lebar tetap untuk field input
+              width: fixedWidth,
               height: fixedHeight,
               child: TextField(
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
-                  color: Colors.black, // Warna teks yang diketik oleh pengguna
+                  color: Colors.black,
                 ),
                 obscureText: true,
                 decoration: InputDecoration(
@@ -113,7 +160,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            // Menampilkan pesan error di bagian bawah kanan jika ada error
             if (isPasswordIncorrect)
               Container(
                 width: fixedWidth,
@@ -144,13 +190,13 @@ class _LoginPageState extends State<LoginPage> {
               ),
             const SizedBox(height: 20),
             SizedBox(
-              width: fixedWidth, // Set lebar tetap untuk tombol Sign In
+              width: fixedWidth,
               height: fixedHeight,
               child: ElevatedButton(
                 onPressed: () {
-                  // Aksi saat tombol Sign In ditekan
+                  _login();
                   setState(() {
-                    isPasswordIncorrect = true; // Contoh menampilkan error
+                    isPasswordIncorrect = true;
                     errorMessage = 'Password Incorrect';
                   });
                 },
@@ -200,10 +246,7 @@ class _LoginPageState extends State<LoginPage> {
                     height: 1, // Ketebalan garis
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.grey
-                        ], // Gradien ujung yang lancip
+                        colors: [Colors.transparent, Colors.grey],
                       ),
                     ),
                   ),
@@ -223,10 +266,7 @@ class _LoginPageState extends State<LoginPage> {
                     height: 1, // Ketebalan garis
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.grey,
-                          Colors.transparent
-                        ], // Gradien ujung yang lancip
+                        colors: [Colors.grey, Colors.transparent],
                       ),
                     ),
                   ),
@@ -297,7 +337,8 @@ class _LoginPageState extends State<LoginPage> {
                       ..onTap = () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => SignupPage(), // Halaman Signup
+                            builder: (context) =>
+                                SignupPage(), // Halaman Signup
                           ),
                         );
                       },
