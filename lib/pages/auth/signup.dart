@@ -160,57 +160,76 @@ class _SignupPageState extends State<SignupPage> {
                   onChanged: (value) => setState(() => confirmPassword = value),
                 ),
                 if (errorMessage.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Text(
-                      errorMessage,
-                      style: GoogleFonts.inter(
-                        textStyle: const TextStyle(
-                          color: Colors.red,
-                          fontSize: 12,
-                        ),
+                  Container(
+                    width: fixedWidth,
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(
+                            Icons.info,
+                            color: Colors.red,
+                            size: 16,
+                          ),
+                          Text(
+                            errorMessage,
+                            style: GoogleFonts.inter(
+                              textStyle: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 const SizedBox(height: 10),
                 // Terms and Conditions Checkbox
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Checkbox(
-                      value: isTermsAccepted,
-                      onChanged: (value) =>
-                          setState(() => isTermsAccepted = value!),
-                    ),
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          text: 'I have read and accept the general ',
-                          style: GoogleFonts.inter(
-                            textStyle: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                            ),
-                          ),
-                          children: [
-                            TextSpan(
-                              text: 'terms, use, and privacy policy',
-                              style: GoogleFonts.inter(
-                                textStyle: const TextStyle(
-                                  color: Color(0xFF005FCB),
-                                  fontSize: 12,
-                                ),
+                Container(
+                  width: fixedWidth,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                        activeColor: Colors.white,
+                        checkColor: Colors.black,
+                        value: isTermsAccepted,
+                        onChanged: (value) =>
+                            setState(() => isTermsAccepted = value!),
+                      ),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            text: 'I have read and accept the general ',
+                            style: GoogleFonts.inter(
+                              textStyle: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
                               ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  // Action to open terms page
-                                },
                             ),
-                          ],
+                            children: [
+                              TextSpan(
+                                text: 'terms, use, and privacy policy',
+                                style: GoogleFonts.inter(
+                                  textStyle: const TextStyle(
+                                    color: Color(0xFF005FCB),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    // Action to open terms page
+                                  },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 25),
                 // Sign Up Button
@@ -307,7 +326,8 @@ class _SignupPageState extends State<SignupPage> {
             color: Colors.black,
           ),
           prefixIcon: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+            padding: const EdgeInsets.only(
+                bottom: 15.0, top: 15.0, left: 30, right: 10),
             child: Image.asset(
               icon,
               width: 16,

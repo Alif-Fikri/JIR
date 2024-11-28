@@ -5,6 +5,7 @@ import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:hive/hive.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -86,6 +87,16 @@ class _LoginPageState extends State<LoginPage> {
     // Jika validasi lolos, lakukan login
     if (errorMessage.isEmpty) {
       _login();
+    }
+  }
+
+  Future<void> saveToken(String token) async {
+    try {
+      var box = await Hive.openBox('authBox');
+      await box.put('token', token);
+      print('Token saved: $token');
+    } catch (e) {
+      print('Error saving token: $e');
     }
   }
 
@@ -171,6 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     _validateAndLogin();
+                    
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
@@ -366,7 +378,7 @@ class _LoginPageState extends State<LoginPage> {
                 bottom: 15.0, top: 15.0, left: 30, right: 10),
             child: Image.asset(
               icon,
-              width: 15,
+              width: 16,
               height: 16,
             ),
           ),

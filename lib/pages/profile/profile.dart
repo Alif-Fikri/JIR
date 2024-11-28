@@ -5,9 +5,10 @@ import 'package:smartcitys/pages/profile/about.dart';
 import 'package:smartcitys/pages/profile/privacy_policy.dart';
 import 'package:smartcitys/pages/profile/settings/settings_page.dart';
 import 'package:smartcitys/pages/profile/terms_of_service.dart';
+import 'package:http/http.dart' as http;
 
 class LogoutDialog {
-  static void show(BuildContext context, VoidCallback onLogout) {
+  static void show(BuildContext context, Future<void> Function(BuildContext) onLogout) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -59,9 +60,9 @@ class LogoutDialog {
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(color: Color(0xff4B5C82), width: 1.5)),
               child: TextButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.of(context).pop();
-                  onLogout();
+                  await onLogout(context);
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: const Color(0xFF435482),
@@ -83,11 +84,33 @@ class LogoutDialog {
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  void handleLogout(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
-    );
+  Future<void> handleLogout(BuildContext context) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http:///auth/logout'),
+        headers: {
+          
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Logout berhasil
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      } else {
+        // Gagal logout
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to logout. Please try again.')),
+        );
+      }
+    } catch (e) {
+      // Menangani error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override
@@ -206,9 +229,8 @@ class ProfilePage extends StatelessWidget {
                     icon: Image.asset('assets/images/logout.png', width: 24),
                     text: "Logout",
                     onTap: () {
-                      LogoutDialog.show(context, () {
-                        handleLogout(context); // Fungsi logout
-                      });
+                    LogoutDialog.show(context, handleLogout);
+                      
                     },
                   ),
                 ],
