@@ -6,6 +6,7 @@ import 'package:smartcitys/pages/auth/signup.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -44,7 +45,15 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        // Navigasi ke halaman Menu jika login berhasil
+        print('Server response: $responseBody');
+
+        // Perubahan: ambil access_token, bukan token
+        final token = responseBody['access_token'];
+
+        // Simpan token ke Hive
+        await saveToken(token);
+
+        // Navigasi ke halaman berikutnya
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const Menu()),
         );
@@ -91,8 +100,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> saveToken(String token) async {
+    print('saveToken called with token: $token');
     try {
       var box = await Hive.openBox('authBox');
+      print('Hive box opened successfully');
       await box.put('token', token);
       print('Token saved: $token');
     } catch (e) {
@@ -182,7 +193,6 @@ class _LoginPageState extends State<LoginPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     _validateAndLogin();
-                    
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),

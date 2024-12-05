@@ -5,6 +5,8 @@ import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/auth/login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -27,6 +29,10 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> _registerUser() async {
     final url = Uri.parse('http://localhost:8000/auth/signup');
+    setState(() {
+      errorMessage = '';
+    });
+
     try {
       final response = await http.post(
         url,
@@ -37,15 +43,21 @@ class _SignupPageState extends State<SignupPage> {
           'password': password,
         }),
       );
+
       if (!mounted) return;
 
       if (response.statusCode == 200) {
-        // Berhasil, navigasi ke halaman login
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => const Menu(),
-        ));
+        final responseBody = jsonDecode(response.body);
+        final token = responseBody['access_token']; // Ambil token
+
+        // Simpan token ke Hive
+        await saveToken(token);
+
+        // Navigasi ke halaman berikutnya
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const Menu()),
+        );
       } else {
-        // Gagal, tampilkan error
         final responseBody = jsonDecode(response.body);
         setState(() {
           errorMessage = responseBody['message'] ?? 'Registration failed';
@@ -55,6 +67,16 @@ class _SignupPageState extends State<SignupPage> {
       setState(() {
         errorMessage = 'Failed to connect to the server. Please try again.';
       });
+    }
+  }
+
+  Future<void> saveToken(String token) async {
+    try {
+      var box = await Hive.openBox('authBox'); // Buka box Hive
+      await box.put('token', token); // Simpan token
+      print('Token saved: $token');
+    } catch (e) {
+      print('Error saving token: $e');
     }
   }
 
@@ -98,7 +120,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => false, // Prevent back navigation
+      onWillPop: () async => false,
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Center(
@@ -238,7 +260,6 @@ class _SignupPageState extends State<SignupPage> {
                   height: fixedHeight,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Panggil fungsi validasi dan registrasi
                       _validateAndRegister();
                     },
                     style: ElevatedButton.styleFrom(
