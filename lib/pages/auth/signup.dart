@@ -48,7 +48,7 @@ class _SignupPageState extends State<SignupPage> {
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        final token = responseBody['access_token']; // Ambil token
+        final token = responseBody['access_token'];
 
         // Simpan token ke Hive
         await saveToken(token);
@@ -72,8 +72,8 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> saveToken(String token) async {
     try {
-      var box = await Hive.openBox('authBox'); // Buka box Hive
-      await box.put('token', token); // Simpan token
+      var box = await Hive.openBox('authBox'); 
+      await box.put('token', token); 
       print('Token saved: $token');
     } catch (e) {
       print('Error saving token: $e');

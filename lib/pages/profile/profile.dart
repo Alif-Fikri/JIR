@@ -6,6 +6,8 @@ import 'package:smartcitys/pages/profile/privacy_policy.dart';
 import 'package:smartcitys/pages/profile/settings/settings_page.dart';
 import 'package:smartcitys/pages/profile/terms_of_service.dart';
 import 'package:http/http.dart' as http;
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class LogoutDialog {
   static void show(BuildContext context, Future<void> Function(BuildContext) onLogout) {
@@ -84,34 +86,44 @@ class LogoutDialog {
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  Future<void> handleLogout(BuildContext context) async {
-    try {
-      final response = await http.post(
-        Uri.parse('http:///auth/logout'),
-        headers: {
-          
-        },
-      );
+Future<void> handleLogout(BuildContext context) async {
+  try {
+    final box = Hive.box('authBox');
+    final token = box.get('token'); 
 
-      if (response.statusCode == 200) {
-        // Logout berhasil
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
-      } else {
-        // Gagal logout
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to logout. Please try again.')),
-        );
-      }
-    } catch (e) {
-      // Menangani error
+    if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text('No token found. Please log in again.')),
+      );
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('http://localhost:8000/auth/logout'),
+      headers: {
+        'Authorization': 'Bearer $token', 
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      await box.delete('token'); 
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to logout. Please try again.')),
       );
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +175,7 @@ class ProfilePage extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 47,
                     backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/150'), // Ganti URL ini dengan URL foto profil pengguna
+                        'https://via.placeholder.com/150'),
                   ),
                 ),
               ),
