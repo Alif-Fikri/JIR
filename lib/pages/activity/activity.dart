@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class AktivitasPage extends StatelessWidget {
+class ActivityPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Aktivitas'),
-        centerTitle: true,
-        backgroundColor: Colors.white,
+        title: Text(
+          'Aktivitas',
+          style: GoogleFonts.inter(
+              fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black),
+        ),
         elevation: 0,
-        foregroundColor: Colors.black,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -28,34 +30,53 @@ class AktivitasPage extends StatelessWidget {
                   SizedBox(height: 8),
                   Text(
                     'Laporan Saya',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.inter(
+                        fontSize: 15, fontWeight: FontWeight.w400),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 20),
             Center(
               child: Container(
-                padding: EdgeInsets.all(16),
+                width: 296.0,
+                height: 210.0,
+                padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                    color: Color(0xffEAEFF3),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        spreadRadius: 0,
+                        blurRadius: 3,
+                        offset: Offset(0, 3),
+                      )
+                    ]),
                 child: Column(
                   children: [
                     Text(
                       'Jumlah laporan yang dilaporkan oleh pengguna sebanyak',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                      style: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 5),
                     Text(
                       '0',
-                      style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.black87),
+                      style: GoogleFonts.inter(
+                          fontSize: 64,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black),
                     ),
                     Text(
                       'Jumlah Laporan',
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                      style: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400),
                     ),
                   ],
                 ),
@@ -64,18 +85,28 @@ class AktivitasPage extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               'Status Laporan',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildStatusIcon(Icons.hourglass_empty, 'Menunggu', Colors.blue),
+                _buildStatusIcon(
+                    Icons.hourglass_empty, 'Menunggu', Colors.blue),
                 _buildStatusIcon(Icons.timelapse, 'Diproses', Colors.orange),
                 _buildStatusIcon(Icons.people, 'Koordinasi', Colors.purple),
                 _buildStatusIcon(Icons.check_circle, 'Selesai', Colors.green),
                 _buildStatusIcon(Icons.cancel, 'Ditolak', Colors.red),
               ],
+            ),
+            SizedBox(
+              height: 25,
+            ),
+            Container(
+              child: Image.asset('assets/images/line2.png'),
             ),
             SizedBox(height: 16),
             Text(
@@ -122,18 +153,6 @@ class AktivitasPage extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Aktivitas'),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifikasi'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-        currentIndex: 1,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {},
-      ),
     );
   }
 
@@ -141,25 +160,29 @@ class AktivitasPage extends StatelessWidget {
     return Column(
       children: [
         CircleAvatar(
-          radius: 28,
-          backgroundColor: color.withOpacity(0.2),
+          radius: 28.5,
+          backgroundColor: Color(0xffEAEFF3),
           child: Icon(icon, size: 28, color: color),
         ),
         SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+          style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Color(0xff304153)),
         ),
       ],
     );
   }
 
-  Widget _buildLaporanItem(IconData icon, String title, String description, String timeAgo) {
+  Widget _buildLaporanItem(
+      IconData icon, String title, String description, String timeAgo) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.blue[50],
+          backgroundColor: Color(0xff435482).withOpacity(0.1),
           child: Icon(icon, color: Colors.blue),
         ),
         title: Text(
@@ -167,9 +190,12 @@ class AktivitasPage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(description),
+        titleTextStyle: GoogleFonts.inter(
+            color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
         trailing: Text(
           timeAgo,
-          style: TextStyle(color: Colors.grey, fontSize: 12),
+          style: GoogleFonts.inter(
+              color: Colors.black, fontSize: 14, fontWeight: FontWeight.w400),
         ),
       ),
     );

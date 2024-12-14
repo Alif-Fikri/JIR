@@ -51,7 +51,7 @@ class ChatbotOpeningPage extends StatelessWidget {
                           ),
                           SizedBox(height: 10),
                           Image.asset(
-                            'assets/images/chatbot.png', // Replace with the path to your chatbot image
+                            'assets/images/chatbot.png',
                             width: 100,
                             height: 100,
                           ),
