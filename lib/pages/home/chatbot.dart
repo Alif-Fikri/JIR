@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ChatbotOpeningPage extends StatelessWidget {
   @override
@@ -7,7 +8,6 @@ class ChatbotOpeningPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Close button
             Padding(
@@ -15,108 +15,133 @@ class ChatbotOpeningPage extends StatelessWidget {
               child: Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
-                  icon: Icon(Icons.close, color: Colors.blueGrey, size: 30),
+                  icon: Icon(Icons.close, color: Color(0xff45557B), size: 18),
                   onPressed: () {
                     Navigator.pop(context);
                   },
                 ),
               ),
             ),
+
+            // Content
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  // Blue decorative circle
-                  Stack(
-                    alignment: Alignment.center,
+                  // Custom Image Assets (Left)
+                  Positioned(
+                    left: -150,
+                    top: 100,
+                    child: Image.asset(
+                      'assets/images/kiri.png',
+                      width: 171,
+                      height: 220,
+                    ),
+                  ),
+                  // Custom Image Assets (Right)
+                  Positioned(
+                    right: -150,
+                    top: 100,
+                    child: Image.asset(
+                      'assets/images/kanan.png',
+                      width: 171,
+                      height: 220,
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.blue[200],
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      Column(
+                      Stack(
+                        alignment: Alignment.center,
                         children: [
-                          Text(
-                            "Hallo\nAku Suki",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blueGrey,
+                          // Blue decorative circle
+                          Container(
+                            width: 261,
+                            height: 261,
+                            decoration: BoxDecoration(
+                              color: Color(0xff84A0FF),
+                              shape: BoxShape.circle,
                             ),
                           ),
-                          SizedBox(height: 10),
-                          Image.asset(
-                            'assets/images/chatbot.png',
-                            width: 100,
-                            height: 100,
+                          Column(
+                            children: [
+                              Text(
+                                "Hallo\nAku Suki",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.inter(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xff2A3342),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Image.asset(
+                                'assets/images/suki.png',
+                                width: 150.0,
+                                height: 150.0,
+                              ),
+                            ],
                           ),
                         ],
                       ),
+                      SizedBox(height: 20),
+
+                      // Subtitle text
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          "Asisten anda untuk \nmendeteksi banjir \ndan kerumunan",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            color: Color(0xff2A3342),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 30),
+
+                      // Start New Chat button
+                      ElevatedButton(
+                        onPressed: () {
+                          // Action for Start Chat
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xff45557B),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 12,
+                          ),
+                        ),
+                        child: Text(
+                          "Start New Chat",
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ],
-                  ),
-
-                  SizedBox(height: 20),
-
-                  // Subtitle text
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "Asisten anda untuk mendeteksi banjir dan kerumunan",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 30),
-
-                  // Start New Chat button
-                  ElevatedButton(
-                    onPressed: () {
-                      // Navigate to chatbot screen
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 40,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: Text(
-                      "Start New Chat",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ),
                 ],
               ),
             ),
-
-            // Microphone button
             Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.only(bottom: 60),
               child: FloatingActionButton(
                 onPressed: () {
                   // Handle microphone input
                 },
-                backgroundColor: Colors.orange,
+                backgroundColor: Color(0xffEAEFF3),
                 child: Icon(
                   Icons.mic,
                   size: 30,
-                  color: Colors.white,
+                  color: Colors.red,
                 ),
               ),
             ),

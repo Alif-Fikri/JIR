@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
+import 'package:smartcitys/pages/home/chatbot.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -272,7 +273,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ],
             ),
           ),
-          
           AnimatedBuilder(
             animation: Listenable.merge([_animationController]),
             builder: (context, child) {
@@ -283,8 +283,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 right: 25,
                 child: GestureDetector(
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('tes')),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatbotOpeningPage(),
+                      ),
                     );
                   },
                   child: Image.asset(
@@ -330,8 +333,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: Text(
                 label,
                 textAlign: TextAlign.center,
-                style:
-                    GoogleFonts.inter(fontSize: 11, color: const Color(0xFF355469)),
+                style: GoogleFonts.inter(
+                    fontSize: 11, color: const Color(0xFF355469)),
                 softWrap: true,
                 overflow: TextOverflow.visible,
               ),
