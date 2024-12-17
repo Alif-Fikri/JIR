@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
-import 'package:smartcitys/pages/home/chatbot.dart';
+import 'package:smartcitys/pages/home/chat/chatbot.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

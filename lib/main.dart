@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smartcitys/pages/auth/login.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
 import 'package:smartcitys/helper/menu.dart';
+import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/home.dart';
 import 'package:smartcitys/pages/profile/settings/settings_page.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -18,6 +19,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Login Page', theme: ThemeData(), home: Menu());
+    return MaterialApp(title: 'Login Page', theme: ThemeData(), home: ChatbotOpeningPage());
   }
 }

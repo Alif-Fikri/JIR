@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/pages/home/chat/chatbot_text.dart';
 
 class ChatbotOpeningPage extends StatelessWidget {
   @override
@@ -105,7 +106,10 @@ class ChatbotOpeningPage extends StatelessWidget {
                       // Start New Chat button
                       ElevatedButton(
                         onPressed: () {
-                          // Action for Start Chat
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ChatBotPage()));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xff45557B),
