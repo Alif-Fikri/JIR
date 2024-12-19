@@ -86,12 +86,12 @@ class _ChatBotPageState extends State<ChatBotPage> {
           Expanded(
             child: TextField(
               decoration: InputDecoration(
-                hintText: "Ketik pesan...",
+                hintText: "Ketik pesan anda...",
                 hintStyle: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.w400,
-                ),
+                    fontSize: 14,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w400,
+                    fontStyle: FontStyle.italic),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
@@ -105,10 +105,10 @@ class _ChatBotPageState extends State<ChatBotPage> {
           ),
           SizedBox(width: 8.0),
           CircleAvatar(
-            backgroundColor: Colors.redAccent,
+            backgroundColor: Color(0xffEAEFF3),
             radius: 24,
             child: IconButton(
-              icon: Icon(Icons.mic, color: Colors.white),
+              icon: Icon(Icons.mic, color: Colors.red),
               onPressed: () {
                 setState(() {
                   _isMicTapped = true;
