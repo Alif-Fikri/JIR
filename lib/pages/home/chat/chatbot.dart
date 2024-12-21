@@ -27,61 +27,34 @@ class ChatbotOpeningPage extends StatelessWidget {
             // Content
             Expanded(
               child: Stack(
-                alignment: Alignment.center,
                 children: [
-                  // Custom Image Assets (Left)
-                  Positioned(
-                    left: -150,
-                    top: 100,
+                  // Single Image Asset
+                  Center(
                     child: Image.asset(
-                      'assets/images/kiri.png',
-                      width: 171,
-                      height: 220,
-                    ),
-                  ),
-                  // Custom Image Assets (Right)
-                  Positioned(
-                    right: -150,
-                    top: 100,
-                    child: Image.asset(
-                      'assets/images/kanan.png',
-                      width: 171,
-                      height: 220,
+                      'assets/images/bg1.png',
+                      width: 300,
+                      height: 300,
                     ),
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Stack(
-                        alignment: Alignment.center,
+                      Column(
                         children: [
-                          // Blue decorative circle
-                          Container(
-                            width: 261,
-                            height: 261,
-                            decoration: BoxDecoration(
-                              color: Color(0xff84A0FF),
-                              shape: BoxShape.circle,
+                          Text(
+                            "Hallo\nAku Suki",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xff2A3342),
                             ),
                           ),
-                          Column(
-                            children: [
-                              Text(
-                                "Hallo\nAku Suki",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.inter(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xff2A3342),
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Image.asset(
-                                'assets/images/suki.png',
-                                width: 150.0,
-                                height: 150.0,
-                              ),
-                            ],
+                          SizedBox(height: 10),
+                          Image.asset(
+                            'assets/images/suki.png',
+                            width: 150.0,
+                            height: 150.0,
                           ),
                         ],
                       ),
