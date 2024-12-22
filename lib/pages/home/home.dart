@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
+import 'package:weather/weather.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,6 +15,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _animationController;
+    WeatherFactory wf = WeatherFactory("");
+  String temperature = "Loading...";
 
   @override
   void initState() {

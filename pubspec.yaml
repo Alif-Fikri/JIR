@@ -38,6 +38,7 @@ dependencies:
   hive_flutter: ^1.1.0
   http: ^1.2.2
   shared_preferences: ^2.3.3
+  weather: ^3.1.1
 
 dev_dependencies:
   build_runner: ^2.4.6
@@ -95,6 +96,8 @@ flutter:
     - assets/images/koordinasi.png
     - assets/images/kanan.png
     - assets/images/kiri.png
+    - assets/images/bg1.png
+    - assets/images/close_icon.png
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
     # For details regarding adding assets from package dependencies, see
