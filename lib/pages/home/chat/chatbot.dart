@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/pages/home/chat/chatbot_text.dart';
 
 class ChatbotOpeningPage extends StatelessWidget {
+  const ChatbotOpeningPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,10 +46,10 @@ class ChatbotOpeningPage extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xff2A3342),
+                              color: const Color(0xff2A3342),
                             ),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Image.asset(
                             'assets/images/suki.png',
                             width: 150.0,
@@ -57,7 +59,7 @@ class ChatbotOpeningPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
@@ -65,25 +67,25 @@ class ChatbotOpeningPage extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 18,
-                        color: Color(0xff2A3342),
+                        color: const Color(0xff2A3342),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ChatBotPage()));
+                              builder: (context) => const ChatBotPage()));
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff45557B),
+                      backgroundColor: const Color(0xff45557B),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         horizontal: 40,
                         vertical: 12,
                       ),
@@ -107,8 +109,8 @@ class ChatbotOpeningPage extends StatelessWidget {
               child: Center(
                 child: FloatingActionButton(
                   onPressed: () {},
-                  backgroundColor: Color(0xffEAEFF3),
-                  child: Icon(
+                  backgroundColor: const Color(0xffEAEFF3),
+                  child: const Icon(
                     Icons.mic,
                     size: 30,
                     color: Colors.red,

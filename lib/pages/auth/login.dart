@@ -167,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.info,
                           color: Colors.red,
                           size: 16,
@@ -218,7 +218,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 10),
-              Container(
+              SizedBox(
                 width: fixedWidth,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -290,7 +290,7 @@ class _LoginPageState extends State<LoginPage> {
                       color: Colors.black.withOpacity(0.2), // Warna bayangan
                       spreadRadius: 1,
                       blurRadius: 5,
-                      offset: Offset(0, 5), // Posisi bayangan
+                      offset: const Offset(0, 5), // Posisi bayangan
                     ),
                   ],
                 ),

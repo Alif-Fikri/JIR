@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:animations/animations.dart';
 
 class ChatBotPage extends StatefulWidget {
+  const ChatBotPage({super.key});
+
   @override
   _ChatBotPageState createState() => _ChatBotPageState();
 }
@@ -18,7 +20,7 @@ class _ChatBotPageState extends State<ChatBotPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: Color(0xff45557B)),
+          icon: const Icon(Icons.close, color: Color(0xff45557B)),
           onPressed: () {},
         ),
       ),
@@ -28,7 +30,7 @@ class _ChatBotPageState extends State<ChatBotPage> {
             children: [
               Expanded(
                 child: ListView(
-                  padding: EdgeInsets.all(32.0),
+                  padding: const EdgeInsets.all(32.0),
                   children: [
                     _chatBubble(
                       text:
@@ -59,10 +61,10 @@ class _ChatBotPageState extends State<ChatBotPage> {
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 8.0),
-        padding: EdgeInsets.all(12.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: isSender ? Color(0xffE45835) : Color(0xff45557B),
+          color: isSender ? const Color(0xffE45835) : const Color(0xff45557B),
           borderRadius: BorderRadius.circular(10.0),
         ),
         child: Text(
@@ -79,7 +81,7 @@ class _ChatBotPageState extends State<ChatBotPage> {
 
   Widget _inputSection() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       color: Colors.white,
       child: Row(
         children: [
@@ -99,16 +101,16 @@ class _ChatBotPageState extends State<ChatBotPage> {
                 filled: true,
                 fillColor: Colors.grey[200],
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               ),
             ),
           ),
-          SizedBox(width: 8.0),
+          const SizedBox(width: 8.0),
           CircleAvatar(
-            backgroundColor: Color(0xffEAEFF3),
+            backgroundColor: const Color(0xffEAEFF3),
             radius: 24,
             child: IconButton(
-              icon: Icon(Icons.mic, color: Colors.red),
+              icon: const Icon(Icons.mic, color: Colors.red),
               onPressed: () {
                 setState(() {
                   _isMicTapped = true;
@@ -127,12 +129,12 @@ class _ChatBotPageState extends State<ChatBotPage> {
         return Scaffold(
           body: Center(
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.redAccent,
                 shape: BoxShape.circle,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(50.0),
+              child: const Padding(
+                padding: EdgeInsets.all(50.0),
                 child: Icon(Icons.mic, size: 100, color: Colors.white),
               ),
             ),

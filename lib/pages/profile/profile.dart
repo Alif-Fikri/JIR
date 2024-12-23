@@ -39,7 +39,7 @@ class LogoutDialog {
               width: 89.0,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
-                  color: Color(0xff4B5C82)),
+                  color: const Color(0xff4B5C82)),
               child: TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -60,7 +60,7 @@ class LogoutDialog {
               width: 89.0,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Color(0xff4B5C82), width: 1.5)),
+                  border: Border.all(color: const Color(0xff4B5C82), width: 1.5)),
               child: TextButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
@@ -93,7 +93,7 @@ Future<void> handleLogout(BuildContext context) async {
 
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No token found. Please log in again.')),
+        const SnackBar(content: Text('No token found. Please log in again.')),
       );
       return;
     }
@@ -114,7 +114,7 @@ Future<void> handleLogout(BuildContext context) async {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to logout. Please try again.')),
+        const SnackBar(content: Text('Failed to logout. Please try again.')),
       );
     }
   } catch (e) {
@@ -194,7 +194,7 @@ Future<void> handleLogout(BuildContext context) async {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SettingsPage(),
+                          builder: (context) => const SettingsPage(),
                         ),
                       );
                     },
@@ -206,7 +206,7 @@ Future<void> handleLogout(BuildContext context) async {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AboutPage(),
+                          builder: (context) => const AboutPage(),
                         ),
                       );
                     },
@@ -219,7 +219,7 @@ Future<void> handleLogout(BuildContext context) async {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PrivacyPolicy(),
+                          builder: (context) => const PrivacyPolicy(),
                         ),
                       );
                     },
@@ -232,7 +232,7 @@ Future<void> handleLogout(BuildContext context) async {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TermsOfService(),
+                          builder: (context) => const TermsOfService(),
                         ),
                       );
                     },

@@ -2,9 +2,12 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:weather/weather.dart';
 import 'dart:math' as math;
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
-import 'package:weather/weather.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,12 +18,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _animationController;
-    WeatherFactory wf = WeatherFactory("");
+  WeatherFactory wf = WeatherFactory(dotenv.env['WEATHER_API_KEY']!);
   String temperature = "Loading...";
+  String location = "Loading...";
+  String weatherDescription = "Loading...";
 
   @override
   void initState() {
     super.initState();
+    _getLocationAndWeather();
 
     _animationController = AnimationController(
       vsync: this,
@@ -32,6 +38,72 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  void _getLocationAndWeather() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    Weather weather = await wf.currentWeatherByLocation(
+        position.latitude, position.longitude);
+
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
+    Placemark place = placemarks[0];
+
+    setState(() {
+      if (weather.temperature?.celsius != null) {
+        temperature = "${weather.temperature!.celsius!.toStringAsFixed(1)}°";
+      } else {
+        temperature = "N/A";
+      }
+      location =
+          "${place.locality}, ${place.subAdministrativeArea}, ${place.administrativeArea}, ${place.country}";
+      weatherDescription =
+          _translateWeatherDescription(weather.weatherDescription ?? "N/A");
+    });
+  }
+
+  String _translateWeatherDescription(String description) {
+    switch (description.toLowerCase()) {
+      case "clear":
+        return "Cerah";
+      case "clouds":
+        return "Berawan";
+      case "rain":
+        return "Hujan";
+      case "snow":
+        return "Salju";
+      case "mist":
+        return "Kabut";
+      case "haze":
+        return "Kabut Asap";
+      case "thunderstorm":
+        return "Badai Petir";
+      default:
+        return description;
+    }
   }
 
   @override
@@ -105,7 +177,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   height: 37,
                                 ),
                                 Text(
-                                  "Cerah Berawan",
+                                  weatherDescription,
                                   style: GoogleFonts.inter(
                                     color: Colors.white,
                                     fontSize: 11,
@@ -113,7 +185,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 Text(
-                                  "32°",
+                                  temperature,
                                   style: GoogleFonts.inter(
                                     color: Colors.white,
                                     fontSize: 11,
@@ -121,7 +193,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 Text(
-                                  "Jakarta Barat",
+                                  location,
                                   style: GoogleFonts.inter(
                                     color: Colors.white,
                                     fontSize: 8,
@@ -289,7 +361,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ChatbotOpeningPage(),
+                        builder: (context) => const ChatbotOpeningPage(),
                       ),
                     );
                   },

@@ -55,7 +55,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ChangePasswordPage()));
+                        builder: (context) => const ChangePasswordPage()));
               },
             ),
             const Divider(color: Color(0xffDEDEDE)),

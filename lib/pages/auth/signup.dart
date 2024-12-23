@@ -190,7 +190,7 @@ class _SignupPageState extends State<SignupPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.info,
                             color: Colors.red,
                             size: 16,
@@ -210,7 +210,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 const SizedBox(height: 10),
                 // Terms and Conditions Checkbox
-                Container(
+                SizedBox(
                   width: fixedWidth,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,7 +305,7 @@ class _SignupPageState extends State<SignupPage> {
                           ..onTap = () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => LoginPage(),
+                                builder: (context) => const LoginPage(),
                               ),
                             );
                           },

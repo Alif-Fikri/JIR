@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ActivityPage extends StatelessWidget {
+  const ActivityPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,16 +20,16 @@ class ActivityPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Center(
               child: Column(
                 children: [
                   CircleAvatar(
                     radius: 40,
                     backgroundColor: Colors.grey[200],
-                    child: Icon(Icons.person, size: 40, color: Colors.blue),
+                    child: const Icon(Icons.person, size: 40, color: Colors.blue),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     'Laporan Saya',
                     style: GoogleFonts.inter(
@@ -36,21 +38,21 @@ class ActivityPage extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Center(
               child: Container(
                 width: 296.0,
                 height: 210.0,
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                    color: Color(0xffEAEFF3),
+                    color: const Color(0xffEAEFF3),
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.3),
                         spreadRadius: 0,
                         blurRadius: 3,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       )
                     ]),
                 child: Column(
@@ -63,7 +65,7 @@ class ActivityPage extends StatelessWidget {
                           color: Colors.black,
                           fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text(
                       '0',
                       style: GoogleFonts.inter(
@@ -82,7 +84,7 @@ class ActivityPage extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Status Laporan',
               style: GoogleFonts.inter(
@@ -90,7 +92,7 @@ class ActivityPage extends StatelessWidget {
                   fontWeight: FontWeight.w400,
                   color: Colors.black),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -102,18 +104,18 @@ class ActivityPage extends StatelessWidget {
                 _buildStatusIcon(Icons.cancel, 'Ditolak', Colors.red),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 25,
             ),
             Container(
               child: Image.asset('assets/images/line2.png'),
             ),
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'Ringkasan Laporan',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Expanded(
               child: ListView(
                 children: [
@@ -161,16 +163,16 @@ class ActivityPage extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 28.5,
-          backgroundColor: Color(0xffEAEFF3),
+          backgroundColor: const Color(0xffEAEFF3),
           child: Icon(icon, size: 28, color: color),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           label,
           style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: Color(0xff304153)),
+              color: const Color(0xff304153)),
         ),
       ],
     );
@@ -179,15 +181,15 @@ class ActivityPage extends StatelessWidget {
   Widget _buildLaporanItem(
       IconData icon, String title, String description, String timeAgo) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Color(0xff435482).withOpacity(0.1),
+          backgroundColor: const Color(0xff435482).withOpacity(0.1),
           child: Icon(icon, color: Colors.blue),
         ),
         title: Text(
           title,
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Text(description),
         titleTextStyle: GoogleFonts.inter(

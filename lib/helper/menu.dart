@@ -16,10 +16,10 @@ class _MenuState extends State<Menu> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    HomePage(),
-    ActivityPage(),
-    NotificationPage(),
-    ProfilePage(),
+    const HomePage(),
+    const ActivityPage(),
+    const NotificationPage(),
+    const ProfilePage(),
   ];
 
   void _onItemTapped(int index) {
