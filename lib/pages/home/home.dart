@@ -40,52 +40,101 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _getLocationAndWeather() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  Future<void> _getLocationAndWeather() async {
+    setState(() {
+      location = "Loading...";
+      temperature = "Loading...";
+      weatherDescription = "Loading...";
+    });
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        setState(() {
+          location = "Location permission denied";
+          temperature = "N/A";
+          weatherDescription = "N/A";
+        });
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
+      setState(() {
+        location = "Location permission permanently denied";
+        temperature = "N/A";
+        weatherDescription = "N/A";
+      });
       return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    try {
+      // Get the current location
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      print("Position: $position");
 
-    Weather weather = await wf.currentWeatherByLocation(
-        position.latitude, position.longitude);
-
-    List<Placemark> placemarks =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
-    Placemark place = placemarks[0];
-
-    setState(() {
-      if (weather.temperature?.celsius != null) {
-        temperature = "${weather.temperature!.celsius!.toStringAsFixed(1)}°";
-      } else {
-        temperature = "N/A";
+      // Fetch weather data
+      Weather? weather;
+      try {
+        weather = await wf.currentWeatherByLocation(
+          position.latitude,
+          position.longitude,
+        );
+        print("Weather data fetched: $weather");
+      } catch (e) {
+        print("Error fetching weather data: $e");
+        weather = null;
       }
-      location =
-          "${place.locality}, ${place.subAdministrativeArea}, ${place.administrativeArea}, ${place.country}";
-      weatherDescription =
-          _translateWeatherDescription(weather.weatherDescription ?? "N/A");
-    });
+
+      // Fetch placemark data
+      List<Placemark> placemarks;
+      try {
+        placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        print("Placemark data fetched: $placemarks");
+      } catch (e) {
+        print("Error fetching placemark data: $e");
+        placemarks = [];
+      }
+
+      Placemark place = placemarks.isNotEmpty ? placemarks.first : Placemark();
+
+      setState(() {
+        if (weather != null && weather.temperature != null) {
+          temperature = "${weather.temperature!.celsius!.toStringAsFixed(1)}°";
+        } else {
+          temperature = "N/A";
+        }
+
+        location = (place.subLocality != null && place.locality != null)
+            ? "${place.subLocality}, ${place.locality}"
+            : "Unknown Location";
+
+        weatherDescription = weather?.weatherDescription != null
+            ? _translateWeatherDescription(weather!.weatherDescription!)
+            : "N/A";
+
+        print("Temperature: $temperature");
+        print("Location: $location");
+        print("Weather Description: $weatherDescription");
+      });
+    } catch (e) {
+      print("Unexpected error: $e");
+      setState(() {
+        location = "Error fetching location";
+        temperature = "N/A";
+        weatherDescription = "N/A";
+      });
+    }
   }
 
-  String _translateWeatherDescription(String description) {
+  String _translateWeatherDescription(String? description) {
+    if (description == null) return "N/A";
     switch (description.toLowerCase()) {
       case "clear":
         return "Cerah";
@@ -101,6 +150,50 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         return "Kabut Asap";
       case "thunderstorm":
         return "Badai Petir";
+      case "broken clouds":
+        return "Awan Pecah";
+      case "scattered clouds":
+        return "Awan Tersebar";
+      case "few clouds":
+        return "Sedikit Awan";
+      case "shower rain":
+        return "Hujan Gerimis";
+      case "drizzle":
+        return "Gerimis";
+      case "light rain":
+        return "Hujan Ringan";
+      case "moderate rain":
+        return "Hujan Sedang";
+      case "heavy intensity rain":
+        return "Hujan Lebat";
+      case "very heavy rain":
+        return "Hujan Sangat Lebat";
+      case "extreme rain":
+        return "Hujan Ekstrem";
+      case "light snow":
+        return "Salju Ringan";
+      case "heavy snow":
+        return "Salju Lebat";
+      case "sleet":
+        return "Hujan Salju";
+      case "freezing rain":
+        return "Hujan Beku";
+      case "overcast clouds":
+        return "Awan Mendung";
+      case "smoke":
+        return "Asap";
+      case "dust":
+        return "Debu";
+      case "fog":
+        return "Kabut Tebal";
+      case "sand":
+        return "Pasir";
+      case "ash":
+        return "Abu Vulkanik";
+      case "squall":
+        return "Angin Kencang";
+      case "tornado":
+        return "Tornado";
       default:
         return description;
     }
