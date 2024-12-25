@@ -111,9 +111,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           temperature = "N/A";
         }
 
-        location = (place.subLocality != null && place.locality != null)
-            ? "${place.subLocality}, ${place.locality}"
-            : "Unknown Location";
+        location = place.locality?.replaceFirst("Kecamatan ", "") ??
+            "Unknown Location";
 
         weatherDescription = weather?.weatherDescription != null
             ? _translateWeatherDescription(weather!.weatherDescription!)
@@ -201,6 +200,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final int currentHour = DateTime.now().hour;
+    String backgroundImage;
+
+    if (currentHour >= 6 && currentHour < 12) {
+      backgroundImage = 'assets/images/morning.png';
+    } else if (currentHour >= 12 && currentHour < 18) {
+      backgroundImage = 'assets/images/afternoon.png';
+    } else {
+      backgroundImage = 'assets/images/night.png';
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -244,9 +253,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(20),
                           child: Container(
                             height: 250.0,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               image: DecorationImage(
-                                image: AssetImage('assets/images/cerah.png'),
+                                image: AssetImage(backgroundImage),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -262,7 +271,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Image.asset(
                                   'assets/images/cerah_berawan.png',
@@ -298,7 +307,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                         ),
                         Positioned(
-                          top: -30.0,
+                          top: -20.0,
                           right: -10.0,
                           child: CircleAvatar(
                             radius: 35,
@@ -356,7 +365,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ),
                 Transform.translate(
-                  offset: const Offset(0, -110.0),
+                  offset: const Offset(0, -125),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: GridView.count(
@@ -401,14 +410,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ),
                 Transform.translate(
-                  offset: const Offset(0, -100),
+                  offset: const Offset(0, -80),
                   child: Container(
                     child: Image.asset('assets/images/line2.png'),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Transform.translate(
-                  offset: const Offset(0, -80),
+                  offset: const Offset(0, -60),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(

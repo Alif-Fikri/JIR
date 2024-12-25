@@ -18,8 +18,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Login Page',
-        theme: ThemeData(),
-        home: const ChatbotOpeningPage());
+        title: 'Login Page', theme: ThemeData(), home: const HomePage());
   }
 }

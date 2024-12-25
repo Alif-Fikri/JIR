@@ -68,7 +68,9 @@ flutter:
     - assets/images/password.png
     - assets/images/person.png
     - assets/images/line.png
-    - assets/images/cerah.png
+    - assets/images/afternoon.png
+    - assets/images/night.png
+    - assets/images/morning.png
     - assets/images/cerah_berawan.png
     - assets/images/path.png
     - assets/images/search.png
