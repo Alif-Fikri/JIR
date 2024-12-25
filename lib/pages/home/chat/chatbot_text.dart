@@ -11,44 +11,63 @@ class ChatBotPage extends StatefulWidget {
 
 class _ChatBotPageState extends State<ChatBotPage> {
   bool _isMicTapped = false;
+  final TextEditingController _controller = TextEditingController();
+  final List<Map<String, dynamic>> _messages = [
+    {
+      "text":
+          "Hallo Zee, aku Suki asisten anda untuk memantau banjir dan kerumunan",
+      "isSender": false
+    },
+    {"text": "Ingin tahu kondisi di area tertentu?", "isSender": false},
+    {"text": "Update kondisi dijalan xxxxxx", "isSender": true},
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Color(0xff45557B)),
-          onPressed: () {},
+          icon: Image.asset(
+            'assets/images/close_icon.png',
+            width: screenWidth * 0.04,
+            height: screenHeight * 0.04,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
       ),
       body: Stack(
         children: [
+          Positioned(
+            top: 150,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              'assets/images/bg2.png',
+              fit: BoxFit.cover,
+            ),
+          ),
           Column(
             children: [
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(32.0),
-                  children: [
-                    _chatBubble(
-                      text:
-                          "Hallo Zee, aku Suki asisten anda untuk memantau banjir dan kerumunan",
-                      isSender: false,
-                    ),
-                    _chatBubble(
-                      text: "Ingin tahu kondisi di area tertentu?",
-                      isSender: false,
-                    ),
-                    _chatBubble(
-                      text: "Update kondisi dijalan xxxxxx",
-                      isSender: true,
-                    )
-                  ],
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(20.0),
+                  itemCount: _messages.length,
+                  itemBuilder: (context, index) {
+                    return _chatBubble(
+                      text: _messages[index]["text"],
+                      isSender: _messages[index]["isSender"],
+                    );
+                  },
                 ),
               ),
-              _inputSection(),
+              _inputSection(screenWidth),
             ],
           ),
           if (_isMicTapped) _buildMicOverlay(),
@@ -61,8 +80,8 @@ class _ChatBotPageState extends State<ChatBotPage> {
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
-        padding: const EdgeInsets.all(12.0),
+        margin: const EdgeInsets.symmetric(vertical: 12.0),
+        padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: isSender ? const Color(0xffE45835) : const Color(0xff45557B),
           borderRadius: BorderRadius.circular(10.0),
@@ -79,48 +98,114 @@ class _ChatBotPageState extends State<ChatBotPage> {
     );
   }
 
-  Widget _inputSection() {
+  Widget _inputSection(double screenWidth) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       color: Colors.white,
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "Ketik pesan anda...",
-                hintStyle: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w400,
-                    fontStyle: FontStyle.italic),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                  borderSide: BorderSide.none,
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xffEAEFF3),
+                borderRadius: BorderRadius.circular(10.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 4), // Shadow position
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _controller,
+                style: GoogleFonts.inter(
+                  fontSize: screenWidth * 0.04,
+                  color: const Color(0xFF435482),
                 ),
-                filled: true,
-                fillColor: Colors.grey[200],
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 12.0),
+                decoration: InputDecoration(
+                  hintText: "Type your message...",
+                  hintStyle: GoogleFonts.inter(
+                    fontSize: screenWidth * 0.04,
+                    color: const Color(0xFF435482),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(
+                      color: const Color(0x14000000),
+                      width: 1.0,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(
+                      color: const Color(0x14000000),
+                      width: 1.0,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(
+                      color: const Color(0x14000000),
+                      width: 1.0,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: Color(0xffEAEFF3),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 10.0,
+                    horizontal: 20.0,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.send, color: Color(0xffE45835)),
+                    onPressed: _sendMessage,
+                  ),
+                ),
               ),
             ),
           ),
           const SizedBox(width: 8.0),
-          CircleAvatar(
-            backgroundColor: const Color(0xffEAEFF3),
-            radius: 24,
-            child: IconButton(
-              icon: const Icon(Icons.mic, color: Colors.red),
-              onPressed: () {
-                setState(() {
-                  _isMicTapped = true;
-                });
-              },
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xffEAEFF3),
+              border: Border.all(
+                color: const Color(0x14000000),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              radius: 24,
+              child: IconButton(
+                icon: const Icon(Icons.mic, color: Colors.red),
+                onPressed: () {
+                  setState(() {
+                    _isMicTapped = true;
+                  });
+                },
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _sendMessage() {
+    if (_controller.text.isNotEmpty) {
+      setState(() {
+        _messages.add({"text": _controller.text, "isSender": true});
+        _controller.clear();
+      });
+    }
   }
 
   Widget _buildMicOverlay() {

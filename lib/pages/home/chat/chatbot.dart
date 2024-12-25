@@ -47,75 +47,77 @@ class ChatbotOpeningPage extends StatelessWidget {
             ),
           ),
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      "Hallo\nAku Suki",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: screenWidth * 0.07,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xff2A3342),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        "Hallo\nAku Suki",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: screenWidth * 0.07,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xff2A3342),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Image.asset(
-                      'assets/images/suki.png',
-                      width: screenWidth * 0.4,
-                      height: screenHeight * 0.3,
-                    ),
-                  ],
-                ),
-                Text(
-                  "Asisten anda untuk \nmendeteksi banjir \ndan kerumunan",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: screenWidth * 0.05,
-                    color: const Color(0xff2A3342),
-                    fontWeight: FontWeight.w600,
+                      const SizedBox(height: 10),
+                      Image.asset(
+                        'assets/images/suki.png',
+                        width: screenWidth * 0.4,
+                        height: screenHeight * 0.3,
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ChatBotPage()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff45557B),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.1,
-                      vertical: screenHeight * 0.03,
-                    ),
-                  ),
-                  child: Text(
-                    "Start New Chat",
+                  Text(
+                    "Asisten anda untuk \nmendeteksi banjir \ndan kerumunan",
+                    textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontSize: screenWidth * 0.035,
+                      fontSize: screenWidth * 0.05,
+                      color: const Color(0xff2A3342),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                FloatingActionButton(
-                  onPressed: () {},
-                  backgroundColor: const Color(0xffEAEFF3),
-                  child: Icon(
-                    Icons.mic,
-                    size: screenWidth * 0.06,
-                    color: Colors.red,
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ChatBotPage()));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff45557B),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.1,
+                        vertical: screenHeight * 0.03,
+                      ),
+                    ),
+                    child: Text(
+                      "Start New Chat",
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: screenWidth * 0.035,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  FloatingActionButton(
+                    onPressed: () {},
+                    backgroundColor: const Color(0xffEAEFF3),
+                    child: Icon(
+                      Icons.mic,
+                      size: screenWidth * 0.06,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -102,6 +102,7 @@ flutter:
     - assets/images/kanan.png
     - assets/images/kiri.png
     - assets/images/bg1.png
+    - assets/images/bg2.png
     - assets/images/close_icon.png
     - .env
     # An image asset can refer to one or more resolution-specific "variants", see
