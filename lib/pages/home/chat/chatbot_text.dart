@@ -100,8 +100,8 @@ class _ChatBotPageState extends State<ChatBotPage> {
                 ),
                 filled: true,
                 fillColor: Colors.grey[200],
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 12.0),
               ),
             ),
           ),
