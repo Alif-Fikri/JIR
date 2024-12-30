@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
+import 'package:smartcitys/pages/home/flood/flood_monitoring';
 import 'package:smartcitys/pages/home/home.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -18,6 +19,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Login Page', theme: ThemeData(), home: const HomePage());
+        title: 'Login Page', theme: ThemeData(), home: FloodMonitoringPage());
   }
 }

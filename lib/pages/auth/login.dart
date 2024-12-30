@@ -47,13 +47,13 @@ class _LoginPageState extends State<LoginPage> {
         final responseBody = jsonDecode(response.body);
         print('Server response: $responseBody');
 
-        // Perubahan: ambil access_token, bukan token
+
         final token = responseBody['access_token'];
 
-        // Simpan token ke Hive
+
         await saveToken(token);
 
-        // Navigasi ke halaman berikutnya
+
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const Menu()),
         );
@@ -93,7 +93,6 @@ class _LoginPageState extends State<LoginPage> {
       }
     });
 
-    // Jika validasi lolos, lakukan login
     if (errorMessage.isEmpty) {
       _login();
     }
@@ -151,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                 icon: 'assets/images/person.png',
               ),
               const SizedBox(height: 25),
-              // Password Field
+
               _buildTextField(
                 controller: _passwordController,
                 label: 'Password',
@@ -186,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               const SizedBox(height: 25),
-              // Sign In Button
+
               SizedBox(
                 width: fixedWidth,
                 height: fixedHeight,

@@ -45,19 +45,16 @@ class FloodMonitoringPage extends StatelessWidget {
               ),
             },
           ),
-          // Floating Action Button for Current Location
           Positioned(
             top: 20,
             left: 16,
             child: FloatingActionButton(
               onPressed: () {
-                // Logic to go to the user's current location
               },
               backgroundColor: Colors.white,
               child: Icon(Icons.location_on, color: Colors.black),
             ),
           ),
-          // Bottom Sheet
           DraggableScrollableSheet(
             initialChildSize: 0.3,
             minChildSize: 0.3,

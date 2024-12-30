@@ -50,10 +50,8 @@ class _SignupPageState extends State<SignupPage> {
         final responseBody = jsonDecode(response.body);
         final token = responseBody['access_token'];
 
-        // Simpan token ke Hive
-        await saveToken(token);
 
-        // Navigasi ke halaman berikutnya
+        await saveToken(token);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const Menu()),
         );
@@ -85,7 +83,6 @@ class _SignupPageState extends State<SignupPage> {
       errorMessage = '';
       isPasswordMismatch = false;
 
-      // Validasi Input
       if (username.isEmpty ||
           email.isEmpty ||
           password.isEmpty ||
@@ -111,7 +108,6 @@ class _SignupPageState extends State<SignupPage> {
       }
     });
 
-    // Jika semua validasi berhasil, kirim data ke server
     if (errorMessage.isEmpty) {
       _registerUser();
     }
