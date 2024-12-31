@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class FloodMonitoringPage extends StatelessWidget {
   final List<Map<String, String>> waterLevels = [
@@ -21,36 +22,24 @@ class FloodMonitoringPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Google Maps Widget
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: LatLng(-6.200000, 106.816666), // Lokasi Jakarta
-              zoom: 12,
+          // OpenStreetMap Widget
+          FlutterMap(
+            options: MapOptions(
+              initialCenter: LatLng(-6.200000, 106.816666), // Koordinat Jakarta, Indonesia
+              initialZoom: 10.0,
             ),
-            markers: {
-              Marker(
-                markerId: MarkerId('location1'),
-                position: LatLng(-6.210000, 106.847000), // Lokasi marker
-                infoWindow: InfoWindow(title: 'Kali Buaran', snippet: '1m'),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: ['a', 'b', 'c'],
               ),
-              Marker(
-                markerId: MarkerId('location2'),
-                position: LatLng(-6.190000, 106.835000), // Lokasi marker
-                infoWindow: InfoWindow(title: 'Kali Cakung', snippet: '2.5m'),
-              ),
-              Marker(
-                markerId: MarkerId('location3'),
-                position: LatLng(-6.170000, 106.828000), // Lokasi marker
-                infoWindow: InfoWindow(title: 'Kali Baru Timur', snippet: '3.8m'),
-              ),
-            },
+            ],
           ),
           Positioned(
             top: 20,
             left: 16,
             child: FloatingActionButton(
-              onPressed: () {
-              },
+              onPressed: () {},
               backgroundColor: Colors.white,
               child: Icon(Icons.location_on, color: Colors.black),
             ),
