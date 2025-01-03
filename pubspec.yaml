@@ -33,7 +33,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.2.1
-  flutter_map: ^7.0.2
+  flutter_map: ^6.1.0
   flutter_screenutil: ^5.9.3
   geocoding: ^3.0.0
   geolocator: ^13.0.2
@@ -108,6 +108,7 @@ flutter:
     - assets/images/bg1.png
     - assets/images/bg2.png
     - assets/images/close_icon.png
+    - assets/images/air.png
     - .env
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware

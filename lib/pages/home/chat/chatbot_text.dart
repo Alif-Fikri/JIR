@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animations/animations.dart';
+import 'package:http/http.dart' as http;
 
 class ChatBotPage extends StatefulWidget {
   const ChatBotPage({super.key});
@@ -21,6 +23,52 @@ class _ChatBotPageState extends State<ChatBotPage> {
     {"text": "Ingin tahu kondisi di area tertentu?", "isSender": false},
     {"text": "Update kondisi dijalan xxxxxx", "isSender": true},
   ];
+
+  Future<void> _fetchGeminiData(String query) async {
+    const String apiUrl = 'https://api.gemini.com/v1/location';
+    const String apiKey = 'AIzaSyAQsq3vyPq0KBY2VNK64_z050HC-g1GhgQ';
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({"query": query}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.body;
+        setState(() {
+          _messages.add({"text": data, "isSender": false});
+        });
+      } else {
+        print('Failed to fetch data. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        setState(() {
+          _messages.add(
+              {"text": "Error: ${response.reasonPhrase}", "isSender": false});
+        });
+      }
+    } catch (e) {
+      print('Exception caught: $e');
+      setState(() {
+        _messages.add({"text": "Failed to fetch data: $e", "isSender": false});
+      });
+    }
+  }
+
+  void _sendMessage() {
+    if (_controller.text.isNotEmpty) {
+      final userMessage = _controller.text;
+      setState(() {
+        _messages.add({"text": userMessage, "isSender": true});
+        _controller.clear();
+      });
+      _fetchGeminiData(userMessage);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,15 +245,6 @@ class _ChatBotPageState extends State<ChatBotPage> {
         ],
       ),
     );
-  }
-
-  void _sendMessage() {
-    if (_controller.text.isNotEmpty) {
-      setState(() {
-        _messages.add({"text": _controller.text, "isSender": true});
-        _controller.clear();
-      });
-    }
   }
 
   Widget _buildMicOverlay() {
