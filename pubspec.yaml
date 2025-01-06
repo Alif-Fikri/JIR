@@ -75,7 +75,6 @@ flutter:
     - assets/images/afternoon.png
     - assets/images/night.png
     - assets/images/morning.png
-    - assets/images/cerah_berawan.png
     - assets/images/path.png
     - assets/images/search.png
     - assets/images/button_menu.png
@@ -110,6 +109,16 @@ flutter:
     - assets/images/close_icon.png
     - assets/images/air.png
     - .env
+    - assets/images/Cuaca Smart City Icon-01.png
+    - assets/images/Cuaca Smart City Icon-02.png
+    - assets/images/Cuaca Smart City Icon-03.png
+    - assets/images/Cuaca Smart City Icon-04.png
+    - assets/images/Cuaca Smart City Icon-05.png
+    - assets/images/Cuaca Smart City Icon-06.png
+    - assets/images/Cuaca Smart City Icon-07.png
+    - assets/images/Cuaca Smart City Icon-08.png
+    - assets/images/Cuaca Smart City Icon-09.png
+    - assets/images/Cuaca Smart City Icon-10.png
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
     # For details regarding adding assets from package dependencies, see
