@@ -142,6 +142,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final int currentHour = DateTime.now().hour;
     String backgroundImage = BackgroundImageSelector.getBackgroundImage(currentHour);
+      String weatherDescription = "Loading..."; 
+  String translatedDescription = _translateWeatherDescription(weatherDescription);
+  String weatherImage = BackgroundImageSelector.getImageForWeather(translatedDescription);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -207,7 +210,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Image.asset(
-                                  'assets/images/Cuaca Smart City Icon-02.png',
+                                  (weatherImage),
                                   width: 50,
                                   height: 37,
                                 ),
