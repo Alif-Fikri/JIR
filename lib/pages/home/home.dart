@@ -141,10 +141,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final int currentHour = DateTime.now().hour;
-    String backgroundImage = BackgroundImageSelector.getBackgroundImage(currentHour);
-      String weatherDescription = "Loading..."; 
-  String translatedDescription = _translateWeatherDescription(weatherDescription);
-  String weatherImage = BackgroundImageSelector.getImageForWeather(translatedDescription);
+    String backgroundImage =
+        BackgroundImageSelector.getBackgroundImage(currentHour);
+    String translatedDescription =
+        _translateWeatherDescription(weatherDescription);
+    String weatherImage =
+        BackgroundImageSelector.getImageForWeather(translatedDescription);
 
     return Scaffold(
       backgroundColor: Colors.white,
