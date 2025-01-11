@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:smartcitys/service/google_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -47,12 +48,9 @@ class _LoginPageState extends State<LoginPage> {
         final responseBody = jsonDecode(response.body);
         print('Server response: $responseBody');
 
-
         final token = responseBody['access_token'];
 
-
         await saveToken(token);
-
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const Menu()),
@@ -112,6 +110,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final GoogleAuthService _authService = GoogleAuthService();
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -223,9 +222,7 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextButton(
-                      onPressed: () {
-                        // Aksi saat tombol Forgot Password ditekan
-                      },
+                      onPressed: () {},
                       child: Text(
                         'Forgot Password?',
                         style: GoogleFonts.inter(
@@ -257,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text(
                       "OR",
                       style: TextStyle(
-                        color: Colors.black, // Warna teks "OR"
+                        color: Colors.black,
                         fontWeight: FontWeight.w300,
                       ),
                     ),
@@ -279,14 +276,14 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 10),
               Container(
-                width: fixedWidth, // Set lebar tetap untuk tombol Google
+                width: fixedWidth,
                 height: fixedHeight,
                 decoration: BoxDecoration(
-                  color: Colors.white, // Warna latar belakang container
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2), // Warna bayangan
+                      color: Colors.black.withOpacity(0.2),
                       spreadRadius: 1,
                       blurRadius: 5,
                       offset: const Offset(0, 5), // Posisi bayangan
@@ -294,9 +291,14 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Aksi saat tombol Sign In with Google ditekan
-                  },
+                  onPressed: () async {
+            final result = await _authService.signInWithGoogle();
+            if (result != null) {
+              print("Login successful! Token: ${result['access_token']}");
+            } else {
+              print("Google login failed");
+            }
+          },
                   icon: Image.asset(
                     'assets/images/google.png',
                     height: 24,
