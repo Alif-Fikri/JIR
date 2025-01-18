@@ -46,6 +46,7 @@ dependencies:
   latlong2: ^0.9.1
   location: ^7.0.1
   shared_preferences: ^2.3.3
+  speech_to_text: ^7.0.0
   weather: ^3.1.1
 
 dev_dependencies:

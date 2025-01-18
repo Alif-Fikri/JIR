@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animations/animations.dart';
 import 'package:http/http.dart' as http;
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ChatBotPage extends StatefulWidget {
   const ChatBotPage({super.key});
@@ -23,6 +24,66 @@ class _ChatBotPageState extends State<ChatBotPage> {
     {"text": "Ingin tahu kondisi di area tertentu?", "isSender": false},
     {"text": "Update kondisi dijalan xxxxxx", "isSender": true},
   ];
+
+  late stt.SpeechToText _speech;
+  String _recognizedText = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+    _simulateInitialMessages();
+  }
+
+  void _simulateInitialMessages() async {
+    final List<Map<String, dynamic>> initialMessages = [
+      {
+        "text":
+            "Hallo Zee, aku Suki asisten anda untuk memantau banjir dan kerumunan",
+        "isSender": false
+      },
+      {"text": "Ingin tahu kondisi di area tertentu?", "isSender": false},
+    ];
+
+    for (final message in initialMessages) {
+      await Future.delayed(const Duration(seconds: 2));
+      setState(() {
+        _messages.add(message);
+      });
+    }
+  }
+  void _startListening() async {
+  bool available = await _speech.initialize(
+    onStatus: (status) => print('Status: $status'),
+    onError: (error) => print('Error: $error'),
+  );
+
+  if (available) {
+    setState(() {
+      _isMicTapped = true;
+    });
+
+    _speech.listen(
+      onResult: (result) {
+        setState(() {
+          _recognizedText = result.recognizedWords;
+        });
+      },
+    );
+  }
+}
+
+void _stopListening() {
+  _speech.stop();
+  setState(() {
+    _isMicTapped = false;
+    if (_recognizedText.isNotEmpty) {
+      _messages.add({"text": _recognizedText, "isSender": true});
+      _recognizedText = '';
+    }
+  });
+}
+
 
   Future<void> _fetchGeminiData(String query) async {
     const String apiUrl = 'https://api.gemini.com/v1/location';
@@ -213,35 +274,35 @@ class _ChatBotPageState extends State<ChatBotPage> {
             ),
           ),
           const SizedBox(width: 8.0),
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xffEAEFF3),
-              border: Border.all(
-                color: const Color(0x14000000),
-                width: 1.0,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 6,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              radius: 24,
-              child: IconButton(
-                icon: const Icon(Icons.mic, color: Colors.red),
-                onPressed: () {
-                  setState(() {
-                    _isMicTapped = true;
-                  });
-                },
-              ),
-            ),
-          ),
+Container(
+  decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    color: const Color(0xffEAEFF3),
+    border: Border.all(
+      color: const Color(0x14000000),
+      width: 1.0,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.1),
+        blurRadius: 6,
+        offset: const Offset(0, 4),
+      ),
+    ],
+  ),
+  child: CircleAvatar(
+    backgroundColor: Colors.transparent,
+    radius: 24,
+    child: IconButton(
+      icon: Icon(
+        _isMicTapped ? Icons.mic : Icons.mic_none,
+        color: Colors.red,
+      ),
+      onPressed: _isMicTapped ? _stopListening : _startListening,
+    ),
+  ),
+),
+
         ],
       ),
     );
