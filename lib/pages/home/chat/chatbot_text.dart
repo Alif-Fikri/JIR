@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:animations/animations.dart';
 import 'package:http/http.dart' as http;
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'dart:async';
+import 'dart:math';
+import 'package:smartcitys/helper/voicefrequency.dart';
 
 class ChatBotPage extends StatefulWidget {
   const ChatBotPage({super.key});
@@ -12,8 +15,12 @@ class ChatBotPage extends StatefulWidget {
   _ChatBotPageState createState() => _ChatBotPageState();
 }
 
-class _ChatBotPageState extends State<ChatBotPage> {
+class _ChatBotPageState extends State<ChatBotPage>
+    with TickerProviderStateMixin {
   bool _isMicTapped = false;
+  bool _isChatVisible = true;
+  late AnimationController _controllerA;
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, dynamic>> _messages = [
     {
@@ -33,6 +40,16 @@ class _ChatBotPageState extends State<ChatBotPage> {
     super.initState();
     _speech = stt.SpeechToText();
     _simulateInitialMessages();
+    _controllerA = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controllerA.dispose();
+    super.dispose();
   }
 
   void _simulateInitialMessages() async {
@@ -52,38 +69,41 @@ class _ChatBotPageState extends State<ChatBotPage> {
       });
     }
   }
+
   void _startListening() async {
-  bool available = await _speech.initialize(
-    onStatus: (status) => print('Status: $status'),
-    onError: (error) => print('Error: $error'),
-  );
-
-  if (available) {
-    setState(() {
-      _isMicTapped = true;
-    });
-
-    _speech.listen(
-      onResult: (result) {
-        setState(() {
-          _recognizedText = result.recognizedWords;
-        });
-      },
+    bool available = await _speech.initialize(
+      onStatus: (status) => print('Status: $status'),
+      onError: (error) => print('Error: $error'),
     );
-  }
-}
 
-void _stopListening() {
-  _speech.stop();
-  setState(() {
-    _isMicTapped = false;
-    if (_recognizedText.isNotEmpty) {
-      _messages.add({"text": _recognizedText, "isSender": true});
-      _recognizedText = '';
+    if (available) {
+      setState(() {
+        _isMicTapped = true;
+        _isChatVisible = false;
+      });
+
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            _recognizedText = result.recognizedWords;
+          });
+        },
+      );
     }
-  });
-}
+  }
 
+  void _stopListening() {
+    _speech.stop();
+    setState(() {
+      _isMicTapped = false;
+      _isChatVisible = true;
+      if (_recognizedText.isNotEmpty) {
+        _messages.add({"text": _recognizedText, "isSender": true});
+        _recognizedText = '';
+      }
+    });
+    scrollToBottom();
+  }
 
   Future<void> _fetchGeminiData(String query) async {
     const String apiUrl = 'https://api.gemini.com/v1/location';
@@ -128,7 +148,20 @@ void _stopListening() {
         _controller.clear();
       });
       _fetchGeminiData(userMessage);
+      scrollToBottom();
     }
+  }
+
+  void scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -162,24 +195,90 @@ void _stopListening() {
               fit: BoxFit.cover,
             ),
           ),
-          Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(20.0),
-                  itemCount: _messages.length,
-                  itemBuilder: (context, index) {
-                    return _chatBubble(
-                      text: _messages[index]["text"],
-                      isSender: _messages[index]["isSender"],
-                    );
-                  },
-                ),
+          if (_isChatVisible)
+            Padding(
+              padding: EdgeInsets.only(bottom: screenHeight * 0.1),
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(20.0),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  return _chatBubble(
+                    text: _messages[index]["text"],
+                    isSender: _messages[index]["isSender"],
+                  );
+                },
               ),
-              _inputSection(screenWidth),
-            ],
+            ),
+          Positioned(
+            bottom: 0, // Fix to bottom
+            left: 0,
+            right: 0,
+            child: _inputSection(screenWidth),
           ),
-          if (_isMicTapped) _buildMicOverlay(),
+          if (_isMicTapped)
+            Center(
+              child: SizedBox(
+                  height: 180,
+                  width: double.infinity,
+                  child: Stack(alignment: Alignment.center, children: [
+                    Positioned.fill(
+                      child: AnimatedBuilder(
+                        animation: _controllerA,
+                        builder: (context, child) {
+                          return CustomPaint(
+                            painter: VoiceFrequencyPainter(
+                              _controllerA.value * 2 * pi,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xffEAEFF3),
+                          border: Border.all(
+                            color: const Color(0x14000000),
+                            width: 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.transparent,
+                          radius: 50,
+                          child: IconButton(
+                            icon: Icon(
+                              _isMicTapped ? Icons.mic : Icons.mic_none,
+                              color: Colors.red,
+                              size: 50,
+                            ),
+                            onPressed:
+                                _isMicTapped ? _stopListening : _startListening,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      child: Text(
+                        'Mendengarkan...',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ])),
+            )
         ],
       ),
     );
@@ -274,67 +373,36 @@ void _stopListening() {
             ),
           ),
           const SizedBox(width: 8.0),
-Container(
-  decoration: BoxDecoration(
-    shape: BoxShape.circle,
-    color: const Color(0xffEAEFF3),
-    border: Border.all(
-      color: const Color(0x14000000),
-      width: 1.0,
-    ),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.1),
-        blurRadius: 6,
-        offset: const Offset(0, 4),
-      ),
-    ],
-  ),
-  child: CircleAvatar(
-    backgroundColor: Colors.transparent,
-    radius: 24,
-    child: IconButton(
-      icon: Icon(
-        _isMicTapped ? Icons.mic : Icons.mic_none,
-        color: Colors.red,
-      ),
-      onPressed: _isMicTapped ? _stopListening : _startListening,
-    ),
-  ),
-),
-
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMicOverlay() {
-    return OpenContainer(
-      openBuilder: (context, _) {
-        return Scaffold(
-          body: Center(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.redAccent,
-                shape: BoxShape.circle,
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xffEAEFF3),
+              border: Border.all(
+                color: const Color(0x14000000),
+                width: 1.0,
               ),
-              child: const Padding(
-                padding: EdgeInsets.all(50.0),
-                child: Icon(Icons.mic, size: 100, color: Colors.white),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              radius: 24,
+              child: IconButton(
+                icon: Icon(
+                  _isMicTapped ? Icons.mic : Icons.mic_none,
+                  color: Colors.red,
+                ),
+                onPressed: _isMicTapped ? _stopListening : _startListening,
               ),
             ),
           ),
-        );
-      },
-      closedElevation: 0,
-      closedColor: Colors.transparent,
-      openColor: Colors.transparent,
-      onClosed: (_) {
-        setState(() {
-          _isMicTapped = false;
-        });
-      },
-      closedBuilder: (context, openContainer) => Container(),
+        ],
+      ),
     );
   }
 }
