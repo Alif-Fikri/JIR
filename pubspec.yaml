@@ -70,7 +70,7 @@ flutter:
   assets:
     - assets/images/email.png
     - assets/images/hide.png
-    - assets/images/google.png
+    - assets/images/logo_google.png
     - assets/images/password.png
     - assets/images/person.png
     - assets/images/line.png
