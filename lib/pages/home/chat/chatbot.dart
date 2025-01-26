@@ -32,8 +32,8 @@ class ChatbotOpeningPage extends StatelessWidget {
             child: Center(
               child: Container(
                 constraints: BoxConstraints(
-                  maxWidth: 700,
-                  maxHeight: 350,
+                  maxWidth: 550,
+                  maxHeight: 450,
                 ),
                 decoration: BoxDecoration(
                   image: DecorationImage(
@@ -62,8 +62,8 @@ class ChatbotOpeningPage extends StatelessWidget {
                       const SizedBox(height: 10),
                       Image.asset(
                         'assets/images/suki.png',
-                        width: 150,
-                        height: 150,
+                        width: 195,
+                        height: 270,
                       ),
                     ],
                   ),
