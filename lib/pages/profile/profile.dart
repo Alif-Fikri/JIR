@@ -10,7 +10,8 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class LogoutDialog {
-  static void show(BuildContext context, Future<void> Function(BuildContext) onLogout) {
+  static void show(
+      BuildContext context, Future<void> Function(BuildContext) onLogout) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -60,7 +61,8 @@ class LogoutDialog {
               width: 89.0,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xff4B5C82), width: 1.5)),
+                  border:
+                      Border.all(color: const Color(0xff4B5C82), width: 1.5)),
               child: TextButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
@@ -86,44 +88,43 @@ class LogoutDialog {
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-Future<void> handleLogout(BuildContext context) async {
-  try {
-    final box = Hive.box('authBox');
-    final token = box.get('token'); 
+  Future<void> handleLogout(BuildContext context) async {
+    try {
+      final box = Hive.box('authBox');
+      final token = box.get('token');
 
-    if (token == null) {
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No token found. Please log in again.')),
+        );
+        return;
+      }
+
+      final response = await http.post(
+        Uri.parse('http://localhost:8000/auth/logout'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        await box.delete('token');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to logout. Please try again.')),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No token found. Please log in again.')),
-      );
-      return;
-    }
-
-    final response = await http.post(
-      Uri.parse('http://localhost:8000/auth/logout'),
-      headers: {
-        'Authorization': 'Bearer $token', 
-        'Content-Type': 'application/json',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      await box.delete('token'); 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to logout. Please try again.')),
+        SnackBar(content: Text('Error: $e')),
       );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $e')),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -174,8 +175,8 @@ Future<void> handleLogout(BuildContext context) async {
                   backgroundColor: Colors.white,
                   child: CircleAvatar(
                     radius: 47,
-                    backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/150'),
+                    backgroundImage:
+                        NetworkImage('https://via.placeholder.com/150'),
                   ),
                 ),
               ),
@@ -241,8 +242,7 @@ Future<void> handleLogout(BuildContext context) async {
                     icon: Image.asset('assets/images/logout.png', width: 24),
                     text: "Logout",
                     onTap: () {
-                    LogoutDialog.show(context, handleLogout);
-                      
+                      LogoutDialog.show(context, handleLogout);
                     },
                   ),
                 ],

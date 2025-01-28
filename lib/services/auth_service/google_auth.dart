@@ -7,7 +7,6 @@ class GoogleAuthService {
 
   Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
-      
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null;
 
@@ -27,7 +26,7 @@ class GoogleAuthService {
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body); 
+        return jsonDecode(response.body);
       } else {
         throw Exception("Failed to authenticate with Google");
       }

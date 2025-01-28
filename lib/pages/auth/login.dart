@@ -3,11 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:smartcitys/service/google_auth.dart';
+import 'package:smartcitys/services/auth_service/google_auth.dart';
+import 'package:smartcitys/services/auth_service/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,92 +16,34 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
   bool isLoading = false;
   String errorMessage = '';
 
   final fixedWidth = 350.0;
   final fixedHeight = 50.0;
 
-  Future<void> _login() async {
-    final url = Uri.parse('http://localhost:8000/auth/login');
+  void _validateAndLogin() async {
     setState(() {
       isLoading = true;
       errorMessage = '';
     });
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text.trim(),
-        }),
+    final email = _emailController.text;
+    final password = _passwordController.text;
+    final result = await _authService.login(email, password);
+
+    if (result['success']) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const Menu(),
+        ),
       );
-
-      if (!mounted) return;
-
-      if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        print('Server response: $responseBody');
-
-        final token = responseBody['access_token'];
-
-        await saveToken(token);
-
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const Menu()),
-        );
-      } else if (response.statusCode == 401) {
-        setState(() {
-          errorMessage = 'Invalid email or password.';
-        });
-      } else {
-        setState(() {
-          errorMessage = 'Server error. Please try again later.';
-        });
-      }
-    } catch (e) {
+    } else {
       setState(() {
-        errorMessage = 'Unable to connect to the server.';
-      });
-    } finally {
-      setState(() {
+        errorMessage = result['message'];
         isLoading = false;
       });
-    }
-  }
-
-  void _validateAndLogin() {
-    setState(() {
-      errorMessage = '';
-
-      if (_emailController.text.trim().isEmpty ||
-          _passwordController.text.trim().isEmpty) {
-        errorMessage = 'Email and Password are required.';
-        return;
-      }
-
-      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(_emailController.text)) {
-        errorMessage = 'Invalid email format.';
-        return;
-      }
-    });
-
-    if (errorMessage.isEmpty) {
-      _login();
-    }
-  }
-
-  Future<void> saveToken(String token) async {
-    print('saveToken called with token: $token');
-    try {
-      var box = await Hive.openBox('authBox');
-      print('Hive box opened successfully');
-      await box.put('token', token);
-      print('Token saved: $token');
-    } catch (e) {
-      print('Error saving token: $e');
     }
   }
 
@@ -201,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   child: isLoading
                       ? const CircularProgressIndicator(
-                          color: Colors.white,
+                          color: Color(0xffFF4136),
                         )
                       : Text(
                           'Sign In',
@@ -292,15 +231,16 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 child: ElevatedButton.icon(
                   onPressed: () async {
-            final result = await _authService.signInWithGoogle();
-            if (result != null) {
-              print("Login successful! Token: ${result['access_token']}");
-            } else {
-              print("Google login failed");
-            }
-          },
+                    final result = await _authService.signInWithGoogle();
+                    if (result != null) {
+                      print(
+                          "Login successful! Token: ${result['access_token']}");
+                    } else {
+                      print("Google login failed");
+                    }
+                  },
                   icon: Image.asset(
-                    'assets/images/google.png',
+                    'assets/images/logo_google.png',
                     height: 24,
                     width: 24,
                   ),

@@ -26,14 +26,14 @@ class ChatbotOpeningPage extends StatelessWidget {
       body: Stack(
         children: [
           Positioned(
-            bottom: 250,
+            bottom: 340,
             left: 0,
             right: 0,
             child: Center(
               child: Container(
                 constraints: BoxConstraints(
-                  maxWidth: 550,
-                  maxHeight: 450,
+                  maxWidth: 530,
+                  maxHeight: 400,
                 ),
                 decoration: BoxDecoration(
                   image: DecorationImage(
@@ -84,14 +84,22 @@ class ChatbotOpeningPage extends StatelessWidget {
                           MaterialPageRoute(
                               builder: (context) => const ChatBotPage()));
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff45557B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.resolveWith((states) {
+                        if (states.contains(MaterialState.pressed)) {
+                          return Color(0xffE45835);
+                        }
+                        return const Color(0xff45557B);
+                      }),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 40,
-                        vertical: 12,
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 20),
                       ),
                     ),
                     child: Text(

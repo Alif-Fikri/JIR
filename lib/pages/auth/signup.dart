@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/auth/login.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:smartcitys/services/auth_service/auth_service.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -18,98 +15,57 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   bool isTermsAccepted = false;
   bool isPasswordMismatch = false;
+  bool isLoading = false;
   String errorMessage = '';
   String username = '';
   String email = '';
   String password = '';
   String confirmPassword = '';
+  final AuthService _authService = AuthService();
 
   final fixedWidth = 350.0;
   final fixedHeight = 50.0;
 
-  Future<void> _registerUser() async {
-    final url = Uri.parse('http://localhost:8000/auth/signup');
-    setState(() {
-      errorMessage = '';
-    });
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': username,
-          'email': email,
-          'password': password,
-        }),
-      );
-
-      if (!mounted) return;
-
-      if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        final token = responseBody['access_token'];
-
-
-        await saveToken(token);
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const Menu()),
-        );
-      } else {
-        final responseBody = jsonDecode(response.body);
-        setState(() {
-          errorMessage = responseBody['message'] ?? 'Registration failed';
-        });
-      }
-    } catch (e) {
+  void _validateAndRegister() async {
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
       setState(() {
-        errorMessage = 'Failed to connect to the server. Please try again.';
+        errorMessage = 'Please fill in all fields';
       });
+      return;
     }
-  }
 
-  Future<void> saveToken(String token) async {
-    try {
-      var box = await Hive.openBox('authBox'); 
-      await box.put('token', token); 
-      print('Token saved: $token');
-    } catch (e) {
-      print('Error saving token: $e');
+    if (password != confirmPassword) {
+      setState(() {
+        errorMessage = 'Passwords do not match';
+      });
+      return;
     }
-  }
 
-  void _validateAndRegister() {
+    if (!isTermsAccepted) {
+      setState(() {
+        errorMessage = 'Please accept the terms and conditions';
+      });
+      return;
+    }
+
     setState(() {
+      isLoading = true;
       errorMessage = '';
-      isPasswordMismatch = false;
-
-      if (username.isEmpty ||
-          email.isEmpty ||
-          password.isEmpty ||
-          confirmPassword.isEmpty) {
-        errorMessage = 'All fields are required.';
-        return;
-      }
-
-      if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
-        errorMessage = 'Invalid email format.';
-        return;
-      }
-
-      if (password != confirmPassword) {
-        errorMessage = 'Password doesn’t match.';
-        isPasswordMismatch = true;
-        return;
-      }
-
-      if (!isTermsAccepted) {
-        errorMessage = 'You must accept the terms and conditions.';
-        return;
-      }
     });
 
-    if (errorMessage.isEmpty) {
-      _registerUser();
+    final response = await _authService.signup(username, email, password);
+
+    if (response['success']) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const Menu(),
+        ),
+      );
+    } else {
+      setState(() {
+        errorMessage = response['message'];
+        isLoading = false;
+      });
     }
   }
 
@@ -238,9 +194,7 @@ class _SignupPageState extends State<SignupPage> {
                                   ),
                                 ),
                                 recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    // Action to open terms page
-                                  },
+                                  ..onTap = () {},
                               ),
                             ],
                           ),
@@ -265,16 +219,20 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       backgroundColor: const Color(0xFF45557B),
                     ),
-                    child: Text(
-                      'Sign Up',
-                      style: GoogleFonts.inter(
-                        textStyle: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                          )
+                        : Text(
+                            'Sign Up',
+                            style: GoogleFonts.inter(
+                              textStyle: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                   ),
                 ),
 

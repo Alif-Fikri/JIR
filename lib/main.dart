@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smartcitys/pages/auth/login.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/home.dart';
@@ -19,6 +20,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Login Page', theme: ThemeData(), home: ChatbotOpeningPage());
+        title: 'Login Page', theme: ThemeData(), home: LoginPage());
   }
 }
