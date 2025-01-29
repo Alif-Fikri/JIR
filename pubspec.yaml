@@ -30,6 +30,7 @@ environment:
 dependencies:
   animations: ^2.0.11
   cupertino_icons: ^1.0.6
+  fl_chart: ^0.63.0
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.2.1
@@ -121,6 +122,9 @@ flutter:
     - assets/images/Cuaca Smart City Icon-08.png
     - assets/images/Cuaca Smart City Icon-09.png
     - assets/images/Cuaca Smart City Icon-10.png
+    - assets/images/siaga.png
+    - assets/images/lokasi.png
+    - assets/images/ketinggian.png
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
     # For details regarding adding assets from package dependencies, see

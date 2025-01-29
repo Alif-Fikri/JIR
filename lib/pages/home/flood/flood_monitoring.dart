@@ -3,6 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:smartcitys/pages/home/flood/flood_item_data.dart';
 
 class FloodMonitoringPage extends StatefulWidget {
   @override
@@ -10,18 +12,9 @@ class FloodMonitoringPage extends StatefulWidget {
 }
 
 class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
-  final List<Map<String, String>> waterLevels = [
-    {'name': 'Kali Buaran', 'level': '1m'},
-    {'name': 'Kali Cakung', 'level': '2.5m'},
-    {'name': 'Kali Baru Timur', 'level': '3.8m'},
-    {'name': 'Kali Baru Timur', 'level': '3.8m'},
-    {'name': 'Kali Baru Timur', 'level': '3.8m'},
-    {'name': 'Kali Baru Timur', 'level': '3.8m'},
-    {'name': 'Kali Baru Timur', 'level': '3.8m'},
-  ];
-
   LatLng? currentLocation;
   final MapController _mapController = MapController();
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -55,6 +48,24 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
     });
   }
 
+  Future<void> _searchLocation(String query) async {
+    try {
+      List<Location> locations = await locationFromAddress(query);
+      if (locations.isNotEmpty) {
+        Location loc = locations.first;
+        LatLng searchedLocation = LatLng(loc.latitude, loc.longitude);
+        setState(() {
+          _mapController.move(searchedLocation, 15.0);
+        });
+      }
+    } catch (e) {
+      print("Lokasi tidak ditemukan: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lokasi tidak ditemukan')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,10 +75,7 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
             fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
         backgroundColor: Color(0xff45557B),
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -76,8 +84,7 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: currentLocation ??
-                  LatLng(-6.200000, 106.816666), // Default ke Jakarta
+              initialCenter: currentLocation ?? LatLng(-6.200000, 106.816666),
               initialZoom: 15.0,
             ),
             children: [
@@ -89,90 +96,56 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
             ],
           ),
           Positioned(
-            top: 20,
+            top: 16,
             left: 16,
-            child: FloatingActionButton(
-              onPressed: _getCurrentLocation,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.my_location, color: Colors.black),
-            ),
-          ),
-          DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.3,
-            maxChildSize: 0.6,
-            builder: (context, scrollController) {
-              return Container(
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(20),
+            right: 16,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(50),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey,
+                          blurRadius: 5,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search . . .',
+                        hintStyle: GoogleFonts.inter(
+                            color: Colors.black, fontStyle: FontStyle.italic),
+                        prefixIcon: Icon(Icons.search, color: Colors.black),
+                        border: InputBorder.none,
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                      ),
+                      onSubmitted: _searchLocation,
+                    ),
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 100,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: Color(0xffD9D9D9),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Water levels',
-                      style: GoogleFonts.publicSans(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Expanded(
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: waterLevels.length,
-                        itemBuilder: (context, index) {
-                          final item = waterLevels[index];
-                          return ListTile(
-                            leading: Container(
-                                padding: EdgeInsets.all(8.0),
-                                // decoration: BoxDecoration(
-                                //   color: Color(0xffF0F2F5),
-                                //   shape: BoxShape.rectangle,
-                                // ),
-                                child: Image.asset(
-                                  'assets/images/air.png',
-                                  width: 50,
-                                  height: 50,
-                                )),
-                            title: Text(
-                              item['name']!,
-                              style: GoogleFonts.publicSans(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black),
-                            ),
-                            subtitle: Text(
-                              item['level']!,
-                              style: GoogleFonts.publicSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xff61788A)),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                SizedBox(width: 8),
+                FloatingActionButton(
+                  onPressed: _getCurrentLocation,
+                  backgroundColor: Colors.white,
+                  mini: true,
+                  child: Icon(Icons.my_location, color: Colors.black),
                 ),
-              );
-            },
+              ],
+            ),
+          ),
+          FloodInfoBottomSheet(
+            status: "Siaga",
+            statusIconPath: "assets/images/siaga.png",
+            waterHeight: 500,
+            waterIconPath: "assets/images/ketinggian.png",
+            location: "Jakarta",
+            locationIconPath: "assets/images/lokasi.png",
           ),
         ],
       ),
