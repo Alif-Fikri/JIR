@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:smartcitys/pages/home/flood/flood_item_data.dart';
+import 'package:smartcitys/services/flood_service/flood_service.dart';
 
 class FloodMonitoringPage extends StatefulWidget {
   @override
@@ -15,11 +16,14 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
   LatLng? currentLocation;
   final MapController _mapController = MapController();
   TextEditingController _searchController = TextEditingController();
+  List<Marker> _floodMarkers = [];
+  List<Map<String, dynamic>> floodData = [];
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
+    _fetchFloodData();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -48,21 +52,30 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
     });
   }
 
-  Future<void> _searchLocation(String query) async {
+  Future<void> _fetchFloodData() async {
     try {
-      List<Location> locations = await locationFromAddress(query);
-      if (locations.isNotEmpty) {
-        Location loc = locations.first;
-        LatLng searchedLocation = LatLng(loc.latitude, loc.longitude);
-        setState(() {
-          _mapController.move(searchedLocation, 15.0);
-        });
-      }
+      final service = FloodService();
+      final data = await service.fetchFloodData();
+
+      setState(() {
+        floodData = data;
+        _floodMarkers = floodData.map((item) {
+          double lat = double.tryParse(item["LATITUDE"].toString()) ?? 0.0;
+          double lng = double.tryParse(item["LONGITUDE"].toString()) ?? 0.0;
+          String status = item["STATUS_SIAGA"] ?? "Unknown";
+
+          return Marker(
+            point: LatLng(lat, lng),
+            child: Icon(
+              Icons.location_on,
+              color: status == "Siaga" ? Colors.red : Colors.orange,
+              size: 40,
+            ),
+          );
+        }).toList();
+      });
     } catch (e) {
-      print("Lokasi tidak ditemukan: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lokasi tidak ditemukan')),
-      );
+      print("Error fetching flood data: $e");
     }
   }
 
@@ -92,6 +105,9 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
                 urlTemplate:
                     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 subdomains: ['a', 'b', 'c'],
+              ),
+              MarkerLayer(
+                markers: _floodMarkers,
               ),
             ],
           ),
@@ -140,15 +156,38 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
             ),
           ),
           FloodInfoBottomSheet(
-            status: "Siaga",
+            status:
+                floodData.isNotEmpty ? floodData[0]["STATUS_SIAGA"] : "Unknown",
             statusIconPath: "assets/images/siaga.png",
-            waterHeight: 500,
+            waterHeight: floodData.isNotEmpty
+                ? int.tryParse(floodData[0]["TINGGI_AIR"].toString()) ?? 0
+                : 0,
             waterIconPath: "assets/images/ketinggian.png",
-            location: "Jakarta",
+            location:
+                floodData.isNotEmpty ? floodData[0]["NAMA_PINTU_AIR"] : "N/A",
             locationIconPath: "assets/images/lokasi.png",
+            floodData: floodData,
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _searchLocation(String query) async {
+    try {
+      List<Location> locations = await locationFromAddress(query);
+      if (locations.isNotEmpty) {
+        Location loc = locations.first;
+        LatLng searchedLocation = LatLng(loc.latitude, loc.longitude);
+        setState(() {
+          _mapController.move(searchedLocation, 15.0);
+        });
+      }
+    } catch (e) {
+      print("Lokasi tidak ditemukan: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lokasi tidak ditemukan')),
+      );
+    }
   }
 }

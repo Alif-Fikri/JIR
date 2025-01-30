@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/widgets.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/services/flood_service/flood_service.dart';
+import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 
 class FloodInfoBottomSheet extends StatelessWidget {
   final String status;
@@ -8,6 +12,7 @@ class FloodInfoBottomSheet extends StatelessWidget {
   final String waterIconPath;
   final String location;
   final String locationIconPath;
+  final List<Map<String, dynamic>> floodData;
 
   FloodInfoBottomSheet({
     required this.status,
@@ -16,12 +21,13 @@ class FloodInfoBottomSheet extends StatelessWidget {
     required this.waterIconPath,
     required this.location,
     required this.locationIconPath,
+    required this.floodData,
   });
 
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.2,
+      initialChildSize: 0.7,
       minChildSize: 0.1,
       maxChildSize: 0.7,
       builder: (context, scrollController) {
@@ -60,19 +66,11 @@ class FloodInfoBottomSheet extends StatelessWidget {
                   ),
 
                   SizedBox(height: 20),
-
-                  // Grafik Perubahan Ketinggian Air
-                  Text("Perubahan Ketinggian Air",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 10),
-                  _buildWaterLevelChart(),
-
-                  SizedBox(height: 10),
-                  Text(
-                    "* Tinggi air saat ini berada di $waterHeight cm, meningkat dibandingkan 2 jam terakhir.",
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  const Divider(),
+                  SizedBox(
+                    height: 20,
                   ),
+                  _buildWaterLevelChart(),
                 ],
               ),
             ),
@@ -107,51 +105,110 @@ class FloodInfoBottomSheet extends StatelessWidget {
     );
   }
 
-  // Widget untuk menampilkan Grafik Perubahan Ketinggian Air
   Widget _buildWaterLevelChart() {
-    return SizedBox(
-      height: 200,
-      child: LineChart(
-        LineChartData(
-          gridData: FlGridData(show: true, drawVerticalLine: true),
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) =>
-                    Text('${value.toInt()} cm', style: TextStyle(fontSize: 10)),
-                reservedSize: 40,
-              ),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.blueGrey, width: 1),
+        color: Color(0xffE7EEFD), // Warna background biru muda
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header Title dalam satu Container
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: Color(0xff45557B), // Warna header biru tua
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
             ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) => Text('${value.toInt()}'),
+            child: Center(
+              child: Text(
+                "Perubahan Ketinggian Air",
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
-          borderData: FlBorderData(show: true),
-          lineBarsData: [
-            LineChartBarData(
-              spots: [
-                FlSpot(0, 100),
-                FlSpot(1, 300),
-                FlSpot(2, 600),
-                FlSpot(3, 800),
-                FlSpot(4, 400),
-                FlSpot(5, 500),
-                FlSpot(6, 700),
-                FlSpot(7, 900),
-                FlSpot(8, 1000),
-              ],
-              isCurved: true,
-              color: Colors.blue,
-              belowBarData:
-                  BarAreaData(show: true, color: Colors.blue.withOpacity(0.3)),
-              dotData: FlDotData(show: true),
+
+          SizedBox(height: 10),
+
+          // Grafik
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: SizedBox(
+              height: 200,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(show: true),
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) => Text(
+                          '${value.toInt()}',
+                          style: GoogleFonts.inter(fontSize: 10),
+                        ),
+                        reservedSize: 40,
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) => Text(
+                          '${value.toInt()}',
+                          style: GoogleFonts.inter(fontSize: 10),
+                        ),
+                      ),
+                    ),
+                    topTitles:
+                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles:
+                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  ),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border.all(color: Colors.grey.shade400, width: 0.5),
+                  ),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: floodData.isNotEmpty
+                          ? floodData
+                              .asMap()
+                              .entries
+                              .map((entry) => FlSpot(
+                                  entry.key.toDouble(),
+                                  double.tryParse(entry.value["TINGGI_AIR"]
+                                          .toString()) ??
+                                      0.0))
+                              .toList()
+                          : [FlSpot(0, 0)],
+                      isCurved: true,
+                      color: Color(0xff576A97),
+                      belowBarData:
+                          BarAreaData(show: true, color: Color(0xff576A97)),
+                      dotData: FlDotData(show: false),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+
+          SizedBox(height: 10),
+
+          // Keterangan di bawah chart
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              "* Tinggi air saat ini berada di $waterHeight cm, meningkat dibandingkan 2 jam terakhir.",
+              style: TextStyle(fontSize: 10, color: Colors.black),
+            ),
+          ),
+        ],
       ),
     );
   }
