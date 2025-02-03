@@ -9,82 +9,6 @@ import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-class LogoutDialog {
-  static void show(
-      BuildContext context, Future<void> Function(BuildContext) onLogout) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: Text(
-            'Log Out?',
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          content: Text(
-            'Are you sure want to logout?',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: Colors.black,
-            ),
-          ),
-          actions: [
-            Container(
-              height: 31.0,
-              width: 89.0,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  color: const Color(0xff4B5C82)),
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  textStyle: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                child: const Text('Cancel'),
-              ),
-            ),
-            Container(
-              height: 31.0,
-              width: 89.0,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  border:
-                      Border.all(color: const Color(0xff4B5C82), width: 1.5)),
-              child: TextButton(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await onLogout(context);
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF435482),
-                  textStyle: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                child: const Text('Log Out'),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -136,45 +60,45 @@ class ProfilePage extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               Container(
-                height: 200,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF3B5998),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(50),
-                    bottomRight: Radius.circular(50),
+                height: 320,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/group_38.png'),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
               Positioned(
-                top: 50,
+                top: 140,
                 left: 20,
                 child: Text(
                   'Hi, Smoggy !',
                   style: GoogleFonts.inter(
-                    fontSize: 24,
+                    fontSize: 27,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               Positioned(
-                top: 80,
+                top: 175,
                 left: 20,
                 child: Text(
                   'smoggy.mail@gmail.com',
                   style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.white70,
+                    fontSize: 15,
+                    color: Colors.white,
                   ),
                 ),
               ),
               const Positioned(
-                bottom: -50,
+                bottom: 15,
+                right: 50,
                 child: CircleAvatar(
-                  radius: 50,
+                  radius: 85,
                   backgroundColor: Colors.white,
                   child: CircleAvatar(
-                    radius: 47,
+                    radius: 79,
                     backgroundImage:
                         NetworkImage('https://via.placeholder.com/150'),
                   ),
@@ -182,7 +106,7 @@ class ProfilePage extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 60),
+          const SizedBox(height: 30),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -287,6 +211,82 @@ class ProfileMenuItem extends StatelessWidget {
         ),
         const Divider(color: Color(0xffDEDEDE)),
       ],
+    );
+  }
+}
+
+class LogoutDialog {
+  static void show(
+      BuildContext context, Future<void> Function(BuildContext) onLogout) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            'Log Out?',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          content: Text(
+            'Are you sure want to logout?',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              color: Colors.black,
+            ),
+          ),
+          actions: [
+            Container(
+              height: 31.0,
+              width: 89.0,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: const Color(0xff4B5C82)),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  textStyle: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: const Text('Cancel'),
+              ),
+            ),
+            Container(
+              height: 31.0,
+              width: 89.0,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  border:
+                      Border.all(color: const Color(0xff4B5C82), width: 1.5)),
+              child: TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await onLogout(context);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF435482),
+                  textStyle: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: const Text('Log Out'),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

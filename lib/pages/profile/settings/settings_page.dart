@@ -20,6 +20,13 @@ class _SettingsPageState extends State<SettingsPage> {
         titleTextStyle: GoogleFonts.inter(
             fontWeight: FontWeight.w700, color: Colors.white, fontSize: 24),
         backgroundColor: const Color(0xff45557B),
+                leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),

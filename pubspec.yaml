@@ -125,6 +125,7 @@ flutter:
     - assets/images/siaga.png
     - assets/images/lokasi.png
     - assets/images/ketinggian.png
+    - assets/images/group_38.png
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
     # For details regarding adding assets from package dependencies, see
