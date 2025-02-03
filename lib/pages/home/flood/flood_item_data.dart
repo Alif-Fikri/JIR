@@ -14,7 +14,8 @@ class FloodInfoBottomSheet extends StatelessWidget {
   final String locationIconPath;
   final List<Map<String, dynamic>> floodData;
 
-  FloodInfoBottomSheet({
+  const FloodInfoBottomSheet({
+    Key? key,
     required this.status,
     required this.statusIconPath,
     required this.waterHeight,
@@ -22,61 +23,52 @@ class FloodInfoBottomSheet extends StatelessWidget {
     required this.location,
     required this.locationIconPath,
     required this.floodData,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.1,
-      maxChildSize: 0.7,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            boxShadow: [
-              BoxShadow(color: Colors.black26, blurRadius: 5, spreadRadius: 2)
-            ],
-          ),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(color: Colors.black26, blurRadius: 5, spreadRadius: 2)
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag Handle
+            Container(
+              width: 50,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            const SizedBox(height: 25),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
                 children: [
-                  // Drag Handle
-                  Container(
-                    width: 50,
-                    height: 5,
-                    decoration: BoxDecoration(
-                        color: Colors.black26,
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                  SizedBox(height: 25),
-
-                  // Info Status, Tinggi Air, Lokasi
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _infoItem(statusIconPath, status, 'Siaga'),
-                      _infoItem(waterIconPath, '$waterHeight cm', 'Tinggi Air'),
-                      _infoItem(locationIconPath, location, 'Lokasi'),
-                    ],
-                  ),
-
-                  SizedBox(height: 20),
-                  const Divider(),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  _buildWaterLevelChart(),
+                  _infoItem(statusIconPath, status, 'Siaga'),
+                  SizedBox(width: 16), // Add spacing if needed
+                  _infoItem(waterIconPath, '$waterHeight cm', 'Tinggi Air'),
+                  SizedBox(width: 16),
+                  _infoItem(locationIconPath, location, 'Lokasi'),
                 ],
               ),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 20),
+            const Divider(),
+            const SizedBox(height: 20),
+            _buildWaterLevelChart(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -203,9 +195,11 @@ class FloodInfoBottomSheet extends StatelessWidget {
           // Keterangan di bawah chart
           Padding(
             padding: EdgeInsets.all(8.0),
-            child: Text(
-              "* Tinggi air saat ini berada di $waterHeight cm, meningkat dibandingkan 2 jam terakhir.",
-              style: TextStyle(fontSize: 10, color: Colors.black),
+            child: FittedBox(
+              child: Text(
+                "* Tinggi air saat ini berada di $waterHeight cm, meningkat dibandingkan 2 jam terakhir.",
+                style: TextStyle(fontSize: 10, color: Colors.black),
+              ),
             ),
           ),
         ],

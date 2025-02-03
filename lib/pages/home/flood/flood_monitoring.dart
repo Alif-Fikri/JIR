@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:smartcitys/helper/radar_map.dart';
 import 'package:smartcitys/pages/home/flood/flood_item_data.dart';
 import 'package:smartcitys/services/flood_service/flood_service.dart';
 
@@ -62,14 +63,18 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
         _floodMarkers = floodData.map((item) {
           double lat = double.tryParse(item["LATITUDE"].toString()) ?? 0.0;
           double lng = double.tryParse(item["LONGITUDE"].toString()) ?? 0.0;
-          String status = item["STATUS_SIAGA"] ?? "Unknown";
 
           return Marker(
             point: LatLng(lat, lng),
-            child: Icon(
-              Icons.location_on,
-              color: status == "Siaga" ? Colors.red : Colors.orange,
-              size: 40,
+            child: GestureDetector(
+              onTap: () {
+                _showFloodInfoBottomSheet(
+                  status: item["STATUS_SIAGA"] ?? "Unknown",
+                  waterHeight: int.tryParse(item["TINGGI_AIR"].toString()) ?? 0,
+                  location: item["NAMA_PINTU_AIR"] ?? "N/A",
+                );
+              },
+              child: RadarMarker(color: Colors.red),
             ),
           );
         }).toList();
@@ -77,6 +82,31 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
     } catch (e) {
       print("Error fetching flood data: $e");
     }
+  }
+
+  void _showFloodInfoBottomSheet({
+    required String status,
+    required int waterHeight,
+    required String location,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return FloodInfoBottomSheet(
+          status: status,
+          statusIconPath: "assets/images/siaga.png",
+          waterHeight: waterHeight,
+          waterIconPath: "assets/images/ketinggian.png",
+          location: location,
+          locationIconPath: "assets/images/lokasi.png",
+          floodData: floodData,
+        );
+      },
+    );
   }
 
   @override
@@ -154,19 +184,6 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
                 ),
               ],
             ),
-          ),
-          FloodInfoBottomSheet(
-            status:
-                floodData.isNotEmpty ? floodData[0]["STATUS_SIAGA"] : "Unknown",
-            statusIconPath: "assets/images/siaga.png",
-            waterHeight: floodData.isNotEmpty
-                ? int.tryParse(floodData[0]["TINGGI_AIR"].toString()) ?? 0
-                : 0,
-            waterIconPath: "assets/images/ketinggian.png",
-            location:
-                floodData.isNotEmpty ? floodData[0]["NAMA_PINTU_AIR"] : "N/A",
-            locationIconPath: "assets/images/lokasi.png",
-            floodData: floodData,
           ),
         ],
       ),
