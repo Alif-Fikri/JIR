@@ -21,6 +21,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Login Page', theme: ThemeData(), home: ProfilePage());
+        title: 'Login Page', theme: ThemeData(), home: ChatbotOpeningPage());
   }
 }

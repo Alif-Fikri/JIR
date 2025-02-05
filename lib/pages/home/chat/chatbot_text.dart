@@ -7,6 +7,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'dart:async';
 import 'dart:math';
 import 'package:smartcitys/helper/voicefrequency.dart';
+import 'package:smartcitys/services/chat_service/chat_api_service.dart';
 
 class ChatBotPage extends StatefulWidget {
   const ChatBotPage({super.key});
@@ -96,28 +97,28 @@ class _ChatBotPageState extends State<ChatBotPage>
     scrollToBottom();
   }
 
-  Future<void> _sendMessages(String message) async {
-    if (message.isEmpty) return;
+Future<void> _sendMessages(String message) async {
+  if (message.isEmpty) return;
 
-    final response = await http.post(
-      Uri.parse("http://localhost:8000/get_response"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"message": message}),
-    );
-
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-      setState(() {
-        _messages
-            .insert(0, {"text": responseData["response"], "isSender": false});
+  try {
+    final response = await ChatService.getChatResponse(message);
+    setState(() {
+      _messages.add({
+        "text": response,
+        "isSender": false
       });
-    } else {
-      setState(() {
-        _messages.insert(
-            0, {"sender": "bot", "text": "Terjadi kesalahan, coba lagi."});
+    });
+    scrollToBottom();
+  } catch (e) {
+    setState(() {
+      _messages.add({
+        "text": "Maaf, terjadi kesalahan. Silakan coba lagi.",
+        "isSender": false
       });
-    }
+    });
+    scrollToBottom();
   }
+}
 
   void _sendMessage() {
     if (_controller.text.isNotEmpty) {
