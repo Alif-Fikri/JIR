@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/auth/login.dart';
-import 'package:smartcitys/services/auth_service/auth_service.dart';
+import 'package:smartcitys/services/auth_service/auth_api_service.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});

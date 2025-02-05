@@ -18,11 +18,11 @@ class _CCTVPageState extends State<CCTVPage> {
   final List<Map<String, dynamic>> locations = [
     {
       'name': 'Bundaran HI',
-      'image': 'https://example.com/bundaran_hi.jpg', // Ganti dengan URL gambar Anda
+      'image': 'https://example.com/bundaran_hi.jpg', 
     },
     {
       'name': 'Monumen Nasional',
-      'image': 'https://example.com/monas.jpg', // Ganti dengan URL gambar Anda
+      'image': 'https://example.com/monas.jpg', 
     },
   ];
 
@@ -71,7 +71,7 @@ class _CCTVPageState extends State<CCTVPage> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
-                    // Tambahkan logika untuk aksi klik lokasi
+                    
                   },
                   child: Column(
                     children: [
@@ -97,30 +97,6 @@ class _CCTVPageState extends State<CCTVPage> {
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Aktivitas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifikasi',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
-        currentIndex: 0,
-        onTap: (index) {
-          // Logika untuk navigasi
-        },
       ),
     );
   }

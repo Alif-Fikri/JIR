@@ -22,16 +22,7 @@ class _ChatBotPageState extends State<ChatBotPage>
   late AnimationController _controllerA;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _controller = TextEditingController();
-  final List<Map<String, dynamic>> _messages = [
-    {
-      "text":
-          "Hallo Zee, aku Suki asisten anda untuk memantau banjir dan kerumunan",
-      "isSender": false
-    },
-    {"text": "Ingin tahu kondisi di area tertentu?", "isSender": false},
-    {"text": "Update kondisi dijalan xxxxxx", "isSender": true},
-  ];
-
+  final List<Map<String, dynamic>> _messages = [];
   late stt.SpeechToText _speech;
   String _recognizedText = '';
 
@@ -105,37 +96,25 @@ class _ChatBotPageState extends State<ChatBotPage>
     scrollToBottom();
   }
 
-  Future<void> _fetchGeminiData(String query) async {
-    const String apiUrl = 'https://api.gemini.com/v1/location';
-    const String apiKey = 'AIzaSyAQsq3vyPq0KBY2VNK64_z050HC-g1GhgQ';
+  Future<void> _sendMessages(String message) async {
+    if (message.isEmpty) return;
 
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({"query": query}),
-      );
+    final response = await http.post(
+      Uri.parse("http://localhost:8000/get_response"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"message": message}),
+    );
 
-      if (response.statusCode == 200) {
-        final data = response.body;
-        setState(() {
-          _messages.add({"text": data, "isSender": false});
-        });
-      } else {
-        print('Failed to fetch data. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        setState(() {
-          _messages.add(
-              {"text": "Error: ${response.reasonPhrase}", "isSender": false});
-        });
-      }
-    } catch (e) {
-      print('Exception caught: $e');
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
       setState(() {
-        _messages.add({"text": "Failed to fetch data: $e", "isSender": false});
+        _messages
+            .insert(0, {"text": responseData["response"], "isSender": false});
+      });
+    } else {
+      setState(() {
+        _messages.insert(
+            0, {"sender": "bot", "text": "Terjadi kesalahan, coba lagi."});
       });
     }
   }
@@ -147,7 +126,7 @@ class _ChatBotPageState extends State<ChatBotPage>
         _messages.add({"text": userMessage, "isSender": true});
         _controller.clear();
       });
-      _fetchGeminiData(userMessage);
+      _sendMessages(userMessage);
       scrollToBottom();
     }
   }
@@ -204,8 +183,8 @@ class _ChatBotPageState extends State<ChatBotPage>
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   return _chatBubble(
-                    text: _messages[index]["text"],
-                    isSender: _messages[index]["isSender"],
+                    text: _messages[index]["text"] ?? "",
+                    isSender: _messages[index]["isSender"] ?? false,
                   );
                 },
               ),
