@@ -1,8 +1,6 @@
-import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animations/animations.dart';
-import 'package:http/http.dart' as http;
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'dart:async';
 import 'dart:math';
@@ -97,28 +95,25 @@ class _ChatBotPageState extends State<ChatBotPage>
     scrollToBottom();
   }
 
-Future<void> _sendMessages(String message) async {
-  if (message.isEmpty) return;
+  Future<void> _sendMessages(String message) async {
+    if (message.isEmpty) return;
 
-  try {
-    final response = await ChatService.getChatResponse(message);
-    setState(() {
-      _messages.add({
-        "text": response,
-        "isSender": false
+    try {
+      final response = await ChatService.getChatResponse(message);
+      setState(() {
+        _messages.add({"text": response, "isSender": false});
       });
-    });
-    scrollToBottom();
-  } catch (e) {
-    setState(() {
-      _messages.add({
-        "text": "Maaf, terjadi kesalahan. Silakan coba lagi.",
-        "isSender": false
+      scrollToBottom();
+    } catch (e) {
+      setState(() {
+        _messages.add({
+          "text": "Maaf, terjadi kesalahan. Silakan coba lagi.",
+          "isSender": false
+        });
       });
-    });
-    scrollToBottom();
+      scrollToBottom();
+    }
   }
-}
 
   void _sendMessage() {
     if (_controller.text.isNotEmpty) {

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:smartcitys/helper/radar_map.dart';
 import 'package:smartcitys/pages/home/flood/flood_item_data.dart';
 import 'package:smartcitys/services/flood_service/flood_api_service.dart';
+import 'package:smartcitys/helper/map.dart';
+import 'package:smartcitys/services/location_service/location_permission.dart';
+import 'package:latlong2/latlong.dart';
 
 class FloodMonitoringPage extends StatefulWidget {
   @override
@@ -15,41 +16,22 @@ class FloodMonitoringPage extends StatefulWidget {
 
 class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
   LatLng? currentLocation;
-  final MapController _mapController = MapController();
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   List<Marker> _floodMarkers = [];
   List<Map<String, dynamic>> floodData = [];
+  late MapController _mapController;
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation();
+    _initializeLocation();
     _fetchFloodData();
   }
 
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition();
+  Future<void> _initializeLocation() async {
+    final location = await LocationService.getCurrentLocation();
     setState(() {
-      currentLocation = LatLng(position.latitude, position.longitude);
-      _mapController.move(currentLocation!, 15.0);
+      currentLocation = location ?? const LatLng(-6.200000, 106.816666);
     });
   }
 
@@ -109,6 +91,13 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
     );
   }
 
+  Future<void> _getCurrentLocation() async {
+    final location = await LocationService.getCurrentLocation();
+    if (location != null) {
+      _mapController.move(location, 15.0);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,23 +113,14 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
       ),
       body: Stack(
         children: [
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: currentLocation ?? LatLng(-6.200000, 106.816666),
-              initialZoom: 15.0,
+          if (currentLocation != null)
+            ReusableMap(
+              initialLocation: currentLocation!,
+              markers: _floodMarkers,
+              onMapCreated: (controller) {
+                _mapController = controller;
+              },
             ),
-            children: [
-              TileLayer(
-                urlTemplate:
-                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: ['a', 'b', 'c'],
-              ),
-              MarkerLayer(
-                markers: _floodMarkers,
-              ),
-            ],
-          ),
           Positioned(
             top: 16,
             left: 16,
@@ -196,9 +176,7 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
       if (locations.isNotEmpty) {
         Location loc = locations.first;
         LatLng searchedLocation = LatLng(loc.latitude, loc.longitude);
-        setState(() {
-          _mapController.move(searchedLocation, 15.0);
-        });
+        _mapController.move(searchedLocation, 15.0);
       }
     } catch (e) {
       print("Lokasi tidak ditemukan: $e");
