@@ -1,55 +1,20 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/helper/menu.dart';
-import 'package:smartcitys/pages/auth/signup.dart';
-import 'package:smartcitys/services/auth_service/google_api_auth.dart';
-import 'package:smartcitys/services/auth_service/auth_api_service.dart';
+import 'package:get/get.dart';
+import 'package:smartcitys/app/routes/app_routes.dart';
+import 'package:smartcitys/controllers/auth_controller/login_controller.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
-  bool isLoading = false;
-  String errorMessage = '';
-
+class LoginPage extends GetView<LoginController> {
   final fixedWidth = 350.0;
   final fixedHeight = 50.0;
 
-  void _validateAndLogin() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = '';
-    });
-
-    final email = _emailController.text;
-    final password = _passwordController.text;
-    final result = await _authService.login(email, password);
-
-    if (result['success']) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const Menu(),
-        ),
-      );
-    } else {
-      setState(() {
-        errorMessage = result['message'];
-        isLoading = false;
-      });
-    }
+  LoginPage({super.key}) {
+    Get.put(LoginController());
   }
 
   @override
   Widget build(BuildContext context) {
-    final GoogleAuthService _authService = GoogleAuthService();
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -81,56 +46,27 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Email Field
               _buildTextField(
-                controller: _emailController,
+                controller: controller.emailController,
                 label: 'Username/Email',
                 icon: 'assets/images/person.png',
               ),
               const SizedBox(height: 25),
-
               _buildTextField(
-                controller: _passwordController,
+                controller: controller.passwordController,
                 label: 'Password',
                 icon: 'assets/images/password.png',
                 isObscure: true,
               ),
-              if (errorMessage.isNotEmpty)
-                Container(
-                  width: fixedWidth,
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(
-                          Icons.info,
-                          color: Colors.red,
-                          size: 16,
-                        ),
-                        Text(
-                          errorMessage,
-                          style: GoogleFonts.inter(
-                            textStyle: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              Obx(() => controller.errorMessage.isNotEmpty
+                  ? _buildErrorMessage(controller.errorMessage.value)
+                  : const SizedBox.shrink()),
               const SizedBox(height: 25),
-
               SizedBox(
                 width: fixedWidth,
                 height: fixedHeight,
                 child: ElevatedButton(
-                  onPressed: () {
-                    _validateAndLogin();
-                  },
+                  onPressed: controller.login,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
@@ -138,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     backgroundColor: const Color(0xFF45557B),
                   ),
-                  child: isLoading
+                  child: Obx(() => controller.isLoading.value
                       ? const CircularProgressIndicator(
                           color: Color(0xffFF4136),
                         )
@@ -151,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
+                        )),
                 ),
               ),
               const SizedBox(height: 10),
@@ -230,15 +166,7 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final result = await _authService.signInWithGoogle();
-                    if (result != null) {
-                      print(
-                          "Login successful! Token: ${result['access_token']}");
-                    } else {
-                      print("Google login failed");
-                    }
-                  },
+                  onPressed: controller.googleSignIn,
                   icon: Image.asset(
                     'assets/images/logo_google.png',
                     height: 24,
@@ -280,13 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const SignupPage(),
-                            ),
-                          );
-                        },
+                        ..onTap = () => Get.toNamed(AppRoutes.signup),
                     ),
                   ],
                 ),
@@ -336,6 +258,35 @@ class _LoginPageState extends State<LoginPage> {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage(String message) {
+    return Container(
+      width: fixedWidth,
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Icon(
+              Icons.info,
+              color: Colors.red,
+              size: 16,
+            ),
+            Text(
+              message,
+              style: GoogleFonts.inter(
+                textStyle: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

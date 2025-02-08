@@ -1,72 +1,16 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/helper/menu.dart';
-import 'package:smartcitys/pages/auth/login.dart';
-import 'package:smartcitys/services/auth_service/auth_api_service.dart';
+import 'package:smartcitys/app/routes/app_routes.dart';
+import 'package:smartcitys/controllers/auth_controller/signup_controller.dart';
 
-class SignupPage extends StatefulWidget {
-  const SignupPage({super.key});
-
-  @override
-  _SignupPageState createState() => _SignupPageState();
-}
-
-class _SignupPageState extends State<SignupPage> {
-  bool isTermsAccepted = false;
-  bool isPasswordMismatch = false;
-  bool isLoading = false;
-  String errorMessage = '';
-  String username = '';
-  String email = '';
-  String password = '';
-  String confirmPassword = '';
-  final AuthService _authService = AuthService();
-
+class SignupPage extends GetView<SignupController> {
   final fixedWidth = 350.0;
   final fixedHeight = 50.0;
 
-  void _validateAndRegister() async {
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      setState(() {
-        errorMessage = 'Please fill in all fields';
-      });
-      return;
-    }
-
-    if (password != confirmPassword) {
-      setState(() {
-        errorMessage = 'Passwords do not match';
-      });
-      return;
-    }
-
-    if (!isTermsAccepted) {
-      setState(() {
-        errorMessage = 'Please accept the terms and conditions';
-      });
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-      errorMessage = '';
-    });
-
-    final response = await _authService.signup(username, email, password);
-
-    if (response['success']) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const Menu(),
-        ),
-      );
-    } else {
-      setState(() {
-        errorMessage = response['message'];
-        isLoading = false;
-      });
-    }
+  SignupPage({super.key}) {
+    Get.put(SignupController());
   }
 
   @override
@@ -104,62 +48,37 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Username Field
                 _buildTextField(
                   label: 'Username',
                   icon: 'assets/images/person.png',
-                  onChanged: (value) => setState(() => username = value),
+                  controller: controller.usernameController,
                 ),
                 const SizedBox(height: 25),
-                // Email Field
+
                 _buildTextField(
                   label: 'Email',
                   icon: 'assets/images/email.png',
-                  onChanged: (value) => setState(() => email = value),
+                  controller: controller.emailController,
                 ),
                 const SizedBox(height: 25),
-                // Password Field
+
                 _buildTextField(
                   label: 'Password',
                   icon: 'assets/images/password.png',
                   isObscure: true,
-                  onChanged: (value) => setState(() => password = value),
+                  controller: controller.passwordController,
                 ),
                 const SizedBox(height: 25),
-                // Confirm Password Field
+
                 _buildTextField(
                   label: 'Confirm Password',
                   icon: 'assets/images/password.png',
                   isObscure: true,
-                  onChanged: (value) => setState(() => confirmPassword = value),
+                  controller: controller.confirmPasswordController,
                 ),
-                if (errorMessage.isNotEmpty)
-                  Container(
-                    width: fixedWidth,
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          const Icon(
-                            Icons.info,
-                            color: Colors.red,
-                            size: 16,
-                          ),
-                          Text(
-                            errorMessage,
-                            style: GoogleFonts.inter(
-                              textStyle: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                Obx(() => controller.errorMessage.isNotEmpty
+                    ? _buildErrorMessage(controller.errorMessage.value)
+                    : const SizedBox.shrink()),
                 const SizedBox(height: 10),
                 // Terms and Conditions Checkbox
                 SizedBox(
@@ -167,13 +86,13 @@ class _SignupPageState extends State<SignupPage> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Checkbox(
-                        activeColor: Colors.white,
-                        checkColor: Colors.black,
-                        value: isTermsAccepted,
-                        onChanged: (value) =>
-                            setState(() => isTermsAccepted = value!),
-                      ),
+                      Obx(() => Checkbox(
+                            activeColor: Colors.white,
+                            checkColor: Colors.black,
+                            value: controller.isTermsAccepted.value,
+                            onChanged: (value) => controller
+                                .isTermsAccepted.value = value ?? false,
+                          )),
                       Expanded(
                         child: RichText(
                           text: TextSpan(
@@ -209,9 +128,7 @@ class _SignupPageState extends State<SignupPage> {
                   width: fixedWidth,
                   height: fixedHeight,
                   child: ElevatedButton(
-                    onPressed: () {
-                      _validateAndRegister();
-                    },
+                    onPressed: controller.validateAndRegister,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       shape: RoundedRectangleBorder(
@@ -219,10 +136,8 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       backgroundColor: const Color(0xFF45557B),
                     ),
-                    child: isLoading
-                        ? const CircularProgressIndicator(
-                            color: Colors.white,
-                          )
+                    child: Obx(() => controller.isLoading.value
+                        ? const CircularProgressIndicator(color: Colors.white)
                         : Text(
                             'Sign Up',
                             style: GoogleFonts.inter(
@@ -232,10 +147,9 @@ class _SignupPageState extends State<SignupPage> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ),
+                          )),
                   ),
                 ),
-
                 const SizedBox(height: 10),
                 RichText(
                   text: TextSpan(
@@ -256,13 +170,7 @@ class _SignupPageState extends State<SignupPage> {
                           ),
                         ),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const LoginPage(),
-                              ),
-                            );
-                          },
+                          ..onTap = () => Get.toNamed(AppRoutes.login),
                       ),
                     ],
                   ),
@@ -276,21 +184,22 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   Widget _buildTextField({
+    required TextEditingController controller,
     required String label,
     required String icon,
     bool isObscure = false,
-    required ValueChanged<String> onChanged,
   }) {
     return SizedBox(
       width: fixedWidth,
       height: fixedHeight,
       child: TextField(
+        controller: controller,
+        obscureText: isObscure,
         style: GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.w400,
           color: Colors.black,
         ),
-        obscureText: isObscure,
         decoration: InputDecoration(
           filled: true,
           fillColor: const Color(0xFFF6F6F6),
@@ -313,7 +222,35 @@ class _SignupPageState extends State<SignupPage> {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage(String message) {
+    return Container(
+      width: fixedWidth,
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Icon(
+              Icons.info,
+              color: Colors.red,
+              size: 16,
+            ),
+            Text(
+              message,
+              style: GoogleFonts.inter(
+                textStyle: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

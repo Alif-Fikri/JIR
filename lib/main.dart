@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:smartcitys/app/routes/app_routes.dart';
+import 'package:smartcitys/bindings/auth_binding.dart';
 import 'package:smartcitys/pages/auth/login.dart';
+import 'package:smartcitys/pages/auth/signup.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/home.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smartcitys/pages/profile/profile.dart';
 
 void main() async {
@@ -20,7 +24,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'Login Page', theme: ThemeData(), home: FloodMonitoringPage());
+    return GetMaterialApp(
+      title: 'JIR App',
+      theme: ThemeData(),
+      initialRoute: AppRoutes.initial,
+      getPages: AppRoutes.getPages,
+      unknownRoute: GetPage(
+        name: '/login',
+        page: () => LoginPage(),
+      ),
+    );
   }
 }

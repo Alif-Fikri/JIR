@@ -36,7 +36,7 @@ class ProfilePage extends StatelessWidget {
         await box.delete('token');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
+          MaterialPageRoute(builder: (context) => LoginPage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

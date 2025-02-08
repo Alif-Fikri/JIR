@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/services/auth_service/auth_api_service.dart';
@@ -5,21 +6,27 @@ import 'package:smartcitys/services/auth_service/auth_api_service.dart';
 class SignupController extends GetxController {
   final AuthService _authService = Get.find();
   
-  final RxString username = ''.obs;
-  final RxString email = ''.obs;
-  final RxString password = ''.obs;
-  final RxString confirmPassword = ''.obs;
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+  
   final RxBool isTermsAccepted = false.obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
 
   void validateAndRegister() async {
+    final username = usernameController.text;
+    final email = emailController.text;
+    final password = passwordController.text;
+    final confirmPassword = confirmPasswordController.text;
+
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
       errorMessage.value = 'Please fill in all fields';
       return;
     }
 
-    if (password.value != confirmPassword.value) {
+    if (password != confirmPassword) {
       errorMessage.value = 'Passwords do not match';
       return;
     }
@@ -33,9 +40,9 @@ class SignupController extends GetxController {
     errorMessage.value = '';
 
     final response = await _authService.signup(
-      username.value,
-      email.value,
-      password.value,
+      username,
+      email,
+      password,
     );
 
     if (response['success']) {
@@ -48,6 +55,20 @@ class SignupController extends GetxController {
   }
 
   void navigateToLogin() {
-    Get.offAll(() => const Menu());
+    Get.offAll(() => const Menu()); // Ini seharusnya navigate ke LoginPage
+    // Seharusnya:
+    // Get.offAll(() => LoginPage());
+    // atau
+    // Get.offAllNamed('/login');
+  }
+
+  @override
+  void onClose() {
+    // Dispose semua controller
+    usernameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.onClose();
   }
 }
