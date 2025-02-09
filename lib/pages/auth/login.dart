@@ -208,8 +208,10 @@ class LoginPage extends GetView<LoginController> {
                         ),
                       ),
                       recognizer: TapGestureRecognizer()
-                        ..onTap = () => Get.toNamed(AppRoutes.signup),
-                    ),
+                        ..onTap = () => Get.toNamed(
+                              AppRoutes.signup,
+                            ),
+                    )
                   ],
                 ),
               ),

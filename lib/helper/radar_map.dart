@@ -20,7 +20,7 @@ class _RadarMarkerState extends State<RadarMarker>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
     )..repeat(reverse: true);
   }
 
@@ -46,7 +46,7 @@ class _RadarMarkerState extends State<RadarMarker>
               shape: BoxShape.circle,
             ),
             child: Container(
-              margin: EdgeInsets.all(4),
+              margin: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: widget.color,
                 shape: BoxShape.circle,

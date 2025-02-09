@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:smartcitys/helper/radar_map.dart';
+
 
 class ReusableMap extends StatefulWidget {
   final LatLng initialLocation;
@@ -65,7 +65,7 @@ class _ReusableMapState extends State<ReusableMap> {
       children: [
         TileLayer(
           urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          subdomains: ['a', 'b', 'c'],
+          subdomains: const ['a', 'b', 'c'],
         ),
         MarkerLayer(markers: widget.markers),
       ],

@@ -50,6 +50,7 @@ dependencies:
   speech_to_text: ^7.0.0
   weather: ^3.1.1
   get: ^4.6.6
+  lottie: ^3.0.0
 
 dev_dependencies:
   build_runner: ^2.4.6
@@ -127,6 +128,8 @@ flutter:
     - assets/images/lokasi.png
     - assets/images/ketinggian.png
     - assets/images/group_38.png
+    - assets/lottie/loading.json
+    - assets/lottie/no_connection.json
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
     # For details regarding adding assets from package dependencies, see
