@@ -7,6 +7,7 @@ class TermsOfService extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Terms Of Service'),
         titleTextStyle: GoogleFonts.inter(
@@ -16,7 +17,10 @@ class TermsOfService extends StatelessWidget {
         ),
         backgroundColor: const Color(0xff45557B),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white,),
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -54,11 +58,10 @@ class TermsOfService extends StatelessWidget {
                   'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    height: 1.5, // Jarak antarbaris teks
+                    height: 1.5,
                     color: Colors.black,
                   ),
-                  textAlign:
-                      TextAlign.justify, // Mengatur teks agar rata kiri-kanan
+                  textAlign: TextAlign.justify,
                 ),
               ),
             ),

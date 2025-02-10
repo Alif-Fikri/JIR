@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smartcitys/app/routes/app_routes.dart';
 import 'package:smartcitys/helper/no_connection.dart';

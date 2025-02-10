@@ -33,8 +33,8 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoutes.initial,
       getPages: AppRoutes.getPages,
       unknownRoute: GetPage(
-        name: '/home',
-        page: () => HomePage(),
+        name: '/profile',
+        page: () => ProfilePage(),
       ),
     );
   }

@@ -21,7 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
         titleTextStyle: GoogleFonts.inter(
             fontWeight: FontWeight.w700, color: Colors.white, fontSize: 24),
         backgroundColor: const Color(0xff45557B),
-                leading: IconButton(
+        leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Colors.white,
           onPressed: () {
@@ -103,8 +103,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       onPressed: () {
                         setState(() {
-                          _isPasswordVisible =
-                              !_isPasswordVisible; // Toggle visibilitas
+                          _isPasswordVisible = !_isPasswordVisible;
                         });
                       },
                     ),
@@ -114,33 +113,30 @@ class _SettingsPageState extends State<SettingsPage> {
                     focusedBorder: const OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.red)),
                     border: const OutlineInputBorder()),
-                obscureText: !_isPasswordVisible, // Atur visibilitas teks
+                obscureText: !_isPasswordVisible,
               ),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Container(
-                    height: 35.0,
-                    width: 280.0,
-                    color: const Color(0xffFFE3E3),
-                    padding: const EdgeInsets.all(5.0),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.warning, color: Colors.red, size: 20),
-                        const SizedBox(width: 5),
-                        Expanded(
-                          child: Text(
-                            "You're about to delete your account. This action cannot be \nundone. All data will be lost.",
-                            style: GoogleFonts.inter(
-                                color: Colors.black, fontSize: 8),
-                            softWrap: true,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+              Container(
+                height: 35.0,
+                width: 280.0,
+                color: const Color(0xffFFE3E3),
+                padding: const EdgeInsets.all(5.0),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning, color: Colors.red, size: 20),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        "You're about to delete your account. This action cannot be undone. All data will be lost.",
+                        style:
+                            GoogleFonts.inter(color: Colors.black, fontSize: 8),
+                        softWrap: true,
+                        overflow: TextOverflow.clip,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -156,9 +152,9 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              style: TextButton.styleFrom(backgroundColor: const Color(0xffE62525)),
+              style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xffE62525)),
               onPressed: () {
-                // Tambahkan logika penghapusan akun di sini
                 Navigator.of(context).pop();
               },
               child: Text(

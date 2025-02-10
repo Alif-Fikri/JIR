@@ -57,7 +57,7 @@ class ProfilePage extends StatelessWidget {
       body: Column(
         children: [
           Stack(
-            alignment: Alignment.center,
+            alignment: Alignment.centerLeft,
             children: [
               Container(
                 height: 320,
@@ -68,45 +68,51 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
               ),
-              Positioned(
-                top: 140,
-                left: 20,
-                child: Text(
-                  'Hi, Smoggy !',
-                  style: GoogleFonts.inter(
-                    fontSize: 27,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20.0, bottom: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hi, Smoggy !',
+                      style: GoogleFonts.inter(
+                        fontSize: 22,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'smoggy.mail@gmail.com',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
               Positioned(
-                top: 175,
-                left: 20,
-                child: Text(
-                  'smoggy.mail@gmail.com',
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const Positioned(
-                bottom: 15,
                 right: 50,
-                child: CircleAvatar(
-                  radius: 85,
-                  backgroundColor: Colors.white,
+                bottom: 15,
+                child: SizedBox(
+                  width: 160,
+                  height: 160,
                   child: CircleAvatar(
-                    radius: 79,
-                    backgroundImage:
-                        NetworkImage('https://via.placeholder.com/150'),
+                    backgroundColor: Colors.white,
+                    child: CircleAvatar(
+                      radius: 74,
+                      backgroundColor: Colors.grey,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 30),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -241,47 +247,62 @@ class LogoutDialog {
             ),
           ),
           actions: [
-            Container(
-              height: 31.0,
-              width: 89.0,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  color: const Color(0xff4B5C82)),
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  textStyle: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          color: const Color(0xff4B5C82)),
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                        ),
+                        child: FittedBox(
+                          child: Text(
+                            'Cancel',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                child: const Text('Cancel'),
-              ),
-            ),
-            Container(
-              height: 31.0,
-              width: 89.0,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  border:
-                      Border.all(color: const Color(0xff4B5C82), width: 1.5)),
-              child: TextButton(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await onLogout(context);
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF435482),
-                  textStyle: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                              color: const Color(0xff4B5C82), width: 1.5)),
+                      child: TextButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          await onLogout(context);
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF435482),
+                        ),
+                        child: FittedBox(
+                          child: Text(
+                            'Log Out',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                child: const Text('Log Out'),
+                ],
               ),
             ),
           ],

@@ -7,6 +7,7 @@ class PrivacyPolicy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Privacy Policy'),
         titleTextStyle: GoogleFonts.inter(
@@ -54,11 +55,11 @@ class PrivacyPolicy extends StatelessWidget {
                   'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    height: 1.5, // Jarak antarbaris teks
+                    height: 1.5, 
                     color: Colors.black,
                   ),
                   textAlign:
-                      TextAlign.justify, // Mengatur teks agar rata kiri-kanan
+                      TextAlign.justify, 
                 ),
               ),
             ),
