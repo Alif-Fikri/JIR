@@ -15,6 +15,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Change Password'),
         titleTextStyle: GoogleFonts.inter(
@@ -47,7 +48,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   },
                 ),
                 filled: true,
-                fillColor: Color(0xffF6F6F6),
+                fillColor: const Color(0xffF6F6F6),
                 hintStyle: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -81,7 +82,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   },
                 ),
                 filled: true,
-                fillColor: Color(0xffF6F6F6),
+                fillColor: const Color(0xffF6F6F6),
                 hintStyle: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -100,7 +101,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               obscureText: _isObscured2,
             ),
-            Spacer(),
+            const Spacer(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xff45557B),

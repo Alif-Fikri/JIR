@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smartcitys/bindings/auth_binding.dart';
 import 'package:smartcitys/helper/menu.dart';
@@ -7,17 +8,34 @@ import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/profile/profile.dart';
 import 'package:smartcitys/helper/loading.dart';
+import 'package:smartcitys/helper/no_connection.dart';
 
 class AppRoutes {
-  static const initial = loading;
-
+  static const initial = home;
+  //auth
   static const login = '/login';
   static const signup = '/signup';
+  //navbar
   static const home = '/home';
   static const profile = '/profile';
+  static const notification = '/notification';
+  //home
   static const flood = '/flood';
   static const chatbot = '/chatbot';
+  static const cctv = '/cctv';
+  static const park = '/park';
+  static const crowd = '/crowd';
+  //profile
+  static const about = '/about';
+  static const termsOfService = '/terms-of-service';
+  static const privacyPolicy = '/privacy-policy';
+  static const settings = '/settings';
+  static const logout = '/logout';
+  static const changePassword = '/change-password';
+  static const deleteAccount = '/delate-account';
+  //widget
   static const loading = '/loading';
+  static const noInternet = '/no-internet';
 
   static final getPages = [
     GetPage(
@@ -37,6 +55,10 @@ class AppRoutes {
     GetPage(
       name: loading,
       page: () => LoadingPage(),
+    ),
+    GetPage(
+      name: noInternet,
+      page: () => NoInternetPage(),
     ),
     GetPage(
       name: home,

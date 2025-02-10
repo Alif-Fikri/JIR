@@ -61,7 +61,7 @@ class ProfilePage extends StatelessWidget {
             children: [
               Container(
                 height: 320,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('assets/images/group_38.png'),
                     fit: BoxFit.cover,

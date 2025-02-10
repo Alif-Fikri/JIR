@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 
 class FloodInfoBottomSheet extends StatelessWidget {
   final String status;
@@ -27,7 +25,7 @@ class FloodInfoBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
@@ -54,9 +52,9 @@ class FloodInfoBottomSheet extends StatelessWidget {
               child: Row(
                 children: [
                   _infoItem(statusIconPath, status, 'Siaga'),
-                  SizedBox(width: 16), // Add spacing if needed
+                  const SizedBox(width: 16),
                   _infoItem(waterIconPath, '$waterHeight cm', 'Tinggi Air'),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   _infoItem(locationIconPath, location, 'Lokasi'),
                 ],
               ),
@@ -76,20 +74,20 @@ class FloodInfoBottomSheet extends StatelessWidget {
     return Row(
       children: [
         Image.asset(iconPath, width: 39, height: 39),
-        SizedBox(width: 5),
+        const SizedBox(width: 5),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style: TextStyle(
+                style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: Color(0xff355469),
+                    color: const Color(0xff355469),
                     fontWeight: FontWeight.bold)),
             Text(value,
-                style: TextStyle(
+                style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: Color(0xff355469))),
+                    color: const Color(0xff355469))),
           ],
         ),
       ],
@@ -101,16 +99,16 @@ class FloodInfoBottomSheet extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.blueGrey, width: 1),
-        color: Color(0xffE7EEFD), // Warna background biru muda
+        color: const Color(0xffE7EEFD),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header Title dalam satu Container
           Container(
-            padding: EdgeInsets.symmetric(vertical: 10),
-            decoration: BoxDecoration(
-              color: Color(0xff45557B), // Warna header biru tua
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: const BoxDecoration(
+              color: Color(0xff45557B),
               borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
             ),
             child: Center(
@@ -125,16 +123,16 @@ class FloodInfoBottomSheet extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
 
           // Grafik
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: SizedBox(
               height: 200,
               child: LineChart(
                 LineChartData(
-                  gridData: FlGridData(show: true),
+                  gridData: const FlGridData(show: true),
                   titlesData: FlTitlesData(
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
@@ -156,9 +154,9 @@ class FloodInfoBottomSheet extends StatelessWidget {
                       ),
                     ),
                     topTitles:
-                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     rightTitles:
-                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   ),
                   borderData: FlBorderData(
                     show: true,
@@ -176,12 +174,12 @@ class FloodInfoBottomSheet extends StatelessWidget {
                                           .toString()) ??
                                       0.0))
                               .toList()
-                          : [FlSpot(0, 0)],
+                          : [const FlSpot(0, 0)],
                       isCurved: true,
-                      color: Color(0xff576A97),
+                      color: const Color(0xff576A97),
                       belowBarData:
-                          BarAreaData(show: true, color: Color(0xff576A97)),
-                      dotData: FlDotData(show: false),
+                           BarAreaData(show: true, color: const Color(0xff576A97)),
+                      dotData: const FlDotData(show: false),
                     ),
                   ],
                 ),
@@ -189,15 +187,15 @@ class FloodInfoBottomSheet extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
 
           // Keterangan di bawah chart
           Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: FittedBox(
               child: Text(
                 "* Tinggi air saat ini berada di $waterHeight cm, meningkat dibandingkan 2 jam terakhir.",
-                style: TextStyle(fontSize: 10, color: Colors.black),
+                style: GoogleFonts.inter(fontSize: 10, color: Colors.black),
               ),
             ),
           ),

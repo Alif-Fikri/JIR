@@ -11,6 +11,7 @@ import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/home.dart';
 import 'package:smartcitys/pages/profile/profile.dart';
 import 'package:smartcitys/helper/loading.dart';
+import 'package:smartcitys/services/internet_service/internet_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,7 @@ void main() async {
   await Hive.openBox('authBox');
   await dotenv.load(fileName: ".env");
   runApp(const MyApp());
+  Get.put(InternetService());
 }
 
 class MyApp extends StatelessWidget {
@@ -31,8 +33,8 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoutes.initial,
       getPages: AppRoutes.getPages,
       unknownRoute: GetPage(
-        name: '/loading',
-        page: () => LoadingPage(),
+        name: '/home',
+        page: () => HomePage(),
       ),
     );
   }
