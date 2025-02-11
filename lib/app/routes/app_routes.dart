@@ -6,12 +6,13 @@ import 'package:smartcitys/pages/auth/login.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
+import 'package:smartcitys/pages/home/park/park.dart';
 import 'package:smartcitys/pages/profile/profile.dart';
 import 'package:smartcitys/helper/loading.dart';
 import 'package:smartcitys/helper/no_connection.dart';
 
 class AppRoutes {
-  static const initial = home;
+  static const initial = park;
   //auth
   static const login = '/login';
   static const signup = '/signup';
@@ -63,6 +64,10 @@ class AppRoutes {
     GetPage(
       name: home,
       page: () => Menu(),
+    ),
+    GetPage(
+      name: park,
+      page: () => ParkPage(),
     ),
     GetPage(
       name: profile,

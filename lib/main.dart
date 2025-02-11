@@ -9,6 +9,7 @@ import 'package:smartcitys/pages/auth/signup.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/home.dart';
+import 'package:smartcitys/pages/home/park/park.dart';
 import 'package:smartcitys/pages/profile/profile.dart';
 import 'package:smartcitys/helper/loading.dart';
 import 'package:smartcitys/services/internet_service/internet_service.dart';
@@ -33,8 +34,8 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoutes.initial,
       getPages: AppRoutes.getPages,
       unknownRoute: GetPage(
-        name: '/profile',
-        page: () => ProfilePage(),
+        name: '/park',
+        page: () => ParkPage(),
       ),
     );
   }

@@ -131,6 +131,7 @@ flutter:
     - assets/images/group_38.png
     - assets/lottie/loading.json
     - assets/lottie/no_connection.json
+    - assets/images/park.png
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
     # For details regarding adding assets from package dependencies, see
