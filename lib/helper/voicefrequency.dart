@@ -9,7 +9,7 @@ class VoiceFrequencyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final centerY = size.height / 2;
-    final numWaves = 40;
+    const numWaves = 40;
 
     for (int i = 0; i < numWaves; i++) {
       final x = i * (size.width / numWaves);

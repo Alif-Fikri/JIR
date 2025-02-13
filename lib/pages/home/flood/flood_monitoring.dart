@@ -10,6 +10,8 @@ import 'package:smartcitys/services/location_service/location_permission.dart';
 import 'package:latlong2/latlong.dart';
 
 class FloodMonitoringPage extends StatefulWidget {
+  const FloodMonitoringPage({super.key});
+
   @override
   _FloodMonitoringPageState createState() => _FloodMonitoringPageState();
 }
@@ -56,7 +58,7 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
                   location: item["NAMA_PINTU_AIR"] ?? "N/A",
                 );
               },
-              child: RadarMarker(color: Colors.red),
+              child: const RadarMarker(color: Colors.red),
             ),
           );
         }).toList();
@@ -74,7 +76,7 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
@@ -102,12 +104,12 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Banjir'),
+        title: const Text('Banjir'),
         titleTextStyle: GoogleFonts.inter(
             fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
-        backgroundColor: Color(0xff45557B),
+        backgroundColor: const Color(0xff45557B),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -132,7 +134,7 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(50),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.grey,
                           blurRadius: 5,
@@ -146,21 +148,21 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
                         hintText: 'Search . . .',
                         hintStyle: GoogleFonts.inter(
                             color: Colors.black, fontStyle: FontStyle.italic),
-                        prefixIcon: Icon(Icons.search, color: Colors.black),
+                        prefixIcon: const Icon(Icons.search, color: Colors.black),
                         border: InputBorder.none,
                         contentPadding:
-                            EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                            const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                       ),
                       onSubmitted: _searchLocation,
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 FloatingActionButton(
                   onPressed: _getCurrentLocation,
                   backgroundColor: Colors.white,
                   mini: true,
-                  child: Icon(Icons.my_location, color: Colors.black),
+                  child: const Icon(Icons.my_location, color: Colors.black),
                 ),
               ],
             ),
@@ -181,7 +183,7 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
     } catch (e) {
       print("Lokasi tidak ditemukan: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lokasi tidak ditemukan')),
+        const SnackBar(content: Text('Lokasi tidak ditemukan')),
       );
     }
   }

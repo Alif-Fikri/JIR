@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:smartcitys/app/routes/app_routes.dart';
 import 'package:weather/weather.dart';
 import 'dart:math' as math;
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
@@ -9,6 +9,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smartcitys/helper/weathertranslator.dart';
 import 'package:smartcitys/helper/image_selector.dart';
+import 'package:get/get.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -103,7 +104,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         placemarks = [];
       }
 
-      Placemark place = placemarks.isNotEmpty ? placemarks.first : Placemark();
+      Placemark place =
+          placemarks.isNotEmpty ? placemarks.first : const Placemark();
 
       setState(() {
         if (weather != null && weather.temperature != null) {
@@ -312,35 +314,39 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       mainAxisSpacing: 30.0,
                       children: [
                         featureIcon(
-                          onPressed: () => print('Navigating to Pantau Banjir'),
-                          imagePath: 'assets/images/pantau_banjir.png',
+                          onPressed: () => Get.toNamed(AppRoutes.flood),
                           label: 'Pantau Banjir',
+                          imagePath: 'assets/images/pantau_banjir.png',
                         ),
                         featureIcon(
-                          onPressed: () =>
-                              print('Navigating to Pantau Kerumunan'),
+                          onPressed: () => Get.toNamed(AppRoutes.crowd),
                           imagePath: 'assets/images/pantau_kerumunan.png',
                           label: 'Pantau Kerumunan',
                         ),
                         featureIcon(
-                          onPressed: () => print('Navigating to Taman'),
-                          imagePath: 'assets/images/laporan.png',
-                          label: 'Laporan',
-                        ),
-                        featureIcon(
-                          onPressed: () => print('Navigating to Taman'),
+                          onPressed: () => Get.toNamed(AppRoutes.park),
                           imagePath: 'assets/images/taman.png',
                           label: 'Taman',
                         ),
                         featureIcon(
-                          onPressed: () => print('Navigating to Lokasi'),
-                          imagePath: 'assets/images/location.png',
-                          label: 'Lokasi',
+                          onPressed: () => Get.toNamed(AppRoutes.park),
+                          imagePath: 'assets/images/peta.png',
+                          label: 'Peta',
                         ),
                         featureIcon(
-                          onPressed: () => print('Navigating to CCTV'),
+                          onPressed: () => Get.toNamed(AppRoutes.cctv),
                           imagePath: 'assets/images/cctv.png',
                           label: 'CCTV',
+                        ),
+                        featureIcon(
+                          onPressed: () => Get.toNamed(AppRoutes.cuaca),
+                          imagePath: 'assets/images/cuaca.png',
+                          label: 'Cuaca',
+                        ),
+                        featureIcon(
+                          onPressed: () => Get.toNamed(AppRoutes.park),
+                          imagePath: 'assets/images/laporan.png',
+                          label: 'Laporan',
                         ),
                       ],
                     ),

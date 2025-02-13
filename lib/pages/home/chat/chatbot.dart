@@ -31,11 +31,11 @@ class ChatbotOpeningPage extends StatelessWidget {
             right: 0,
             child: Center(
               child: Container(
-                constraints: BoxConstraints(
+                constraints: const BoxConstraints(
                   maxWidth: 530,
                   maxHeight: 400,
                 ),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('assets/images/bg1.png'),
                   ),
@@ -86,18 +86,18 @@ class ChatbotOpeningPage extends StatelessWidget {
                     },
                     style: ButtonStyle(
                       backgroundColor:
-                          MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.pressed)) {
-                          return Color(0xffE45835);
+                          WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.pressed)) {
+                          return const Color(0xffE45835);
                         }
                         return const Color(0xff45557B);
                       }),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
+                      padding: WidgetStateProperty.all<EdgeInsets>(
                         const EdgeInsets.symmetric(
                             horizontal: 40, vertical: 20),
                       ),
@@ -115,7 +115,7 @@ class ChatbotOpeningPage extends StatelessWidget {
                   FloatingActionButton(
                     onPressed: () {},
                     backgroundColor: const Color(0xffEAEFF3),
-                    child: Icon(
+                    child: const Icon(
                       Icons.mic,
                       size: 30,
                       color: Colors.red,

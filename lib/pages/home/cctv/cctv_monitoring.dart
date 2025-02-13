@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CCTVPage extends StatefulWidget {
+  const CCTVPage({super.key});
+
   @override
   _CCTVPageState createState() => _CCTVPageState();
 }
@@ -30,17 +32,17 @@ class _CCTVPageState extends State<CCTVPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('CCTV'),
+        title: const Text('CCTV'),
         backgroundColor: Colors.blueGrey.shade700,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          SizedBox(
             height: 200,
             child: GoogleMap(
               onMapCreated: _onMapCreated,
@@ -52,8 +54,8 @@ class _CCTVPageState extends State<CCTVPage> {
               trafficEnabled: true,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
             child: Text(
               'Ayo Pantau!',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -62,7 +64,7 @@ class _CCTVPageState extends State<CCTVPage> {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
@@ -84,10 +86,10 @@ class _CCTVPageState extends State<CCTVPage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         locations[index]['name'],
-                        style: TextStyle(fontSize: 14),
+                        style: const TextStyle(fontSize: 14),
                         textAlign: TextAlign.center,
                       ),
                     ],

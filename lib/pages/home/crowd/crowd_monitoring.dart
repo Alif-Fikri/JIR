@@ -13,19 +13,21 @@ class CrowdMonitoringPage extends StatelessWidget {
     {'location': 'Ferry Building', 'level': 'Low', 'count': '700'},
   ];
 
+  CrowdMonitoringPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Kerumunan'),
+        title: const Text('Kerumunan'),
         backgroundColor: Colors.blueGrey.shade700,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.calendar_today),
+            icon: const Icon(Icons.calendar_today),
             onPressed: () {
 
             },
@@ -38,23 +40,23 @@ class CrowdMonitoringPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Level Kerumunan',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 16),
-              Text(
+              const SizedBox(height: 16),
+              const Text(
                 "Today's crowd",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               _buildCrowdList(todayCrowd),
-              SizedBox(height: 16),
-              Text(
+              const SizedBox(height: 16),
+              const Text(
                 "Yesterday's crowd",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               _buildCrowdList(yesterdayCrowd),
             ],
           ),
@@ -68,12 +70,12 @@ class CrowdMonitoringPage extends StatelessWidget {
       children: crowdData.map((data) {
         return ListTile(
           leading: Container(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               color: Colors.grey.shade200,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.location_on, color: Colors.blue),
+            child: const Icon(Icons.location_on, color: Colors.blue),
           ),
           title: Text(data['location']),
           subtitle: Text(

@@ -4,8 +4,7 @@ class RadarMarker extends StatefulWidget {
   final Color color;
   final double size;
 
-  const RadarMarker({Key? key, required this.color, this.size = 24.0})
-      : super(key: key);
+  const RadarMarker({super.key, required this.color, this.size = 24.0});
 
   @override
   _RadarMarkerState createState() => _RadarMarkerState();

@@ -12,7 +12,7 @@ class FloodInfoBottomSheet extends StatelessWidget {
   final List<Map<String, dynamic>> floodData;
 
   const FloodInfoBottomSheet({
-    Key? key,
+    super.key,
     required this.status,
     required this.statusIconPath,
     required this.waterHeight,
@@ -20,7 +20,7 @@ class FloodInfoBottomSheet extends StatelessWidget {
     required this.location,
     required this.locationIconPath,
     required this.floodData,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

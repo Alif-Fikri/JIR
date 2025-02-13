@@ -9,7 +9,7 @@ class AboutPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('About JIR'),
+        title: const Text('Tentang Kami'),
         titleTextStyle: GoogleFonts.inter(
           fontWeight: FontWeight.bold,
           fontSize: 20,
@@ -17,57 +17,92 @@ class AboutPage extends StatelessWidget {
         ),
         backgroundColor: const Color(0xff45557B),
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
-            Container(
-              height: 150.0,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10.0),
-              ),
+            _buildImageHeader(),
+            const SizedBox(height: 30),
+            _buildTitle("Tentang JIR"),
+            const SizedBox(height: 15),
+            _buildParagraph(
+              "Aplikasi JIR adalah platform inovatif yang dikembangkan untuk membantu masyarakat dalam pemantauan bencana dan kondisi lingkungan sekitar. JIR hadir dengan tujuan utama untuk meningkatkan kesadaran dan respons terhadap ancaman banjir, kerumunan berlebih, dan kebakaran melalui sistem pemantauan real-time.\n"
+              "Dengan menggabungkan teknologi canggih seperti analisis data, pemantauan CCTV publik, dan laporan berbasis pengguna, JIR bertujuan untuk menyediakan informasi yang cepat dan akurat bagi warga, petugas keamanan, serta pemerintah daerah.",
             ),
             const SizedBox(height: 20),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
-                  'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
-                  'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. '
-                  'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. '
-                  'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. '
-                  '\n\n'
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
-                  'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
-                  'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. '
-                  'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. '
-                  'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. '
-                  '\n\n'
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    height: 1.5,
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.justify,
-                ),
-              ),
+            _buildTitle("Visi & Misi"),
+            const SizedBox(height: 15),
+            _buildParagraph(
+              "Visi kami adalah menjadi platform pemantauan lingkungan yang andal dan berbasis teknologi guna menciptakan komunitas yang lebih aman dan tanggap terhadap bencana.",
+            ),
+            const SizedBox(height: 10),
+            _buildSubtitle("Misi kami:"),
+            _buildParagraph(
+              "- Menyediakan informasi terkini mengenai potensi bencana dan kondisi lingkungan.\n"
+              "- Membantu masyarakat dalam melaporkan kejadian penting seperti banjir dan kebakaran.\n"
+              "- Memanfaatkan teknologi pemantauan untuk meningkatkan keselamatan publik.\n"
+              "- Berkolaborasi dengan pemerintah dan lembaga terkait dalam pengelolaan bencana.",
+            ),
+            const SizedBox(height: 20),
+            _buildParagraph(
+              "Kami terus berinovasi dan mengembangkan fitur-fitur baru agar aplikasi JIR dapat memberikan manfaat yang lebih besar bagi penggunanya. Dengan menggunakan aplikasi ini, Anda turut serta dalam membangun sistem tanggap darurat yang lebih baik untuk masyarakat.",
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildImageHeader() {
+    return Container(
+      height: 150,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(20),
+        image: const DecorationImage(
+          image: AssetImage('assets/images/afternoon.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitle(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+    );
+  }
+
+  Widget _buildSubtitle(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 13,
+        fontWeight: FontWeight.w300,
+        color: Colors.black,
+      ),
+    );
+  }
+
+  Widget _buildParagraph(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+          fontSize: 13,
+          height: 1.5,
+          color: Colors.black,
+          fontWeight: FontWeight.w300),
+      textAlign: TextAlign.justify,
     );
   }
 }

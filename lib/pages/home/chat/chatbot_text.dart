@@ -132,7 +132,7 @@ class _ChatBotPageState extends State<ChatBotPage>
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
@@ -314,27 +314,27 @@ class _ChatBotPageState extends State<ChatBotPage>
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(
-                      color: const Color(0x14000000),
+                    borderSide: const BorderSide(
+                      color: Color(0x14000000),
                       width: 1.0,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(
-                      color: const Color(0x14000000),
+                    borderSide: const BorderSide(
+                      color: Color(0x14000000),
                       width: 1.0,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(
-                      color: const Color(0x14000000),
+                    borderSide: const BorderSide(
+                      color: Color(0x14000000),
                       width: 1.0,
                     ),
                   ),
                   filled: true,
-                  fillColor: Color(0xffEAEFF3),
+                  fillColor: const Color(0xffEAEFF3),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10.0,
                     horizontal: 20.0,

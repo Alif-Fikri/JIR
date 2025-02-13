@@ -96,7 +96,7 @@ class ProfilePage extends StatelessWidget {
                   ],
                 ),
               ),
-              Positioned(
+              const Positioned(
                 right: 50,
                 bottom: 15,
                 child: SizedBox(
