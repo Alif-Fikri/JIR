@@ -42,10 +42,10 @@ class AboutPage extends StatelessWidget {
             const SizedBox(height: 10),
             _buildSubtitle("Misi kami:"),
             _buildParagraph(
-              "- Menyediakan informasi terkini mengenai potensi bencana dan kondisi lingkungan.\n"
-              "- Membantu masyarakat dalam melaporkan kejadian penting seperti banjir dan kebakaran.\n"
-              "- Memanfaatkan teknologi pemantauan untuk meningkatkan keselamatan publik.\n"
-              "- Berkolaborasi dengan pemerintah dan lembaga terkait dalam pengelolaan bencana.",
+              "• Menyediakan informasi terkini mengenai potensi bencana dan kondisi lingkungan.\n"
+              "• Membantu masyarakat dalam melaporkan kejadian penting seperti banjir dan kebakaran.\n"
+              "• Memanfaatkan teknologi pemantauan untuk meningkatkan keselamatan publik.\n"
+              "• Berkolaborasi dengan pemerintah dan lembaga terkait dalam pengelolaan bencana.",
             ),
             const SizedBox(height: 20),
             _buildParagraph(

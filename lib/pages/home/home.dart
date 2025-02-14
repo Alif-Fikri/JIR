@@ -344,7 +344,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           label: 'Cuaca',
                         ),
                         featureIcon(
-                          onPressed: () => Get.toNamed(AppRoutes.park),
+                          onPressed: () => Get.toNamed(AppRoutes.lapor),
                           imagePath: 'assets/images/laporan.png',
                           label: 'Laporan',
                         ),

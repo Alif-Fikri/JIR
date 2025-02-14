@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:smartcitys/bindings/auth_binding.dart';
 import 'package:smartcitys/helper/menu.dart';
+import 'package:smartcitys/pages/activity/activity.dart';
 import 'package:smartcitys/pages/auth/login.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
@@ -9,6 +10,7 @@ import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/home.dart';
 import 'package:smartcitys/pages/home/map/map.dart';
 import 'package:smartcitys/pages/home/park/park.dart';
+import 'package:smartcitys/pages/home/report/report.dart';
 import 'package:smartcitys/pages/home/weather/weather.dart';
 import 'package:smartcitys/pages/notifications/notification.dart';
 import 'package:smartcitys/pages/profile/about.dart';
@@ -29,6 +31,7 @@ class AppRoutes {
   static const home = '/home';
   static const profile = '/profile';
   static const notification = '/notification';
+  static const activity = '/activity';
   //home
   static const flood = '/flood';
   static const chatbot = '/chatbot';
@@ -37,6 +40,7 @@ class AppRoutes {
   static const crowd = '/crowd';
   static const cuaca = '/cuaca';
   static const peta = '/peta';
+  static const lapor = '/lapor';
   //profile
   static const about = '/about';
   static const termsOfService = '/terms-of-service';
@@ -66,7 +70,7 @@ class AppRoutes {
     ),
     GetPage(
       name: home,
-      page: () => const Menu(),
+      page: () => Menu(),
     ),
     GetPage(
       name: profile,
@@ -75,6 +79,10 @@ class AppRoutes {
     GetPage(
       name: notification,
       page: () => const NotificationPage(),
+    ),
+    GetPage(
+      name: notification,
+      page: () => const ActivityPage(),
     ),
     GetPage(
       name: flood,
@@ -96,9 +104,13 @@ class AppRoutes {
       name: cuaca,
       page: () => WeatherPage(),
     ),
-        GetPage(
+    GetPage(
       name: peta,
       page: () => MapPage(),
+    ),
+    GetPage(
+      name: lapor,
+      page: () => ReportPage(),
     ),
     GetPage(
       name: about,

@@ -24,7 +24,7 @@ class LoginController extends GetxController {
     );
 
     if (result['success']) {
-      Get.offAll(() => const Menu());
+      Get.offAll(() => Menu());
     } else {
       errorMessage.value = result['message'];
     }
@@ -35,7 +35,7 @@ class LoginController extends GetxController {
   void googleSignIn() async {
     final result = await _googleAuthService.signInWithGoogle();
     if (result != null) {
-      Get.offAll(() => const Menu());
+      Get.offAll(() => Menu());
     } else {
       errorMessage.value = 'Google sign in failed';
     }

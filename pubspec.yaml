@@ -135,6 +135,7 @@ flutter:
     - assets/images/cuaca.png
     - assets/images/laporan.png
     - assets/images/peta.png
+    - assets/images/report.png
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
     # For details regarding adding assets from package dependencies, see

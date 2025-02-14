@@ -9,8 +9,7 @@ class BackgroundImageSelector {
     }
   }
 
-  static String getImageForWeather(String? description) {
-    if (description == null) return 'assets/images/Cuaca Smart City Icon-01.png';
+  static String getImageForWeather(String description) {
     switch (description.toLowerCase()) {
       case "clear":
         return 'assets/images/Cuaca Smart City Icon-05.png';

@@ -3,7 +3,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 
-
 class ReusableMap extends StatefulWidget {
   final LatLng initialLocation;
   final List<Marker> markers;
@@ -37,7 +36,7 @@ class _ReusableMapState extends State<ReusableMap> {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse && 
+      if (permission != LocationPermission.whileInUse &&
           permission != LocationPermission.always) {
         return;
       }
