@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:smartcitys/controllers/home_controller.dart';
+import 'package:smartcitys/app/controllers/home_controller.dart';
 
 class HomeBinding implements Bindings {
   @override

@@ -4,6 +4,12 @@
 <dict>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>We need your location to show the weather data.</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Need photo library access to upload images</string>
+<key>NSCameraUsageDescription</key>
+<string>Need camera access to take photos</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>Need microphone access for video recording</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

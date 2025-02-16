@@ -2,8 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/app/controllers/auth_controller/signup_controller.dart';
 import 'package:smartcitys/app/routes/app_routes.dart';
-import 'package:smartcitys/controllers/auth_controller/signup_controller.dart';
 
 class SignupPage extends GetView<SignupController> {
   final fixedWidth = 350.0;

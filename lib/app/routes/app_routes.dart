@@ -11,6 +11,7 @@ import 'package:smartcitys/pages/home/home.dart';
 import 'package:smartcitys/pages/home/map/map.dart';
 import 'package:smartcitys/pages/home/park/park.dart';
 import 'package:smartcitys/pages/home/report/report.dart';
+import 'package:smartcitys/pages/home/report/report_user.dart';
 import 'package:smartcitys/pages/home/weather/weather.dart';
 import 'package:smartcitys/pages/notifications/notification.dart';
 import 'package:smartcitys/pages/profile/about.dart';
@@ -41,6 +42,7 @@ class AppRoutes {
   static const cuaca = '/cuaca';
   static const peta = '/peta';
   static const lapor = '/lapor';
+  static const report = '/report_user';
   //profile
   static const about = '/about';
   static const termsOfService = '/terms-of-service';
@@ -112,6 +114,10 @@ class AppRoutes {
       name: lapor,
       page: () => ReportPage(),
     ),
+    //     GetPage(
+    //   name: report,
+    //   page: () => ReportUser(),
+    // ),
     GetPage(
       name: about,
       page: () => const AboutPage(),
