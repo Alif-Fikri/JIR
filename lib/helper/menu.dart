@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/pages/home/home.dart';
 import 'package:smartcitys/pages/notifications/notification.dart';
@@ -13,11 +14,11 @@ class Menu extends StatefulWidget {
 }
 
 class _MenuState extends State<Menu> {
-  int _selectedIndex = 0;
+  int _selectedIndex = Get.arguments ?? 0; 
 
   final List<Widget> _pages = [
     HomePage(),
-    const ActivityPage(),
+    ActivityPage(),
     const NotificationPage(),
     const ProfilePage(),
   ];

@@ -2,39 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-
-import 'package:smartcitys/app/routes/app_routes.dart';
-
-class ReportController extends GetxController {
-  final imageFile = Rxn<File>();
-  final description = ''.obs;
-  final _picker = ImagePicker();
-
-  Future<void> pickImage(ImageSource source) async {
-    try {
-      final pickedFile = await _picker.pickImage(source: source);
-      if (pickedFile != null) {
-        imageFile.value = File(pickedFile.path);
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Gagal memilih gambar: ${e.toString()}');
-    }
-  }
-
-  void submitReport() {
-    if (imageFile.value == null || description.isEmpty) {
-      Get.snackbar('Error', 'Harap lengkapi semua field');
-      return;
-    }
-    
-    Get.snackbar('Sukses', 'Laporan berhasil dikirim');
-    Get.offAllNamed(AppRoutes.home);
-  }
-}
+import 'package:smartcitys/app/controllers/report_controller.dart';
+import 'package:smartcitys/pages/home/report/report_user.dart';
 
 class ReportPage extends StatelessWidget {
-  final ReportController controller = Get.put(ReportController());
+  final ReportController controller =
+      Get.find<ReportController>();
+
+  ReportPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +17,8 @@ class ReportPage extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       body: _buildBody(),
+      floatingActionButton: _buildFloatingButton(), 
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -64,29 +41,21 @@ class ReportPage extends StatelessWidget {
   }
 
   Widget _buildBody() {
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildImagePickerButton(),
-          const SizedBox(height: 20),
-          Text(
-            'Tap ikon di atas untuk memilih gambar',
-            style: GoogleFonts.inter(color: Colors.grey),
-          ),
+        children: const [
+          SizedBox(height: 30),
         ],
       ),
     );
   }
 
-  Widget _buildImagePickerButton() {
-    return InkWell(
-      onTap: _showImageSourceDialog,
-      child: Image.asset(
-        'assets/images/report.png',
-        height: 60,
-        width: 60,
-      ),
+  Widget _buildFloatingButton() {
+    return FloatingActionButton(
+      onPressed: _showImageSourceDialog,
+      backgroundColor: const Color(0xff45557B),
+      child: const Icon(Icons.add, color: Colors.white),
     );
   }
 
@@ -123,102 +92,5 @@ class ReportPage extends StatelessWidget {
         Get.to(() => ReportFormPage());
       }
     });
-  }
-}
-
-class ReportFormPage extends StatelessWidget {
-  final ReportController controller = Get.find();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: _buildAppBar(),
-      body: _buildFormContent(),
-    );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: Text(
-        'Laporan Baru',
-        style: GoogleFonts.inter(
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-          color: Colors.white,
-        ),
-      ),
-      backgroundColor: const Color(0xff45557B),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => Get.back(),
-      ),
-    );
-  }
-
-  Widget _buildFormContent() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildImagePreview(),
-          const SizedBox(height: 20),
-          _buildDescriptionField(),
-          const SizedBox(height: 30),
-          _buildSubmitButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImagePreview() {
-    return Obx(() => controller.imageFile.value != null
-        ? Column(
-            children: [
-              Image.file(
-                controller.imageFile.value!,
-                height: 200,
-                fit: BoxFit.cover,
-              ),
-              const SizedBox(height: 10),
-            ],
-          )
-        : const SizedBox.shrink());
-  }
-
-  Widget _buildDescriptionField() {
-    return TextField(
-      onChanged: (value) => controller.description.value = value,
-      maxLines: 5,
-      decoration: InputDecoration(
-        hintText: "Tambahkan deskripsi...",
-        border: const OutlineInputBorder(),
-        hintStyle: GoogleFonts.inter(color: Colors.grey),
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return Center(
-      child: ElevatedButton(
-        onPressed: controller.submitReport,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xff45557B),
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        child: Text(
-          'Kirim Laporan',
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
   }
 }

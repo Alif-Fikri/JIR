@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:smartcitys/bindings/auth_binding.dart';
+import 'package:smartcitys/bindings/report_binding.dart';
 import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/activity/activity.dart';
 import 'package:smartcitys/pages/auth/login.dart';
@@ -8,7 +9,7 @@ import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/crowd/crowd_monitoring.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/home.dart';
-import 'package:smartcitys/pages/home/map/map.dart';
+import 'package:smartcitys/pages/home/map/map_monitoring.dart';
 import 'package:smartcitys/pages/home/park/park.dart';
 import 'package:smartcitys/pages/home/report/report.dart';
 import 'package:smartcitys/pages/home/report/report_user.dart';
@@ -84,7 +85,8 @@ class AppRoutes {
     ),
     GetPage(
       name: notification,
-      page: () => const ActivityPage(),
+      page: () => ActivityPage(),
+      binding: ReportBinding(),
     ),
     GetPage(
       name: flood,
@@ -108,11 +110,12 @@ class AppRoutes {
     ),
     GetPage(
       name: peta,
-      page: () => MapPage(),
+      page: () => MapMonitoring(),
     ),
     GetPage(
       name: lapor,
       page: () => ReportPage(),
+      binding: ReportBinding(),
     ),
     //     GetPage(
     //   name: report,

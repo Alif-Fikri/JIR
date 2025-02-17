@@ -4,6 +4,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smartcitys/app/routes/app_routes.dart';
 import 'package:smartcitys/bindings/auth_binding.dart';
+import 'package:smartcitys/bindings/initial_binding.dart';
+import 'package:smartcitys/bindings/report_binding.dart';
 import 'package:smartcitys/pages/auth/login.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
@@ -32,6 +34,7 @@ class MyApp extends StatelessWidget {
       title: 'JIR App',
       theme: ThemeData(),
       initialRoute: AppRoutes.initial,
+      initialBinding: InitialBinding(),
       getPages: AppRoutes.getPages,
       unknownRoute: GetPage(
         name: '/home',

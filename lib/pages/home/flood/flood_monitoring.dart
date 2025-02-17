@@ -10,7 +10,9 @@ import 'package:smartcitys/services/location_service/location_permission.dart';
 import 'package:latlong2/latlong.dart';
 
 class FloodMonitoringPage extends StatefulWidget {
-  const FloodMonitoringPage({super.key});
+  final LatLng? initialLocation;
+
+  const FloodMonitoringPage({super.key, this.initialLocation});
 
   @override
   _FloodMonitoringPageState createState() => _FloodMonitoringPageState();
@@ -31,10 +33,12 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
   }
 
   Future<void> _initializeLocation() async {
-    final location = await LocationService.getCurrentLocation();
-    setState(() {
+    if (widget.initialLocation != null) {
+      currentLocation = widget.initialLocation;
+    } else {
+      final location = await LocationService.getCurrentLocation();
       currentLocation = location ?? const LatLng(-6.200000, 106.816666);
-    });
+    }
   }
 
   Future<void> _fetchFloodData() async {
@@ -148,10 +152,11 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
                         hintText: 'Search . . .',
                         hintStyle: GoogleFonts.inter(
                             color: Colors.black, fontStyle: FontStyle.italic),
-                        prefixIcon: const Icon(Icons.search, color: Colors.black),
+                        prefixIcon:
+                            const Icon(Icons.search, color: Colors.black),
                         border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 16),
                       ),
                       onSubmitted: _searchLocation,
                     ),
