@@ -329,7 +329,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           label: 'Taman',
                         ),
                         featureIcon(
-                          onPressed: () => Get.toNamed(AppRoutes.park),
+                          onPressed: () => Get.toNamed(AppRoutes.peta),
                           imagePath: 'assets/images/peta.png',
                           label: 'Peta',
                         ),

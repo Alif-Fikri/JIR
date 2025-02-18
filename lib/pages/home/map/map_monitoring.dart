@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/services/flood_service/flood_api_service.dart';
 
@@ -23,75 +24,88 @@ class _MapMonitoringState extends State<MapMonitoring> {
 
   Future<void> _loadFloodData() async {
     final data = await _floodService.fetchFloodData();
-    setState(() => _floodData = data);
+
+    // Perbaiki cara membersihkan "Status: "
+    final cleanedData = data.map((item) {
+      return {
+        ...item,
+        "STATUS_SIAGA": item["STATUS_SIAGA"]
+            .toString()
+            .replaceAll(RegExp(r"Status\s*:\s*"), ""),
+      };
+    }).toList();
+
+    print("Data API setelah dibersihkan: $cleanedData"); // Debugging
+
+    setState(() {
+      _floodData = cleanedData;
+    });
+
+    if (mounted && _floodData.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showFloodMonitoringBottomSheet(context);
+      });
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Pantau Bencana',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFF45557B),
+  void _showFloodMonitoringBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      body: _buildDisasterList(),
-    );
-  }
-
-  Widget _buildDisasterList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _floodData.length,
-      itemBuilder: (context, index) {
-        final item = _floodData[index];
-        return _DisasterListItem(
-          location: item['NAMA_PINTU_AIR'] ?? 'Lokasi Tidak Diketahui',
-          status: item['STATUS_SIAGA'] ?? 'N/A',
-          latitude: double.tryParse(item['LATITUDE'].toString()) ?? 0.0,
-          longitude: double.tryParse(item['LONGITUDE'].toString()) ?? 0.0,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.4,
+          minChildSize: 0.2,
+          maxChildSize: 0.6,
+          expand: false,
+          builder: (context, scrollController) {
+            return FloodMonitoringBottomSheet(
+              floodData: _floodData,
+              scrollController: scrollController,
+            );
+          },
         );
       },
     );
   }
-}
-
-class _DisasterListItem extends StatelessWidget {
-  final String location;
-  final String status;
-  final double latitude;
-  final double longitude;
-
-  const _DisasterListItem({
-    required this.location,
-    required this.status,
-    required this.latitude,
-    required this.longitude,
-  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: _StatusIndicator(status: status),
-        title: Text(location,
-            style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-        subtitle: Text('Status: $status',
-            style: GoogleFonts.inter(color: Colors.grey[600])),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () => _showDisasterDetails(context),
+    List<Marker> markers = _floodData.map((item) {
+      final latitude = double.tryParse(item['LATITUDE'].toString()) ?? 0.0;
+      final longitude = double.tryParse(item['LONGITUDE'].toString()) ?? 0.0;
+      return Marker(
+        point: LatLng(latitude, longitude),
+        child: GestureDetector(
+          onTap: () => _showDisasterDetails(context, item),
+          child: Icon(Icons.radio_button_checked, color: Colors.red, size: 30),
+        ),
+      );
+    }).toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Pantau Banjir',
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF45557B),
+      ),
+      body: ReusableMap(
+        initialLocation: LatLng(-6.2088, 106.8456), // Default Jakarta
+        markers: markers,
       ),
     );
   }
 
-  void _showDisasterDetails(BuildContext context) {
+  void _showDisasterDetails(BuildContext context, Map<String, dynamic> item) {
     showModalBottomSheet(
       context: context,
       builder: (context) => DisasterBottomSheet(
-        location: location,
-        status: status,
-        onViewLocation: () => _navigateToFloodMonitoring(context),
+        location: item['NAMA_PINTU_AIR'] ?? 'Lokasi Tidak Diketahui',
+        status: item['STATUS_SIAGA'] ?? 'N/A',
+        onViewLocation: () => _navigateToFloodMonitoring(context, item),
       ),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -100,7 +114,10 @@ class _DisasterListItem extends StatelessWidget {
     );
   }
 
-  void _navigateToFloodMonitoring(BuildContext context) {
+  void _navigateToFloodMonitoring(
+      BuildContext context, Map<String, dynamic> item) {
+    final latitude = double.tryParse(item['LATITUDE'].toString()) ?? 0.0;
+    final longitude = double.tryParse(item['LONGITUDE'].toString()) ?? 0.0;
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -112,36 +129,41 @@ class _DisasterListItem extends StatelessWidget {
   }
 }
 
-class _StatusIndicator extends StatelessWidget {
-  final String status;
+class ReusableMap extends StatefulWidget {
+  final LatLng initialLocation;
+  final List<Marker> markers;
 
-  const _StatusIndicator({required this.status});
+  const ReusableMap(
+      {super.key, required this.initialLocation, required this.markers});
+
+  @override
+  _ReusableMapState createState() => _ReusableMapState();
+}
+
+class _ReusableMapState extends State<ReusableMap> {
+  late MapController _mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _mapController = MapController();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Color indicatorColor;
-    switch (status.toLowerCase()) {
-      case 'siaga':
-        indicatorColor = Colors.orange;
-        break;
-      case 'sedang':
-        indicatorColor = Colors.yellow;
-        break;
-      case 'normal':
-        indicatorColor = Colors.green;
-        break;
-      default:
-        indicatorColor = Colors.grey;
-    }
-
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        color: indicatorColor,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
+    return FlutterMap(
+      mapController: _mapController,
+      options: MapOptions(
+        initialCenter: widget.initialLocation,
+        initialZoom: 13.0,
       ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          subdomains: const ['a', 'b', 'c'],
+        ),
+        MarkerLayer(markers: widget.markers),
+      ],
     );
   }
 }
@@ -178,8 +200,8 @@ class DisasterBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text('Detail Lokasi',
-              style: GoogleFonts.inter(
-                  fontSize: 18, fontWeight: FontWeight.bold)),
+              style:
+                  GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           _DetailRow(
             icon: Icons.location_on,
@@ -237,8 +259,8 @@ class _DetailRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style: GoogleFonts.inter(
-                      fontSize: 12, color: Colors.grey[600])),
+                  style:
+                      GoogleFonts.inter(fontSize: 12, color: Colors.grey[600])),
               Text(value,
                   style: GoogleFonts.inter(
                       fontSize: 14, fontWeight: FontWeight.w500)),
@@ -246,6 +268,120 @@ class _DetailRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class FloodMonitoringBottomSheet extends StatefulWidget {
+  final List<Map<String, dynamic>> floodData;
+  final ScrollController scrollController;
+
+  const FloodMonitoringBottomSheet({
+    Key? key,
+    required this.floodData,
+    required this.scrollController,
+  }) : super(key: key);
+
+  @override
+  _FloodMonitoringBottomSheetState createState() =>
+      _FloodMonitoringBottomSheetState();
+}
+
+class _FloodMonitoringBottomSheetState
+    extends State<FloodMonitoringBottomSheet> {
+  bool showAll = false;
+
+  @override
+  Widget build(BuildContext context) {
+    // Dibataskan jumlah data yang ditampilkan jika showAll = false
+    List<Map<String, dynamic>> displayedData = showAll
+        ? widget.floodData
+        : widget.floodData.take(5).toList(); // Tampilkan hanya 5 pertama
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Center(
+            child: Text(
+              "Pantauan Hari Ini",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87),
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Daftar banjir dengan bullet warna
+          Expanded(
+            child: ListView.builder(
+              controller: widget.scrollController,
+              itemCount: displayedData.length,
+              itemBuilder: (context, index) {
+                final item = displayedData[index];
+                return ListTile(
+                  title:
+                      Text(item["NAMA_PINTU_AIR"] ?? "Lokasi Tidak Diketahui"),
+                  trailing: _statusIndicator(item["STATUS_SIAGA"] ?? "N/A"),
+                );
+              },
+            ),
+          ),
+          if (!showAll)
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    showAll = true;
+                  });
+                },
+                child: const Text(
+                  "Selengkapnya",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.blue),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // Bullet indikator siaga
+  Widget _statusIndicator(String status) {
+    String cleanedStatus = status.replaceAll("Status: ", "");
+
+    Color statusColor;
+    switch (cleanedStatus) {
+      case "Siaga 3":
+        statusColor = Colors.red;
+        break;
+      case "Siaga 2":
+        statusColor = Colors.orange;
+        break;
+      case "Siaga 1":
+        statusColor = Colors.orange;
+        break;
+      case "Sedang":
+        statusColor = Colors.orange;
+        break;
+      case "Normal":
+        statusColor = Colors.green;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.circle, color: statusColor, size: 11),
+        const SizedBox(width: 5),
+        Text(cleanedStatus,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+      ],
     );
   }
 }
