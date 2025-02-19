@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/services/flood_service/flood_api_service.dart';
+import 'package:get/get.dart';
 
 class MapMonitoring extends StatefulWidget {
   const MapMonitoring({super.key});
@@ -57,7 +58,7 @@ class _MapMonitoringState extends State<MapMonitoring> {
       ),
       builder: (context) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.4,
+          initialChildSize: 0.5,
           minChildSize: 0.2,
           maxChildSize: 0.6,
           expand: false,
@@ -88,12 +89,22 @@ class _MapMonitoringState extends State<MapMonitoring> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pantau Banjir',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFF45557B),
+        title: Text(
+          'Peta',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xff45557B),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: ReusableMap(
-        initialLocation: LatLng(-6.2088, 106.8456), // Default Jakarta
+        initialLocation: const LatLng(-6.2088, 106.8456), // Default Jakarta
         markers: markers,
       ),
     );
@@ -114,19 +125,23 @@ class _MapMonitoringState extends State<MapMonitoring> {
     );
   }
 
-  void _navigateToFloodMonitoring(
-      BuildContext context, Map<String, dynamic> item) {
-    final latitude = double.tryParse(item['LATITUDE'].toString()) ?? 0.0;
-    final longitude = double.tryParse(item['LONGITUDE'].toString()) ?? 0.0;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FloodMonitoringPage(
+void _navigateToFloodMonitoring(
+    BuildContext context, Map<String, dynamic> item) {
+  final latitude = double.tryParse(item['LATITUDE'].toString());
+  final longitude = double.tryParse(item['LONGITUDE'].toString());
+
+  print("Navigasi ke: Latitude: $latitude, Longitude: $longitude");
+
+  if (latitude != null && longitude != null) {
+    Get.to(() => FloodMonitoringPage(
           initialLocation: LatLng(latitude, longitude),
-        ),
-      ),
-    );
+        ));
+  } else {
+    Get.snackbar("Error", "Koordinat tidak valid",
+        snackPosition: SnackPosition.BOTTOM);
   }
+}
+
 }
 
 class ReusableMap extends StatefulWidget {
@@ -307,13 +322,18 @@ class _FloodMonitoringBottomSheetState
             child: Text(
               "Pantauan Hari Ini",
               style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87),
+                  color: Color(0xff45557B)),
             ),
           ),
           const SizedBox(height: 10),
-
+          Text('Daftar Banjir',
+              style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xff45557B))),
+          const Divider(),
           // Daftar banjir dengan bullet warna
           Expanded(
             child: ListView.builder(
@@ -324,7 +344,30 @@ class _FloodMonitoringBottomSheetState
                 return ListTile(
                   title:
                       Text(item["NAMA_PINTU_AIR"] ?? "Lokasi Tidak Diketahui"),
+                  titleTextStyle: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400),
                   trailing: _statusIndicator(item["STATUS_SIAGA"] ?? "N/A"),
+                  leadingAndTrailingTextStyle: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),
+                  onTap: () {
+                    final latitude =
+                        double.tryParse(item['LATITUDE'].toString()) ?? 0.0;
+                    final longitude =
+                        double.tryParse(item['LONGITUDE'].toString()) ?? 0.0;
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FloodMonitoringPage(
+                          initialLocation: LatLng(latitude, longitude),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -337,10 +380,10 @@ class _FloodMonitoringBottomSheetState
                     showAll = true;
                   });
                 },
-                child: const Text(
+                child: Text(
                   "Selengkapnya",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.blue),
+                  style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold, color: Color(0xff45557B)),
                 ),
               ),
             ),
