@@ -30,6 +30,7 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
   void initState() {
     super.initState();
     _initializeLocation();
+    currentLocation = widget.initialLocation ?? const LatLng(-6.200000, 106.816666);
     _fetchFloodData();
   }
 

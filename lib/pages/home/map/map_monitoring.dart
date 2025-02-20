@@ -1,10 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/helper/map.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/services/flood_service/flood_api_service.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:dio/dio.dart' as dio;
+import 'dart:convert';
 
 class MapMonitoring extends StatefulWidget {
   const MapMonitoring({super.key});
@@ -15,12 +21,76 @@ class MapMonitoring extends StatefulWidget {
 
 class _MapMonitoringState extends State<MapMonitoring> {
   final FloodService _floodService = FloodService();
+  final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _floodData = [];
+  List<LatLng> _routePoints = [];
+  LatLng? _userLocation;
+  LatLng? _destination;
 
   @override
   void initState() {
     super.initState();
     _loadFloodData();
+    _getUserLocation();
+  }
+
+  Future<void> _getUserLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.deniedForever) {
+        return;
+      }
+    }
+
+    Position position = await Geolocator.getCurrentPosition();
+    setState(() {
+      _userLocation = LatLng(position.latitude, position.longitude);
+    });
+  }
+
+  Future<void> _searchLocation(String query) async {
+    String url =
+        "https://nominatim.openstreetmap.org/search?q=$query&format=json";
+    try {
+      dio.Response response = await Dio().get(url);
+      if (response.data.isNotEmpty) {
+        double lat = double.parse(response.data[0]["lat"]);
+        double lon = double.parse(response.data[0]["lon"]);
+        setState(() {
+          _destination = LatLng(lat, lon);
+        });
+        _fetchRoute();
+      }
+    } catch (e) {
+      print("Error fetching location: $e");
+    }
+  }
+
+  Future<void> _fetchRoute() async {
+    if (_userLocation == null || _destination == null) return;
+
+    String url =
+        "http://router.project-osrm.org/route/v1/driving/${_userLocation!.longitude},${_userLocation!.latitude};${_destination!.longitude},${_destination!.latitude}?overview=simplified&geometries=geojson";
+
+    try {
+      dio.Response response = await Dio().get(url);
+      List coordinates = response.data["routes"][0]["geometry"]["coordinates"];
+      setState(() {
+        _routePoints =
+            coordinates.map((coord) => LatLng(coord[1], coord[0])).toList();
+      });
+    } catch (e) {
+      print("Error fetching route: $e");
+    }
   }
 
   Future<void> _loadFloodData() async {
@@ -103,9 +173,100 @@ class _MapMonitoringState extends State<MapMonitoring> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: ReusableMap(
-        initialLocation: const LatLng(-6.2088, 106.8456), // Default Jakarta
-        markers: markers,
+      body: Stack(
+        children: [
+          FlutterMap(
+            options: MapOptions(
+              center: _userLocation ?? const LatLng(-6.2088, 106.8456),
+              zoom: 13.0,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: ['a', 'b', 'c'],
+              ),
+              if (_userLocation != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _userLocation!,
+                      child: const Icon(Icons.person_pin_circle,
+                          color: Colors.blue, size: 40),
+                    ),
+                  ],
+                ),
+              if (_destination != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _destination!,
+                      child: const Icon(Icons.location_on,
+                          color: Colors.red, size: 40),
+                    ),
+                  ],
+                ),
+              if (_routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _routePoints,
+                      strokeWidth: 4.0,
+                      color: Colors.blue,
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          Positioned(
+            top: 16,
+            left: 16,
+            right: 16,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(50),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.grey,
+                          blurRadius: 5,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Masukkan tujuan...',
+                        hintStyle: GoogleFonts.inter(
+                          color: Colors.black,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        prefixIcon:
+                            const Icon(Icons.search, color: Colors.black),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.send, color: Colors.blue),
+                          onPressed: () {
+                            _searchLocation(_searchController.text);
+                          },
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 16,
+                        ),
+                      ),
+                      onSubmitted: _searchLocation,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -125,61 +286,22 @@ class _MapMonitoringState extends State<MapMonitoring> {
     );
   }
 
-void _navigateToFloodMonitoring(
-    BuildContext context, Map<String, dynamic> item) {
-  final latitude = double.tryParse(item['LATITUDE'].toString());
-  final longitude = double.tryParse(item['LONGITUDE'].toString());
+  void _navigateToFloodMonitoring(
+      BuildContext context, Map<String, dynamic> item) {
+    final latStr = item['LATITUDE'].toString();
+    final lngStr = item['LONGITUDE'].toString();
 
-  print("Navigasi ke: Latitude: $latitude, Longitude: $longitude");
+    final latitude = double.tryParse(latStr);
+    final longitude = double.tryParse(lngStr);
 
-  if (latitude != null && longitude != null) {
+    if (latitude == null || longitude == null) {
+      Get.snackbar("Error", "Koordinat tidak valid: ($latStr, $lngStr)");
+      return;
+    }
+
     Get.to(() => FloodMonitoringPage(
           initialLocation: LatLng(latitude, longitude),
         ));
-  } else {
-    Get.snackbar("Error", "Koordinat tidak valid",
-        snackPosition: SnackPosition.BOTTOM);
-  }
-}
-
-}
-
-class ReusableMap extends StatefulWidget {
-  final LatLng initialLocation;
-  final List<Marker> markers;
-
-  const ReusableMap(
-      {super.key, required this.initialLocation, required this.markers});
-
-  @override
-  _ReusableMapState createState() => _ReusableMapState();
-}
-
-class _ReusableMapState extends State<ReusableMap> {
-  late MapController _mapController;
-
-  @override
-  void initState() {
-    super.initState();
-    _mapController = MapController();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FlutterMap(
-      mapController: _mapController,
-      options: MapOptions(
-        initialCenter: widget.initialLocation,
-        initialZoom: 13.0,
-      ),
-      children: [
-        TileLayer(
-          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          subdomains: const ['a', 'b', 'c'],
-        ),
-        MarkerLayer(markers: widget.markers),
-      ],
-    );
   }
 }
 
