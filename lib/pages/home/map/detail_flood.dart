@@ -135,6 +135,10 @@ class _FloodMonitoringBottomSheetState
 
     return Container(
       padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
