@@ -52,7 +52,10 @@ dependencies:
   latlong2: ^0.9.1
   location: ^7.0.1
   lottie: ^3.0.0
+  modal_bottom_sheet: ^3.0.0
   permission_handler: ^10.4.0
+  sensors: ^2.0.3
+  sensors_plus: ^6.1.1
   shared_preferences: ^2.3.3
   speech_to_text: ^7.0.0
   weather: ^3.1.1

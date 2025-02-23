@@ -4,6 +4,8 @@ import 'dart:convert';
 class FloodService {
   final String url = "https://poskobanjir.dsdadki.web.id/datatmalaststatus.json";
 
+  get floodData => null;
+
   Future<List<Map<String, dynamic>>> fetchFloodData() async {
     try {
       final response = await http.get(Uri.parse(url));

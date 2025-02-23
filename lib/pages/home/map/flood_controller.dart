@@ -1,0 +1,102 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
+import 'package:smartcitys/pages/home/map/detail_flood.dart';
+import 'package:smartcitys/services/flood_service/flood_api_service.dart';
+import 'package:smartcitys/pages/home/flood/flood_item_data.dart';
+
+class FloodController extends GetxController {
+  final FloodService _floodService = FloodService();
+
+  var floodData = <Map<String, dynamic>>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadFloodData();
+  }
+
+  Future<void> loadFloodData() async {
+    try {
+      final data = await _floodService.fetchFloodData();
+
+      // Membersihkan "Status: "
+      final cleanedData = data.map((item) {
+        return {
+          ...item,
+          "STATUS_SIAGA": item["STATUS_SIAGA"]
+              .toString()
+              .replaceAll(RegExp(r"Status\s*:\s*"), ""),
+        };
+      }).toList();
+
+      print("Data API setelah dibersihkan: $cleanedData");
+      floodData.value = cleanedData;
+
+      if (floodData.isNotEmpty) {
+        _showFloodMonitoringBottomSheet(Get.context!);
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Gagal memuat data banjir: ${e.toString()}",
+          backgroundColor: Colors.red);
+    }
+  }
+
+  void _showFloodMonitoringBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.2,
+          maxChildSize: 0.6,
+          expand: false,
+          builder: (context, scrollController) {
+            return FloodMonitoringBottomSheet(
+              floodData: floodData,
+              scrollController: scrollController,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void showDisasterDetails(BuildContext context, Map<String, dynamic> item) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => DisasterBottomSheet(
+        location: item['NAMA_PINTU_AIR'] ?? 'Lokasi Tidak Diketahui',
+        status: item['STATUS_SIAGA'] ?? 'N/A',
+        onViewLocation: () => navigateToFloodMonitoring(context, item),
+      ),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+    );
+  }
+
+  void navigateToFloodMonitoring(
+      BuildContext context, Map<String, dynamic> item) {
+    final latStr = item['LATITUDE'].toString();
+    final lngStr = item['LONGITUDE'].toString();
+
+    final latitude = double.tryParse(latStr);
+    final longitude = double.tryParse(lngStr);
+
+    if (latitude == null || longitude == null) {
+      Get.snackbar("Error", "Koordinat tidak valid: ($latStr, $lngStr)");
+      return;
+    }
+
+    Get.to(() => FloodMonitoringPage(
+          initialLocation: LatLng(latitude, longitude),
+        ));
+  }
+}

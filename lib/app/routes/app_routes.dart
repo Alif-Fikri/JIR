@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:smartcitys/bindings/auth_binding.dart';
+import 'package:smartcitys/bindings/home_binding.dart';
 import 'package:smartcitys/bindings/report_binding.dart';
 import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/activity/activity.dart';
@@ -111,6 +112,7 @@ class AppRoutes {
     GetPage(
       name: peta,
       page: () => MapMonitoring(),
+      binding: HomeBinding(),
     ),
     GetPage(
       name: lapor,
