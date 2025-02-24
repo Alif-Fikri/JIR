@@ -7,18 +7,21 @@ import 'package:smartcitys/helper/map.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/map/detail_flood.dart';
 import 'package:smartcitys/pages/home/map/flood_controller.dart';
+import 'package:smartcitys/pages/home/map/menu_map_monitoring.dart';
 import 'package:smartcitys/pages/home/map/route_controller.dart';
-import 'package:smartcitys/services/flood_service/flood_api_service.dart';
 
 class MapMonitoring extends StatelessWidget {
   final RouteController _routeController = Get.put(RouteController());
   final TextEditingController _searchController = TextEditingController();
+  final FloodController controller = Get.find<FloodController>();
+  final FocusNode _searchFocusNode = FocusNode();
 
   MapMonitoring({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
           'Peta',
@@ -39,24 +42,21 @@ class MapMonitoring extends StatelessWidget {
           _buildMap(),
           _buildSearchSection(),
           _buildFloatingButton(),
+          _buildFloodMonitoringButton(),
         ],
       ),
     );
   }
 
   Widget _buildMap() {
-    final FloodController controller =
-        Get.find<FloodController>();
-return Obx(() {
-  final floodData = controller.floodData;
-  print("Flood Data Loaded: ${floodData.length} items");
+    final FloodController controller = Get.find<FloodController>();
 
-  if (floodData.isEmpty) {
-    return const Center(child: CircularProgressIndicator());
-  }
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-
-      final markers = floodData.map((item) {
+      final markers = controller.floodData.map((item) {
         final lat =
             double.tryParse(item['LATITUDE']?.toString() ?? '0.0') ?? 0.0;
         final lng =
@@ -114,31 +114,53 @@ return Obx(() {
         ],
       ),
       child: TextField(
-        controller: _searchController,
-        decoration: InputDecoration(
-          hintText: 'Masukkan tujuan...',
-          hintStyle: GoogleFonts.inter(
-            color: Colors.black,
-            fontStyle: FontStyle.italic,
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          decoration: InputDecoration(
+            hintText: 'Masukkan tujuan...',
+            hintStyle: GoogleFonts.inter(
+              color: Colors.black,
+              fontStyle: FontStyle.italic,
+            ),
+            prefixIcon: const Icon(Icons.search, color: Colors.black),
+            suffixIcon: Obx(() {
+              if (_routeController.searchSuggestions.isNotEmpty) {
+                return IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.grey),
+                  onPressed: _clearSearch,
+                );
+              }
+              if (_searchController.text.isNotEmpty) {
+                return IconButton(
+                  icon: const Icon(Icons.close, size: 20),
+                  onPressed: () {
+                    _searchController.clear();
+                    _routeController.clearRoute();
+                    _routeController.searchSuggestions.clear();
+                    _searchFocusNode.unfocus();
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            }),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 16,
+            ),
           ),
-          prefixIcon: const Icon(Icons.search, color: Colors.black),
-          suffixIcon: Obx(() {
-            if (_routeController.searchSuggestions.isNotEmpty) {
-              return IconButton(
-                icon: const Icon(Icons.clear, color: Colors.grey),
-                onPressed: _clearSearch,
-              );
+          onTap: () {
+            if (_searchController.text.isEmpty) {
+              _searchFocusNode.requestFocus();
             }
-            return const SizedBox.shrink();
+          },
+          onChanged: (value) {
+            if (value.isEmpty) {
+              _routeController.clearRoute(); 
+              _searchFocusNode.unfocus();
+            }
+            _routeController.handleSearch(value);
           }),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 14,
-            horizontal: 16,
-          ),
-        ),
-        onChanged: _routeController.handleSearch,
-      ),
     );
   }
 
@@ -211,7 +233,7 @@ return Obx(() {
           }),
         Text(
           RouteController.getLocationType(suggestion['type']),
-          style: TextStyle(
+          style: GoogleFonts.inter(
             fontSize: 12,
             color: Colors.blue,
           ),
@@ -227,6 +249,7 @@ return Obx(() {
     _searchController.text = suggestion['display_name'] ?? '';
     _routeController.searchSuggestions.clear();
     _routeController.fetchRoute();
+    _searchFocusNode.unfocus();
   }
 
   Widget _buildFloatingButton() {
@@ -236,7 +259,7 @@ return Obx(() {
       child: Obx(() => Visibility(
             visible: _routeController.routeSteps.isNotEmpty,
             child: FloatingActionButton(
-              backgroundColor: Colors.blue,
+              backgroundColor: const Color(0xff45557B),
               child: const Icon(Icons.directions, color: Colors.white),
               onPressed: () => Get.bottomSheet(RouteBottomSheetContent()),
             ),
@@ -244,9 +267,14 @@ return Obx(() {
     );
   }
 
+  Widget _buildFloodMonitoringButton() {
+    return const Positioned(bottom: 20, left: 20, child: AnimatedMenuButton());
+  }
+
   void _clearSearch() {
     _searchController.clear();
     _routeController.searchSuggestions.clear();
+    _routeController.clearRoute();
   }
 
   void _showDisasterDetails(Map<String, dynamic> item) {
@@ -293,18 +321,19 @@ class _VehicleOption extends StatelessWidget {
           color: isSelected ? Colors.blue[100] : Colors.grey[200],
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Colors.blue : Colors.transparent,
+            color: isSelected ? Color(0xff45557B) : Colors.transparent,
             width: 2,
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
+            Icon(icon,
+                color: isSelected ? const Color(0xff45557B) : Colors.grey),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.blue : Colors.grey,
+                color: isSelected ? const Color(0xff45557B) : Colors.grey,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -325,9 +354,9 @@ class RouteBottomSheetContent extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       height: MediaQuery.of(context).size.height * 0.6,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
@@ -347,12 +376,16 @@ class RouteBottomSheetContent extends StatelessWidget {
         Text(
           "Petunjuk Arah",
           style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xff45557B)),
         ),
         IconButton(
-          icon: const Icon(Icons.close),
+          icon: Image.asset(
+            'assets/images/close_icon.png',
+            height: 15,
+            width: 15,
+          ),
           onPressed: () => Navigator.pop(Get.context!),
         ),
       ],
@@ -405,7 +438,7 @@ class RouteBottomSheetContent extends StatelessWidget {
         style: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: Colors.blue[800],
+          color: const Color(0xff45557B),
         ),
       ),
       subtitle: Column(
@@ -435,7 +468,7 @@ class RouteBottomSheetContent extends StatelessWidget {
       padding: const EdgeInsets.only(top: 16),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
+          backgroundColor: const Color(0xff45557B),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -445,9 +478,7 @@ class RouteBottomSheetContent extends StatelessWidget {
         child: Text(
           'Tutup',
           style: GoogleFonts.inter(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
     );

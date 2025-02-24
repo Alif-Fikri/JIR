@@ -36,6 +36,7 @@ class ReusableMapState extends State<ReusableMap>
   late final MapController _mapController;
   LatLng? _lastUserLocation;
   bool _shouldUpdateMap = true;
+  bool _isRouteInitialized = false;
   List<LatLng>? _lastRoutePoints;
   final distance = const Distance();
 
@@ -59,29 +60,49 @@ class ReusableMapState extends State<ReusableMap>
   void didUpdateWidget(ReusableMap oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.userLocation != null &&
-        _lastUserLocation != null &&
-        distance(widget.userLocation!, _lastUserLocation!) > 10) {
-      _shouldUpdateMap = true;
-      _lastUserLocation = widget.userLocation;
+    // Perbaikan 1: Gabungkan logika update
+    if (widget.userLocation != null && _lastUserLocation != null) {
+      final dist = distance(widget.userLocation!, _lastUserLocation!);
+      if (dist > 10) {
+        _shouldUpdateMap = true;
+        _lastUserLocation = widget.userLocation;
+      }
     }
 
-    if (widget.routePoints != _lastRoutePoints) {
+    // Perbaikan 2: Struktur logika route yang benar
+    if (!_isRouteInitialized ||
+        !_areRoutesEqual(widget.routePoints, _lastRoutePoints)) {
       _lastRoutePoints = widget.routePoints;
       _updateMapBounds();
+      _isRouteInitialized = true;
     }
+  }
+
+  bool _areRoutesEqual(List<LatLng>? a, List<LatLng>? b) {
+    if (a == null || b == null) return a == b;
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   void _updateMapBounds() {
     if (widget.routePoints == null || widget.routePoints!.isEmpty) return;
 
     final bounds = LatLngBounds.fromPoints(widget.routePoints!);
-    _mapController.fitCamera(
-      CameraFit.bounds(
-        bounds: bounds,
-        padding: const EdgeInsets.all(50),
-      ),
-    );
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
+
+      _mapController.fitCamera(
+        CameraFit.bounds(
+          bounds: bounds,
+          padding: const EdgeInsets.all(100),
+          maxZoom: 17.0, // Pindahkan parameter ke sini
+        ),
+      );
+    });
   }
 
   void _updateMapPosition() {
@@ -131,7 +152,7 @@ class ReusableMapState extends State<ReusableMap>
 
   TileLayer _buildTileLayer() {
     return TileLayer(
-      urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
       tileBuilder: (context, tileWidget, tile) {
         return AnimatedOpacity(
@@ -151,8 +172,7 @@ class ReusableMapState extends State<ReusableMap>
           point: widget.userLocation!,
           width: 48,
           height: 48,
-          child: _UserLocationMarker(
-          ),
+          child: _UserLocationMarker(),
         ),
       if (widget.destination != null)
         Marker(
@@ -202,35 +222,23 @@ class _UserLocationMarker extends StatelessWidget {
       return Stack(
         alignment: Alignment.center,
         children: [
+          // Arah mata angin
           Transform.rotate(
-            angle: currentHeading * (pi / 180) - pi/2,
+            angle:
+                (currentHeading * (pi / 180)), // Hapus adjustment -90 derajat
             child: CustomPaint(
               size: const Size(48, 48),
               painter: _DirectionLightPainter(),
             ),
           ),
+          // Icon tengah
           Container(
             width: 24,
             height: 24,
             decoration: BoxDecoration(
               color: Colors.blue.shade700,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white,
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 2,
-                )
-              ],
-            ),
-            child: const Icon(
-              Icons.navigation,
-              color: Colors.white,
-              size: 16,
+              border: Border.all(color: Colors.white, width: 2),
             ),
           ),
         ],
@@ -243,34 +251,21 @@ class _DirectionLightPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          Colors.blue.withOpacity(0.15),
-          Colors.blue.withOpacity(0.05),
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.3, 1.0],
-      ).createShader(Rect.fromCircle(
-        center: Offset(size.width / 2, size.height / 2),
-        radius: size.width / 2,
-      ));
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
+    size = const Size(48, 48);
 
+    // Gambar panah arah
     final path = ui.Path()
-      ..moveTo(size.width / 2, size.height / 2)
-      ..arcTo(
-        Rect.fromCircle(
-          center: Offset(size.width / 2, size.height / 2),
-          radius: size.width / 2,
-        ),
-        -pi / 2 - pi / 12,
-        pi / 6,
-        true,
-      )
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width * 0.4, size.height * 0.3)
+      ..lineTo(size.width * 0.6, size.height * 0.3)
       ..close();
 
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
+      true; // Diubah ke true
 }

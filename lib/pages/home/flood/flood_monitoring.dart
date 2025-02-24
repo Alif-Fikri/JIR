@@ -30,7 +30,8 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
   void initState() {
     super.initState();
     _initializeLocation();
-    currentLocation = widget.initialLocation ?? const LatLng(-6.200000, 106.816666);
+    currentLocation =
+        widget.initialLocation ?? const LatLng(-6.200000, 106.816666);
     _fetchFloodData();
   }
 
@@ -40,27 +41,25 @@ class _FloodMonitoringPageState extends State<FloodMonitoringPage> {
     });
   }
 
-  // Di dalam class _FloodMonitoringPageState
-Future<void> _getCurrentLocation() async {
-  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    // Handle location service not enabled
-    return;
-  }
-
-  LocationPermission permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission != LocationPermission.whileInUse && 
-        permission != LocationPermission.always) {
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
       return;
     }
-  }
 
-  Position position = await Geolocator.getCurrentPosition();
-  LatLng current = LatLng(position.latitude, position.longitude);
-  _mapController.move(current, 15.0);
-}
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        return;
+      }
+    }
+
+    Position position = await Geolocator.getCurrentPosition();
+    LatLng current = LatLng(position.latitude, position.longitude);
+    _mapController.move(current, 15.0);
+  }
 
   Future<void> _fetchFloodData() async {
     try {

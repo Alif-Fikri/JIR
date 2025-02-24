@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 
 class RouteController extends GetxController {
   final Dio _dio = Dio();
@@ -34,16 +35,19 @@ class RouteController extends GetxController {
     _startCompassUpdates();
   }
 
-    void _startCompassUpdates() {
-    _compassSubscription = magnetometerEvents.listen((event) {
-      userHeading(event.heading ?? 0.0);
+  void _startCompassUpdates() {
+    _compassSubscription = FlutterCompass.events?.listen((event) {
+      if (event.heading != null) {
+        double heading = event.heading!;
+        userHeading(heading);
+      }
     });
   }
 
   void _handleRotation(double dx, double dy) {
-  final angle = atan2(dy, dx);
-  userHeading(angle * (180 / pi));
-}
+    final angle = atan2(dy, dx);
+    userHeading(angle * (180 / pi));
+  }
 
   Future<void> _getUserLocation() async {
     try {
@@ -138,6 +142,7 @@ class RouteController extends GetxController {
   Future<void> fetchSearchSuggestions(String query) async {
     if (query.isEmpty) {
       searchSuggestions.clear();
+      update();
       return;
     }
 
@@ -152,13 +157,15 @@ class RouteController extends GetxController {
           List<Map<String, dynamic>>.from(response.data);
 
       if (userLocation.value != null) {
-        results.sort((a, b) {
-          final distA = calculateDistance(userLocation.value!,
-              LatLng(double.parse(a['lat']), double.parse(a['lon'])));
-          final distB = calculateDistance(userLocation.value!,
-              LatLng(double.parse(b['lat']), double.parse(b['lon'])));
-          return distA.compareTo(distB);
-        });
+        results = results
+            .map((e) => {
+                  ...e,
+                  'distance': calculateDistance(userLocation.value!,
+                      LatLng(double.parse(e['lat']), double.parse(e['lon'])))
+                })
+            .toList();
+
+        results.sort((a, b) => a['distance'].compareTo(b['distance']));
       }
 
       searchSuggestions(results.take(5).toList());
@@ -316,13 +323,21 @@ class RouteController extends GetxController {
 
   void handleSearch(String query) {
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+    _debounceTimer = Timer(const Duration(milliseconds: 150), () {
       if (query.isEmpty) {
         searchSuggestions.clear();
       } else {
         fetchSearchSuggestions(query);
       }
     });
+  }
+
+  void clearRoute() {
+    routePoints.clear();
+    routeSteps.clear();
+    destination.value = null;
+    searchSuggestions.clear();
+    update();
   }
 
   @override

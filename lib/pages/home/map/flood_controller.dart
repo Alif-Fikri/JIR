@@ -8,8 +8,9 @@ import 'package:smartcitys/pages/home/flood/flood_item_data.dart';
 
 class FloodController extends GetxController {
   final FloodService _floodService = FloodService();
-
-  var floodData = <Map<String, dynamic>>[].obs;
+  final floodData = <Map<String, dynamic>>[].obs;
+  final isLoading = false.obs;
+  bool _hasInitialLoad = false;
 
   @override
   void onInit() {
@@ -18,6 +19,8 @@ class FloodController extends GetxController {
   }
 
   Future<void> loadFloodData() async {
+    if (_hasInitialLoad) return;
+    isLoading(true);
     try {
       final data = await _floodService.fetchFloodData();
 
@@ -33,13 +36,15 @@ class FloodController extends GetxController {
 
       print("Data API setelah dibersihkan: $cleanedData");
       floodData.value = cleanedData;
+      _hasInitialLoad = true;
 
-      if (floodData.isNotEmpty) {
-        _showFloodMonitoringBottomSheet(Get.context!);
-      }
-    } catch (e) {
-      Get.snackbar("Error", "Gagal memuat data banjir: ${e.toString()}",
-          backgroundColor: Colors.red);
+      print("Data banjir di-load sekali saja");
+
+      // if (floodData.isNotEmpty) {
+      //   _showFloodMonitoringBottomSheet(Get.context!);
+      // }
+    } finally {
+      isLoading(false);
     }
   }
 
@@ -98,5 +103,11 @@ class FloodController extends GetxController {
     Get.to(() => FloodMonitoringPage(
           initialLocation: LatLng(latitude, longitude),
         ));
+  }
+
+  void showFloodMonitoringSheet() {
+    if (floodData.isNotEmpty) {
+      _showFloodMonitoringBottomSheet(Get.context!);
+    }
   }
 }
