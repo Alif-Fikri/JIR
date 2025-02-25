@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 
 class RouteController extends GetxController {
@@ -16,12 +15,16 @@ class RouteController extends GetxController {
   final RxList<LatLng> routePoints = <LatLng>[].obs;
   final Rx<LatLng?> userLocation = Rx<LatLng?>(null);
   final Rx<LatLng?> destination = Rx<LatLng?>(null);
+  final RxList<List<LatLng>> _alternativeRoutes = RxList<List<LatLng>>([]);
   final RxDouble userHeading = 0.0.obs;
   final RxList<Map<String, dynamic>> searchSuggestions =
       <Map<String, dynamic>>[].obs;
+  final Map<String, List<Map<String, dynamic>>> _searchCache = {};
   StreamSubscription<Position>? _positionStream;
   StreamSubscription<CompassEvent>? _compassSubscription;
   Timer? _debounceTimer;
+  DateTime _lastCheck = DateTime.now();
+  LatLng? startPoint;
 
   @override
   void onInit() {
@@ -31,8 +34,75 @@ class RouteController extends GetxController {
 
   void _initialize() async {
     await _getUserLocation();
+    startPoint = userLocation.value;
     _startLocationUpdates();
     _startCompassUpdates();
+  }
+
+  void _startLocationUpdates() {
+    _positionStream = Geolocator.getPositionStream().listen((position) async {
+      final currentLocation = LatLng(position.latitude, position.longitude);
+      userLocation(currentLocation);
+
+      final now = DateTime.now();
+      if (now.difference(_lastCheck).inSeconds.abs() > 10) {
+        _checkRouteDeviation(currentLocation);
+        _lastCheck = now;
+      }
+    });
+  }
+
+  void _checkRouteDeviation(LatLng currentLocation) async {
+    if (routePoints.isEmpty || destination.value == null) return;
+
+    final nearestPointOnRoute = _findNearestPoint(currentLocation, routePoints);
+    final distanceToRoute =
+        calculateDistance(currentLocation, nearestPointOnRoute);
+
+    if (startPoint == null) startPoint = userLocation.value;
+    final totalDistance =
+        calculateDistance(startPoint!, destination.value!);
+    final remainingDistance =
+        calculateDistance(currentLocation, destination.value!);
+
+    if (remainingDistance < totalDistance * 0.2) return;
+
+    if (distanceToRoute > 50) {
+      await _fetchNewRoute(currentLocation, destination.value!);
+    }
+  }
+
+  LatLng _findNearestPoint(LatLng point, List<LatLng> route) {
+    LatLng nearest = route.first;
+    double minDistance = double.maxFinite;
+
+    for (final routePoint in route) {
+      final dist = calculateDistance(point, routePoint);
+      if (dist < minDistance) {
+        minDistance = dist;
+        nearest = routePoint;
+      }
+    }
+    return nearest;
+  }
+
+  Future<void> _fetchNewRoute(LatLng start, LatLng end) async {
+    try {
+      final profile = selectedVehicle.value == 'motorcycle' ? 'bike' : 'car';
+      final url = "http://router.project-osrm.org/route/v1/$profile/"
+          "${start.longitude},${start.latitude};"
+          "${end.longitude},${end.latitude}"
+          "?overview=full&steps=true&geometries=geojson";
+
+      final response = await _dio.get(url);
+      _parseRouteData(response.data);
+
+      Get.snackbar("Info", "Rute diperbarui",
+          duration: const Duration(seconds: 2),
+          snackPosition: SnackPosition.TOP);
+    } catch (e) {
+      Get.snackbar("Error", "Gagal memperbarui rute");
+    }
   }
 
   void _startCompassUpdates() {
@@ -68,18 +138,6 @@ class RouteController extends GetxController {
       Get.snackbar("Peringatan", "Gagal mendapatkan lokasi",
           backgroundColor: Colors.orange);
     }
-  }
-
-  void _startLocationUpdates() {
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.bestForNavigation,
-        distanceFilter: 10,
-      ),
-    ).listen((position) {
-      userLocation(LatLng(position.latitude, position.longitude));
-      userHeading(position.heading ?? 0.0);
-    });
   }
 
   void updateVehicle(String vehicle) {
@@ -133,45 +191,85 @@ class RouteController extends GetxController {
             'modifier': maneuver?['modifier'],
           };
         })));
+        final alternatives = data['alternatives'] ?? [];
+        if (alternatives.isNotEmpty) {
+          _alternativeRoutes.value =
+              alternatives.map((alt) => _parseAlternativeRoute(alt)).toList();
+        }
       }
     } catch (e) {
       throw Exception('Format data tidak valid');
     }
   }
 
-  Future<void> fetchSearchSuggestions(String query) async {
-    if (query.isEmpty) {
-      searchSuggestions.clear();
-      update();
-      return;
-    }
-
+  List<LatLng> _parseAlternativeRoute(Map<String, dynamic> altData) {
     try {
-      final url = "https://nominatim.openstreetmap.org/search?q=$query"
-          "&format=json&addressdetails=1"
-          "&countrycodes=id"
-          "&bounded=1&viewbox=106.4,-6.4,107.0,-6.0";
+      final coordinates = altData['geometry']['coordinates'];
+      return coordinates
+          .map<LatLng>((coord) => LatLng(coord[1], coord[0]))
+          .toList();
+    } catch (e) {
+      throw Exception('Format alternatif tidak valid');
+    }
+  }
 
-      final response = await _dio.get(url);
-      List<Map<String, dynamic>> results =
-          List<Map<String, dynamic>>.from(response.data);
+  void useAlternativeRoute(int index) {
+    if (index < _alternativeRoutes.length) {
+      routePoints(_alternativeRoutes[index]);
+    }
+  }
 
-      if (userLocation.value != null) {
-        results = results
-            .map((e) => {
-                  ...e,
-                  'distance': calculateDistance(userLocation.value!,
-                      LatLng(double.parse(e['lat']), double.parse(e['lon'])))
-                })
-            .toList();
-
-        results.sort((a, b) => a['distance'].compareTo(b['distance']));
+  Future<void> fetchSearchSuggestions(String query) async {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
+      if (query.isEmpty) {
+        searchSuggestions.clear();
+        return;
       }
 
-      searchSuggestions(results.take(5).toList());
-    } catch (e) {
-      Get.snackbar("Error", "Gagal memuat saran lokasi");
-    }
+      if (_searchCache.containsKey(query)) {
+        searchSuggestions(_searchCache[query]!);
+        return;
+      }
+
+      try {
+        final response = await _dio.get(
+          "https://nominatim.openstreetmap.org/search",
+          queryParameters: {
+            'q': query,
+            'format': 'json',
+            'addressdetails': 1,
+            'countrycodes': 'id',
+            'viewbox': '106.4,-6.4,107.0,-6.0',
+            'bounded': 1,
+            'limit': 10,
+          },
+        );
+
+        List<Map<String, dynamic>> results =
+            List<Map<String, dynamic>>.from(response.data);
+
+        if (userLocation.value != null) {
+          results = results.map((item) {
+            final lat = double.tryParse(item['lat']?.toString() ?? '0') ?? 0;
+            final lon = double.tryParse(item['lon']?.toString() ?? '0') ?? 0;
+            return {
+              ...item,
+              'distance':
+                  calculateDistance(userLocation.value!, LatLng(lat, lon))
+            };
+          }).toList()
+            ..sort((a, b) =>
+                (a['distance'] as double).compareTo(b['distance'] as double));
+        }
+
+        final finalResults = results.take(5).toList();
+        _searchCache[query] = finalResults;
+        searchSuggestions(finalResults);
+      } catch (e) {
+        Get.snackbar("Error", "Gagal memuat saran lokasi");
+      }
+    });
   }
 
   static double calculateDistance(LatLng start, LatLng end) {
@@ -345,6 +443,7 @@ class RouteController extends GetxController {
     _positionStream?.cancel();
     _debounceTimer?.cancel();
     _compassSubscription?.cancel();
+    _alternativeRoutes.close();
     super.onClose();
   }
 }
