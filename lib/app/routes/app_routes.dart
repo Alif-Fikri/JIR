@@ -6,6 +6,7 @@ import 'package:smartcitys/helper/menu.dart';
 import 'package:smartcitys/pages/activity/activity.dart';
 import 'package:smartcitys/pages/auth/login.dart';
 import 'package:smartcitys/pages/auth/signup.dart';
+import 'package:smartcitys/pages/home/cctv/cctv_monitoring.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/crowd/crowd_monitoring.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
@@ -108,6 +109,10 @@ class AppRoutes {
     GetPage(
       name: cuaca,
       page: () => WeatherPage(),
+    ),
+    GetPage(
+      name: cctv,
+      page: () => CCTVPage(),
     ),
     GetPage(
       name: peta,

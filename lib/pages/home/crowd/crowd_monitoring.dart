@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:smartcitys/helper/map.dart';
 
 class CrowdMonitoringPage extends StatelessWidget {
   final List<Map<String, dynamic>> todayCrowd = [
@@ -14,82 +18,65 @@ class CrowdMonitoringPage extends StatelessWidget {
   ];
 
   CrowdMonitoringPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kerumunan'),
-        backgroundColor: Colors.blueGrey.shade700,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+  final List<Marker> crowdmarkers = [
+    Marker(
+      point: LatLng(-6.2088, 106.8456), 
+      width: 40,
+      height: 40,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.8),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            onPressed: () {
-
-            },
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Level Kerumunan',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                "Today's crowd",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              _buildCrowdList(todayCrowd),
-              const SizedBox(height: 16),
-              const Text(
-                "Yesterday's crowd",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              _buildCrowdList(yesterdayCrowd),
-            ],
+        child: Center(
+          child: Text(
+            '2.5k',
+            style: GoogleFonts.inter(
+                color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildCrowdList(List<Map<String, dynamic>> crowdData) {
-    return Column(
-      children: crowdData.map((data) {
-        return ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.location_on, color: Colors.blue),
+    ),
+    Marker(
+      point: LatLng(-6.1945, 106.8229),
+      width: 40,
+      height: 40,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.8),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+        ),
+        child: Center(
+          child: Text(
+            '1.8k',
+            style: GoogleFonts.inter(
+                color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
           ),
-          title: Text(data['location']),
-          subtitle: Text(
-            data['level'],
-            style: TextStyle(
-              color: _getCrowdLevelColor(data['level']),
-              fontWeight: FontWeight.bold,
-            ),
+        ),
+      ),
+    ),
+    Marker(
+      point: LatLng(-6.1754, 106.8273),
+      width: 40,
+      height: 40,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.green.withOpacity(0.8),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+        ),
+        child: Center(
+          child: Text(
+            '700',
+            style: GoogleFonts.inter(
+                color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
           ),
-          trailing: Text(data['count']),
-        );
-      }).toList(),
-    );
-  }
+        ),
+      ),
+    ),
+  ];
 
   Color _getCrowdLevelColor(String level) {
     switch (level) {
@@ -100,7 +87,112 @@ class CrowdMonitoringPage extends StatelessWidget {
       case 'Low':
         return Colors.green;
       default:
-        return Colors.black;
+        return Colors.grey;
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Kerumunan',
+            style: GoogleFonts.inter(
+                fontSize: 20, color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+          backgroundColor: const Color(0xFF45557B),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Column(children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Container(
+                height: 250,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 5,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: ReusableMap(
+                  initialLocation: LatLng(-6.2000, 106.8167),
+                  markers: crowdmarkers,
+                  userLocation: null,
+                  destination: null,
+                  routePoints: null,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Level Kerumunan',
+                      style: GoogleFonts.inter(
+                          fontSize: 28, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Kerumunan hari ini",
+                      style: GoogleFonts.inter(
+                          fontSize: 20, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildCrowdList(todayCrowd),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Kerumunan kemarin",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildCrowdList(yesterdayCrowd),
+                  ],
+                ),
+              ),
+            ),
+          ]),
+        ));
+  }
+
+  Widget _buildCrowdList(List<Map<String, dynamic>> crowdData) {
+    return Column(
+      children: crowdData.map((data) {
+        return ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              shape: BoxShape.rectangle,
+            ),
+            child: const Icon(Icons.location_on, color: Colors.black),
+          ),
+          title: Text(data['location']),
+          titleTextStyle:
+              GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w400),
+          subtitle: Text(
+            data['level'],
+            style: GoogleFonts.inter(
+              color: _getCrowdLevelColor(data['level']),
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          trailing: Text(data['count']),
+          leadingAndTrailingTextStyle:
+              GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w400),
+        );
+      }).toList(),
+    );
   }
 }
