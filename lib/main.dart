@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
       getPages: AppRoutes.getPages,
       unknownRoute: GetPage(
         name: '/home',
-        page: () => HomePage(),
+        page: () => const HomePage(),
       ),
     );
   }

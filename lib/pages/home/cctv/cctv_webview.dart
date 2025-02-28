@@ -5,7 +5,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 class CCTVWebView extends StatefulWidget {
   final String url;
 
-  CCTVWebView({required this.url});
+  const CCTVWebView({super.key, required this.url});
 
   @override
   _CCTVWebViewState createState() => _CCTVWebViewState();

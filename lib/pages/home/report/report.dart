@@ -41,10 +41,10 @@ class ReportPage extends StatelessWidget {
   }
 
   Widget _buildBody() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
       child: Column(
-        children: const [
+        children: [
           SizedBox(height: 30),
         ],
       ),

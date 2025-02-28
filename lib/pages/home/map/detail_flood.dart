@@ -76,7 +76,7 @@ class DetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const DetailRow({
+  const DetailRow({super.key, 
     required this.icon,
     required this.label,
     required this.value,
@@ -112,10 +112,10 @@ class FloodMonitoringBottomSheet extends StatefulWidget {
   final ScrollController scrollController;
 
   const FloodMonitoringBottomSheet({
-    Key? key,
+    super.key,
     required this.floodData,
     required this.scrollController,
-  }) : super(key: key);
+  });
 
   @override
   _FloodMonitoringBottomSheetState createState() =>
@@ -135,7 +135,7 @@ class _FloodMonitoringBottomSheetState
 
     return Container(
       padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
@@ -207,7 +207,7 @@ class _FloodMonitoringBottomSheetState
                 child: Text(
                   "Selengkapnya",
                   style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold, color: Color(0xff45557B)),
+                      fontWeight: FontWeight.bold, color: const Color(0xff45557B)),
                 ),
               ),
             ),

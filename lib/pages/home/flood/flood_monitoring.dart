@@ -7,7 +7,6 @@ import 'package:smartcitys/helper/radar_map.dart';
 import 'package:smartcitys/pages/home/flood/flood_item_data.dart';
 import 'package:smartcitys/services/flood_service/flood_api_service.dart';
 import 'package:smartcitys/helper/map.dart';
-import 'package:smartcitys/services/location_service/location_permission.dart';
 import 'package:latlong2/latlong.dart';
 
 class FloodMonitoringPage extends StatefulWidget {

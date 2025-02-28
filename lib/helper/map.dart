@@ -172,7 +172,7 @@ class ReusableMapState extends State<ReusableMap>
           point: widget.userLocation!,
           width: 48,
           height: 48,
-          child: _UserLocationMarker(),
+          child: const _UserLocationMarker(),
         ),
       if (widget.destination != null)
         Marker(

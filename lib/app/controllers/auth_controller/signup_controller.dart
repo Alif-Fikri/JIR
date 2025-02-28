@@ -46,7 +46,7 @@ class SignupController extends GetxController {
     );
 
     if (response['success']) {
-      Get.offAll(() => Menu());
+      Get.offAll(() => const Menu());
     } else {
       errorMessage.value = response['message'];
     }
@@ -55,7 +55,7 @@ class SignupController extends GetxController {
   }
 
   void navigateToLogin() {
-    Get.offAll(() => Menu()); // Ini seharusnya navigate ke LoginPage
+    Get.offAll(() => const Menu()); // Ini seharusnya navigate ke LoginPage
     // Seharusnya:
     // Get.offAll(() => LoginPage());
     // atau

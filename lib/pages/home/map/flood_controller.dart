@@ -4,7 +4,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/map/detail_flood.dart';
 import 'package:smartcitys/services/flood_service/flood_api_service.dart';
-import 'package:smartcitys/pages/home/flood/flood_item_data.dart';
 
 class FloodController extends GetxController {
   final FloodService _floodService = FloodService();

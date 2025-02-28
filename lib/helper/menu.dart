@@ -17,7 +17,7 @@ class _MenuState extends State<Menu> {
   int _selectedIndex = Get.arguments ?? 0; 
 
   final List<Widget> _pages = [
-    HomePage(),
+    const HomePage(),
     ActivityPage(),
     const NotificationPage(),
     const ProfilePage(),

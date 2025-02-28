@@ -75,7 +75,7 @@ class AppRoutes {
     ),
     GetPage(
       name: home,
-      page: () => Menu(),
+      page: () => const Menu(),
     ),
     GetPage(
       name: profile,
@@ -92,7 +92,7 @@ class AppRoutes {
     ),
     GetPage(
       name: flood,
-      page: () => FloodMonitoringPage(),
+      page: () => const FloodMonitoringPage(),
     ),
     GetPage(
       name: chatbot,
@@ -108,7 +108,7 @@ class AppRoutes {
     ),
     GetPage(
       name: cuaca,
-      page: () => WeatherPage(),
+      page: () => const WeatherPage(),
     ),
     GetPage(
       name: cctv,

@@ -11,24 +11,26 @@ class CCTVPage extends StatelessWidget {
       name: "DPR",
       url:
           "https://cctv.balitower.co.id/Bendungan-Hilir-003-700014_1/embed.html",
-      coordinates: LatLng(-6.2096, 106.8005), // Koordinat DPR
+      coordinates: const LatLng(-6.2096, 106.8005), // Koordinat DPR
     ),
     CCTVLocation(
       name: "Bundaran HI",
       url: "https://cctv.balitower.co.id/Menteng-001-700123_5/embed.html",
-      coordinates: LatLng(-6.1945, 106.8229),
+      coordinates: const LatLng(-6.1945, 106.8229),
     ),
     CCTVLocation(
       name: "Monas",
       url: "https://cctv.balitower.co.id/Monas-Barat-009-506632_2/embed.html",
-      coordinates: LatLng(-6.1754, 106.8273),
+      coordinates: const LatLng(-6.1754, 106.8273),
     ),
     CCTVLocation(
       name: "Patung Kuda",
       url: "https://cctv.balitower.co.id/JPO-Merdeka-Barat-507357_9/embed.html",
-      coordinates: LatLng(-6.1715, 106.8343),
+      coordinates: const LatLng(-6.1715, 106.8343),
     ),
   ];
+
+   CCTVPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +77,7 @@ class CCTVPage extends StatelessWidget {
               height: 250,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
                     blurRadius: 5,
@@ -84,7 +86,7 @@ class CCTVPage extends StatelessWidget {
                 ],
               ),
               child: ReusableMap(
-                initialLocation: LatLng(-6.2000, 106.8167),
+                initialLocation: const LatLng(-6.2000, 106.8167),
                 markers: cctvMarkers,
                 userLocation: null,
                 destination: null,
@@ -93,7 +95,7 @@ class CCTVPage extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text("Ayo Pantau !",
@@ -111,8 +113,8 @@ class CCTVPage extends StatelessWidget {
 
   Widget _buildLocationGrid() {
     return GridView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 15),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 15,
         mainAxisSpacing: 10,

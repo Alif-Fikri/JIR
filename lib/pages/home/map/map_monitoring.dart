@@ -321,7 +321,7 @@ class _VehicleOption extends StatelessWidget {
           color: isSelected ? Colors.blue[100] : Colors.grey[200],
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Color(0xff45557B) : Colors.transparent,
+            color: isSelected ? const Color(0xff45557B) : Colors.transparent,
             width: 2,
           ),
         ),

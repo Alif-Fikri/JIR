@@ -39,7 +39,7 @@ class ReportController extends GetxController {
       imageFile.value = null;
       description.value = '';
       Get.snackbar('Sukses', 'Laporan berhasil dikirim');
-      Get.off(() => Menu(), arguments: 1);
+      Get.off(() => const Menu(), arguments: 1);
     });
   }
 

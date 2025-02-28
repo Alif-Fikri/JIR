@@ -287,7 +287,7 @@ class RouteController extends GetxController {
     final roadName = maneuver['name'] ?? '';
 
     // Fungsi konversi angka ke urutan (1 -> pertama, 2 -> kedua, dst)
-    String _exitIndonesian(int? exitNum) {
+    String exitIndonesian(int? exitNum) {
       if (exitNum == null) return '';
       switch (exitNum) {
         case 1:
@@ -328,9 +328,9 @@ class RouteController extends GetxController {
       case 'new name':
         return 'Teruskan lurus menuju $roadName';
       case 'roundabout':
-        return 'Masuk bundaran dan ambil keluar ${_exitIndonesian(exit)}';
+        return 'Masuk bundaran dan ambil keluar ${exitIndonesian(exit)}';
       case 'rotary':
-        return 'Masuk lingkaran lalu keluar di keluar ${_exitIndonesian(exit)}';
+        return 'Masuk lingkaran lalu keluar di keluar ${exitIndonesian(exit)}';
       case 'fork':
         return 'Ambil percabangan ${_translateModifier(modifier)}';
       case 'merge':

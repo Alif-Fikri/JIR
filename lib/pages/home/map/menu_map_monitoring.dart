@@ -110,7 +110,7 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
                 ),
               ),
             );
-          }).toList(),
+          }),
 
           // Main Button
           Positioned(

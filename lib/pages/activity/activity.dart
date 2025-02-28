@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/app/controllers/report_controller.dart';
 import 'package:smartcitys/pages/home/report/report_card.dart';
-import 'dart:io';
 
 class ActivityPage extends StatelessWidget {
   final ReportController controller = Get.find<ReportController>();
