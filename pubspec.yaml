@@ -83,74 +83,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/email.png
-    - assets/images/hide.png
-    - assets/images/logo_google.png
-    - assets/images/password.png
-    - assets/images/person.png
-    - assets/images/line.png
-    - assets/images/afternoon.png
-    - assets/images/night.png
-    - assets/images/morning.png
-    - assets/images/path.png
-    - assets/images/search.png
-    - assets/images/button_menu.png
-    - assets/images/pantau_banjir.png
-    - assets/images/pantau_kerumunan.png
-    - assets/images/taman.png
-    - assets/images/laporan.png
-    - assets/images/location.png
-    - assets/images/cctv.png
-    - assets/images/line2.png
-    - assets/images/settings.png
-    - assets/images/about.png
-    - assets/images/privacypolicy.png
-    - assets/images/termsofservice.png
-    - assets/images/logout.png
-    - assets/images/robot.png
-    - assets/images/delete.png
-    - assets/images/change.png
-    - assets/images/peringatan.png
-    - assets/images/info.png
-    - assets/images/suhu.png
-    - assets/images/suki.png
-    - assets/images/menunggu.png
-    - assets/images/diproses.png
-    - assets/images/ditolak.png
-    - assets/images/selesai.png
-    - assets/images/koordinasi.png
-    - assets/images/kanan.png
-    - assets/images/kiri.png
-    - assets/images/bg1.png
-    - assets/images/bg2.png
-    - assets/images/close_icon.png
-    - assets/images/air.png
+    - assets/images/
+    - assets/lottie/
     - .env
-    - assets/images/Cuaca Smart City Icon-01.png
-    - assets/images/Cuaca Smart City Icon-02.png
-    - assets/images/Cuaca Smart City Icon-03.png
-    - assets/images/Cuaca Smart City Icon-04.png
-    - assets/images/Cuaca Smart City Icon-05.png
-    - assets/images/Cuaca Smart City Icon-06.png
-    - assets/images/Cuaca Smart City Icon-07.png
-    - assets/images/Cuaca Smart City Icon-08.png
-    - assets/images/Cuaca Smart City Icon-09.png
-    - assets/images/Cuaca Smart City Icon-10.png
-    - assets/images/siaga.png
-    - assets/images/lokasi.png
-    - assets/images/ketinggian.png
-    - assets/images/group_38.png
-    - assets/lottie/loading.json
-    - assets/lottie/no_connection.json
-    - assets/images/park.png
-    - assets/images/cuaca.png
-    - assets/images/laporan.png
-    - assets/images/peta.png
-    - assets/images/report.png
-    - assets/images/monas.jpg
-    - assets/images/dpr.jpg
-    - assets/images/patung_kuda.jpg
-    - assets/images/bundaran_hi.jpg
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/assets-and-images/#resolution-aware
     # For details regarding adding assets from package dependencies, see

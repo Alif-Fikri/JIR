@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smartcitys/helper/menu.dart';
+import 'package:smartcitys/pages/auth/login.dart';
 import 'package:smartcitys/services/auth_service/auth_api_service.dart';
 
 class SignupController extends GetxController {
@@ -55,7 +56,7 @@ class SignupController extends GetxController {
   }
 
   void navigateToLogin() {
-    Get.offAll(() => const Menu()); // Ini seharusnya navigate ke LoginPage
+    Get.off(() => LoginPage()); // Ini seharusnya navigate ke LoginPage
     // Seharusnya:
     // Get.offAll(() => LoginPage());
     // atau

@@ -25,7 +25,6 @@ class PrivacyPolicy extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: ListView(
           children: [
-            const SizedBox(height: 30),
             _buildTitle("Kebijakan Privasi JIR"),
             const SizedBox(height: 15),
             _buildUpdate("Terakhir diperbarui: 12 Januari 2025"),

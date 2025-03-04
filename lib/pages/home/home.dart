@@ -168,7 +168,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 25.0, left: 25.0),
                       child: Align(
-                        alignment: Alignment.topLeft,
+                        alignment: Alignment.topCenter,
                         child: Text(
                           "JIR APPLICATION",
                           style: GoogleFonts.inter(

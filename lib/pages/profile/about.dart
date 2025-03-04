@@ -26,7 +26,7 @@ class AboutPage extends StatelessWidget {
         child: ListView(
           children: [
             _buildImageHeader(),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             _buildTitle("Tentang JIR"),
             const SizedBox(height: 15),
             _buildParagraph(

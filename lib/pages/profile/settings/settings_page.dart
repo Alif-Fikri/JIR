@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/app/controllers/auth_controller/delete_acc_controller.dart';
 import 'package:smartcitys/pages/profile/settings/change_password_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -10,7 +12,15 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _isPasswordVisible = false;
+  final TextEditingController _passwordController = TextEditingController();
+  final DeleteAccountController _deleteController =
+      Get.put(DeleteAccountController());
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +73,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const ChangePasswordPage()));
+                        builder: (context) => ChangePasswordPage()));
               },
             ),
             const Divider(color: Color(0xffDEDEDE)),
@@ -74,99 +84,112 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showDeleteAccountDialog(BuildContext context) {
+    bool isPasswordVisible = false;
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(
-            'DELETE ACCOUNT',
-            style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold, color: Colors.black, fontSize: 20),
-            textAlign: TextAlign.center,
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: InputDecoration(
-                    labelText: 'Password',
-                    hintText: 'Please insert your Password',
-                    labelStyle: GoogleFonts.inter(
-                        fontSize: 14, fontStyle: FontStyle.italic),
-                    hintStyle: GoogleFonts.inter(
-                        fontSize: 14, fontWeight: FontWeight.w500),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _isPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text(
+              'DELETE ACCOUNT',
+              style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  fontSize: 20),
+              textAlign: TextAlign.center,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _passwordController,
+                  obscureText: !isPasswordVisible,
+                  decoration: InputDecoration(
+                      labelText: 'Password',
+                      hintText: 'Please insert your Password',
+                      labelStyle: GoogleFonts.inter(
+                          fontSize: 14, fontStyle: FontStyle.italic),
+                      hintStyle: GoogleFonts.inter(
+                          fontSize: 14, fontWeight: FontWeight.w500),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isPasswordVisible = !isPasswordVisible;
+                          });
+                        },
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                    ),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red)),
-                    border: const OutlineInputBorder()),
-                obscureText: !_isPasswordVisible,
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red)),
+                      border: const OutlineInputBorder()),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  height: 35.0,
+                  width: 280.0,
+                  color: const Color(0xffFFE3E3),
+                  padding: const EdgeInsets.all(5.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning, color: Colors.red, size: 20),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          "You're about to delete your account. This action cannot be undone. All data will be lost.",
+                          style: GoogleFonts.inter(
+                              color: Colors.black, fontSize: 8),
+                          softWrap: true,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              if (_deleteController.isLoading.value)
+                const CircularProgressIndicator(),
+              TextButton(
+                onPressed: _deleteController.isLoading.value
+                    ? null
+                    : () => Navigator.of(context).pop(),
+                child: Text(
+                  'Close',
+                  style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xff323232)),
+                ),
               ),
-              const SizedBox(height: 10),
-              Container(
-                height: 35.0,
-                width: 280.0,
-                color: const Color(0xffFFE3E3),
-                padding: const EdgeInsets.all(5.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.warning, color: Colors.red, size: 20),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: Text(
-                        "You're about to delete your account. This action cannot be undone. All data will be lost.",
-                        style:
-                            GoogleFonts.inter(color: Colors.black, fontSize: 8),
-                        softWrap: true,
-                        overflow: TextOverflow.clip,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
+              TextButton(
+                style: TextButton.styleFrom(
+                    backgroundColor: const Color(0xffE62525)),
+                onPressed: _deleteController.isLoading.value
+                    ? null
+                    : () async {
+                        await _deleteController
+                            .deleteAccount(_passwordController.text);
+                        if (mounted) Navigator.of(context).pop();
+                      },
+                child: Text(
+                  'Delete',
+                  style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500),
                 ),
               ),
             ],
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                'Close',
-                style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xff323232)),
-              ),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xffE62525)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Delete',
-                style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500),
-              ),
-            ),
-          ],
-        );
+          );
+        });
       },
     );
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
-import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:smartcitys/pages/home/map/route_controller.dart';
@@ -60,7 +59,6 @@ class ReusableMapState extends State<ReusableMap>
   void didUpdateWidget(ReusableMap oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Perbaikan 1: Gabungkan logika update
     if (widget.userLocation != null && _lastUserLocation != null) {
       final dist = distance(widget.userLocation!, _lastUserLocation!);
       if (dist > 10) {
@@ -69,7 +67,6 @@ class ReusableMapState extends State<ReusableMap>
       }
     }
 
-    // Perbaikan 2: Struktur logika route yang benar
     if (!_isRouteInitialized ||
         !_areRoutesEqual(widget.routePoints, _lastRoutePoints)) {
       _lastRoutePoints = widget.routePoints;
@@ -99,7 +96,7 @@ class ReusableMapState extends State<ReusableMap>
         CameraFit.bounds(
           bounds: bounds,
           padding: const EdgeInsets.all(100),
-          maxZoom: 17.0, // Pindahkan parameter ke sini
+          maxZoom: 17.0, 
         ),
       );
     });
@@ -225,7 +222,7 @@ class _UserLocationMarker extends StatelessWidget {
           // Arah mata angin
           Transform.rotate(
             angle:
-                (currentHeading * (pi / 180)), // Hapus adjustment -90 derajat
+                (currentHeading * (pi / 180)), 
             child: CustomPaint(
               size: const Size(48, 48),
               painter: _DirectionLightPainter(),
@@ -255,7 +252,6 @@ class _DirectionLightPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     size = const Size(48, 48);
 
-    // Gambar panah arah
     final path = ui.Path()
       ..moveTo(size.width / 2, 0)
       ..lineTo(size.width * 0.4, size.height * 0.3)
@@ -267,5 +263,5 @@ class _DirectionLightPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) =>
-      true; // Diubah ke true
+      true;
 }

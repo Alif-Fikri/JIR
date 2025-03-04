@@ -24,6 +24,13 @@ class ActivityPage extends StatelessWidget {
           ),
         ),
         backgroundColor: Colors.white,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(2.0),
+          child: Container(
+            color: const Color(0xff51669D),
+            height: 2.0,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

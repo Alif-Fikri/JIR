@@ -1,92 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/app/controllers/auth_controller/change_password_controller.dart';
 
-class ChangePasswordPage extends StatefulWidget {
-  const ChangePasswordPage({super.key});
+class ChangePasswordPage extends StatelessWidget {
+  ChangePasswordPage({super.key});
 
-  @override
-  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
-}
-
-class _ChangePasswordPageState extends State<ChangePasswordPage> {
-  bool _isObscured1 = true;
-  bool _isObscured2 = true;
+  final ChangePasswordController controller = Get.put(ChangePasswordController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Change Password'),
-        titleTextStyle: GoogleFonts.inter(
-            fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
+        title: Text(
+          'Change Password',
+          style: GoogleFonts.inter(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
         backgroundColor: const Color(0xff45557B),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Colors.white,
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Get.back(),
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
         child: Column(
           children: [
-            TextField(
+            Obx(() => TextField(
+              controller: controller.newPasswordController,
+              obscureText: controller.isObscuredNew.value, 
               decoration: InputDecoration(
                 labelText: 'New Password',
+                errorText: controller.validatePassword(
+                    controller.newPasswordController.text),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _isObscured1 ? Icons.visibility_off : Icons.visibility,
+                    controller.isObscuredNew.value
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                     color: Colors.black26,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _isObscured1 = !_isObscured1;
-                    });
-                  },
+                  onPressed: () => controller.isObscuredNew.toggle(),
                 ),
                 filled: true,
                 fillColor: const Color(0xffF6F6F6),
-                hintStyle: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black),
-                labelStyle: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black),
-                enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xffD8D8D8))),
-                focusedBorder: const OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Color(0xff45557B), width: 3.0)),
-                border: const OutlineInputBorder(),
-              ),
-              obscureText: _isObscured1,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Confirm New Password',
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isObscured2 ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.black26,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isObscured2 = !_isObscured2;
-                    });
-                  },
-                ),
-                filled: true,
-                fillColor: const Color(0xffF6F6F6),
-                hintStyle: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black),
                 labelStyle: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -95,25 +58,61 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 enabledBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xffD8D8D8))),
                 focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xff45557B), width: 3.0),
+                  borderSide: BorderSide(
+                      color: Color(0xff45557B), width: 3.0),
                 ),
-                border: const OutlineInputBorder(),
               ),
-              obscureText: _isObscured2,
-            ),
+            )),
+            const SizedBox(height: 20), 
+            Obx(() => TextField(
+              controller: controller.confirmPasswordController,
+              obscureText: controller.isObscuredConfirm.value, 
+              decoration: InputDecoration(
+                labelText: 'Confirm New Password',
+                errorText: controller.validateConfirmPassword(
+                    controller.confirmPasswordController.text),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    controller.isObscuredConfirm.value
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                    color: Colors.black26,
+                  ),
+                  onPressed: () => controller.isObscuredConfirm.toggle(),
+                ),
+                filled: true,
+                fillColor: const Color(0xffF6F6F6),
+                labelStyle: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+                enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xffD8D8D8))),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(
+                      color: Color(0xff45557B), width: 3.0),
+                ),
+              ),
+            )),
             const Spacer(),
-            ElevatedButton(
+            Obx(() => ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xff45557B),
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 15, horizontal: 24),
                 textStyle: GoogleFonts.inter(
                     fontSize: 16, fontWeight: FontWeight.w400),
               ),
-              onPressed: () {},
-              child: const Text('Update Password'),
-            ),
+              onPressed: controller.isLoading.value
+                  ? null
+                  : controller.changePassword,
+              child: controller.isLoading.value
+                  ? const CircularProgressIndicator(
+                      color: Colors.white)
+                  : const Text('Update Password'),
+            )),
           ],
         ),
       ),

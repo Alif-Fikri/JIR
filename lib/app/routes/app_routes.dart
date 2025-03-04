@@ -10,11 +10,9 @@ import 'package:smartcitys/pages/home/cctv/cctv_monitoring.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/crowd/crowd_monitoring.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
-import 'package:smartcitys/pages/home/home.dart';
 import 'package:smartcitys/pages/home/map/map_monitoring.dart';
 import 'package:smartcitys/pages/home/park/park.dart';
 import 'package:smartcitys/pages/home/report/report.dart';
-import 'package:smartcitys/pages/home/report/report_user.dart';
 import 'package:smartcitys/pages/home/weather/weather.dart';
 import 'package:smartcitys/pages/notifications/notification.dart';
 import 'package:smartcitys/pages/profile/about.dart';
@@ -150,7 +148,7 @@ class AppRoutes {
     // ),
     GetPage(
       name: changePassword,
-      page: () => const ChangePasswordPage(),
+      page: () => ChangePasswordPage(),
     ),
     //     GetPage(
     //   name: deleteAccount,
