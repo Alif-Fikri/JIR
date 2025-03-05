@@ -46,11 +46,6 @@ class CrowdController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'Gagal memuat data: ${e.toString()}';
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
-      );
     } finally {
       isLoading(false);
     }
