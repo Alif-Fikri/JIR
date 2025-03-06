@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smartcitys/app/routes/app_routes.dart';
 
 class ParkPage extends StatefulWidget {
   const ParkPage({super.key});
@@ -19,12 +21,20 @@ class _ParkPageState extends State<ParkPage> {
             children: [
               Container(
                 height: 220,
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(40),
                     bottomRight: Radius.circular(40),
                   ),
-                  image: DecorationImage(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    )
+                  ],
+                  image: const DecorationImage(
                     image: AssetImage('assets/images/park.png'),
                     fit: BoxFit.cover,
                   ),
@@ -86,6 +96,7 @@ class _ParkPageState extends State<ParkPage> {
               ),
             ],
           ),
+          const SizedBox(height: 15),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
             child: Container(
@@ -96,7 +107,6 @@ class _ParkPageState extends State<ParkPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TEKS HEADER
                   Padding(
                     padding: const EdgeInsets.only(top: 15, left: 20),
                     child: Text(
@@ -197,17 +207,37 @@ class _ParkPageState extends State<ParkPage> {
                 _buildSectionTitle('Rekomendasi Taman Terdekat'),
                 SizedBox(
                   height: 160,
-                  child: ListView(
+                  child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      _buildNearbyPark(
-                          'Taman Cattleya', '6 KM', 'assets/images/park.png'),
-                      _buildNearbyPark(
-                          'Taman Srengseng', '7 KM', 'assets/images/park.png'),
-                      _buildNearbyPark('Taman Ayodya - Barito', '9 KM',
-                          'assets/images/park.png'),
-                    ],
+                    itemCount: 3,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 10),
+                    itemBuilder: (context, index) {
+                      final parks = [
+                        {
+                          'name': 'Taman Cattleya',
+                          'distance': '6 KM',
+                          'image': 'assets/images/park.png'
+                        },
+                        {
+                          'name': 'Taman Srengseng',
+                          'distance': '7 KM',
+                          'image': 'assets/images/park.png'
+                        },
+                        {
+                          'name': 'Taman Ayodya - Barito',
+                          'distance': '9 KM',
+                          'image': 'assets/images/park.png'
+                        },
+                      ];
+                      return _buildNearbyPark(
+                          parks[index]['name']!,
+                          parks[index]['distance']!,
+                          parks[index]['image']!, () {
+                        Get.toNamed(AppRoutes.parkdetail);
+                      });
+                    },
                   ),
                 ),
                 _buildSectionTitle('Rekomendasi Taman Lainnya'),
@@ -222,7 +252,7 @@ class _ParkPageState extends State<ParkPage> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 30),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
@@ -236,16 +266,34 @@ class _ParkPageState extends State<ParkPage> {
     );
   }
 
-  Widget _buildNearbyPark(String name, String distance, String imagePath) {
+  Widget _buildNearbyPark(
+      String name, String distance, String imagePath, VoidCallback onTap) {
     return Container(
       width: 100,
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: Image.asset(imagePath,
-                width: 80, height: 80, fit: BoxFit.cover),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 6,
+                    spreadRadius: 2,
+                    offset: const Offset(2, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: Image.asset(imagePath,
+                    width: 80, height: 80, fit: BoxFit.cover),
+              ),
+            ),
           ),
           const SizedBox(height: 5),
           SizedBox(
@@ -262,6 +310,7 @@ class _ParkPageState extends State<ParkPage> {
               ),
             ),
           ),
+          const SizedBox(height: 2),
           Text(
             distance,
             style: GoogleFonts.inter(
@@ -288,7 +337,7 @@ class _ParkPageState extends State<ParkPage> {
       itemBuilder: (context, index) {
         final park = parks[index];
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(

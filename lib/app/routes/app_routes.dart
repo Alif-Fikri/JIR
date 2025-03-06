@@ -12,6 +12,7 @@ import 'package:smartcitys/pages/home/crowd/crowd_monitoring.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/map/map_monitoring.dart';
 import 'package:smartcitys/pages/home/park/park.dart';
+import 'package:smartcitys/pages/home/park/park_detail.dart';
 import 'package:smartcitys/pages/home/report/report.dart';
 import 'package:smartcitys/pages/home/weather/weather.dart';
 import 'package:smartcitys/pages/notifications/notification.dart';
@@ -39,6 +40,7 @@ class AppRoutes {
   static const chatbot = '/chatbot';
   static const cctv = '/cctv';
   static const park = '/park';
+  static const parkdetail = '/parkdetail';
   static const crowd = '/crowd';
   static const cuaca = '/cuaca';
   static const peta = '/peta';
@@ -99,6 +101,10 @@ class AppRoutes {
     GetPage(
       name: park,
       page: () => const ParkPage(),
+    ),
+    GetPage(
+      name: parkdetail,
+      page: () => const ParkDetail(),
     ),
     GetPage(
       name: crowd,
