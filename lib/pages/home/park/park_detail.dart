@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:smartcitys/pages/home/park/airquality_chart.dart';
+import 'package:smartcitys/pages/home/park/temperature_chart.dart';
 
 class ParkDetail extends StatelessWidget {
   const ParkDetail({super.key});
@@ -112,54 +114,54 @@ class ParkDetail extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 15,
-                        ),
-                        child: Text(
-                          'Kualitas udara',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 15),
+                      child: Text(
+                        'Kualitas udara',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 136,
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: const BorderRadius.only(
-                                    bottomLeft: Radius.circular(20),
-                                    bottomRight: Radius.circular(20),
-                                  ),
-                                  border: Border.all(
-                                    color: const Color(0xff45557B),
-                                    width: 1.0, // Ketebalan border
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      spreadRadius: 2,
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 280,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(20),
+                                  bottomRight: Radius.circular(20),
                                 ),
+                                border: Border.all(
+                                  color: const Color(0xff45557B),
+                                  width: 1.0, // Ketebalan border
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
                               ),
+                              child: const AirQualityChart(),
                             ),
-                          ],
-                        ),
-                      )
-                    ]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 15),
               Center(
@@ -205,7 +207,7 @@ class ParkDetail extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       SizedBox(
-                        height: 136,
+                        height: 200,
                         child: Stack(
                           children: [
                             Positioned.fill(
@@ -218,13 +220,13 @@ class ParkDetail extends StatelessWidget {
                                     bottomRight: Radius.circular(20),
                                   ),
                                   border: const Border(
-                                    top: BorderSide(
-                                        color: Color(0xff45557B), width: 1.0),
-                                    left: BorderSide(
-                                        color: Color(0xff45557B), width: 1.0),
-                                    right: BorderSide(
-                                        color: Color(0xff45557B), width: 1.0),
-                                  ),
+                                      top: BorderSide(
+                                          color: Color(0xff45557B), width: 1.0),
+                                      left: BorderSide(
+                                          color: Color(0xff45557B), width: 1.0),
+                                      right: BorderSide(
+                                          color: Color(0xff45557B), width: 1.0),
+                                      bottom: BorderSide.none),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.2),
@@ -234,6 +236,7 @@ class ParkDetail extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                                child: const TemperatureChart(),
                               ),
                             ),
                           ],

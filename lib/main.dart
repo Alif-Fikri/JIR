@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:smartcitys/app/routes/app_routes.dart';
 import 'package:smartcitys/bindings/initial_binding.dart';
 import 'package:smartcitys/pages/home/home.dart';
@@ -12,6 +13,7 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('authBox');
   await dotenv.load(fileName: ".env");
+  await initializeDateFormatting('id_ID', null);
   runApp(const MyApp());
   Get.put(InternetService());
 }
