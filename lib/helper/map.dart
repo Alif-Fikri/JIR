@@ -64,6 +64,9 @@ class ReusableMapState extends State<ReusableMap>
       if (dist > 10) {
         _shouldUpdateMap = true;
         _lastUserLocation = widget.userLocation;
+
+        _filterPassedRoutePoints();
+        _checkIfDestinationReached();
       }
     }
 
@@ -96,7 +99,7 @@ class ReusableMapState extends State<ReusableMap>
         CameraFit.bounds(
           bounds: bounds,
           padding: const EdgeInsets.all(100),
-          maxZoom: 17.0, 
+          maxZoom: 17.0,
         ),
       );
     });
@@ -105,6 +108,33 @@ class ReusableMapState extends State<ReusableMap>
   void _updateMapPosition() {
     if (widget.userLocation != null) {
       _mapController.move(widget.userLocation!, _mapController.camera.zoom);
+    }
+  }
+
+  void _filterPassedRoutePoints() {
+    if (widget.userLocation == null || widget.routePoints == null) return;
+
+    // Jarak minimum agar dianggap "sudah dilewati" (misal: 10 meter)
+    const double thresholdDistance = 10.0;
+
+    setState(() {
+      widget.routePoints!.removeWhere((point) {
+        return distance(widget.userLocation!, point) < thresholdDistance;
+      });
+    });
+  }
+
+  void _checkIfDestinationReached() {
+    if (widget.userLocation == null || widget.destination == null) return;
+
+    // Jarak agar dianggap "sampai tujuan" (misal: 20 meter)
+    const double destinationThreshold = 20.0;
+
+    if (distance(widget.userLocation!, widget.destination!) <
+        destinationThreshold) {
+      setState(() {
+        widget.routePoints!.clear(); // Hapus semua rute
+      });
     }
   }
 
@@ -221,8 +251,7 @@ class _UserLocationMarker extends StatelessWidget {
         children: [
           // Arah mata angin
           Transform.rotate(
-            angle:
-                (currentHeading * (pi / 180)), 
+            angle: (currentHeading * (pi / 180)),
             child: CustomPaint(
               size: const Size(48, 48),
               painter: _DirectionLightPainter(),
@@ -262,6 +291,5 @@ class _DirectionLightPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) =>
-      true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
