@@ -46,7 +46,7 @@ class AuthService {
       } else {
         return {'success': false, 'message': 'Signup failed'};
       }
-                                                                                                                                } catch (e) {
+      } catch (e) {
       return {'success': false, 'message': 'Unable to connect to the server'};
     }
   }

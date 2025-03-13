@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:smartcitys/pages/home/park/airquality_chart.dart';
-import 'package:smartcitys/pages/home/park/temperature_chart.dart';
+import 'package:smartcitys/pages/home/park/widget/airquality_chart.dart';
+import 'package:smartcitys/pages/home/park/widget/pm_table.dart';
+import 'package:smartcitys/pages/home/park/widget/temperature_chart.dart';
 
 class ParkDetail extends StatelessWidget {
   const ParkDetail({super.key});
@@ -107,7 +108,7 @@ class ParkDetail extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 30),
               Container(
                 decoration: BoxDecoration(
                   color: const Color(0xff45557B),
@@ -163,27 +164,9 @@ class ParkDetail extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 15),
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'Selengkapnya',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xff45557B),
-                      ),
-                    ),
-                    const Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 20,
-                      color: Color(0xff45557B),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 30),
+              const PMTableWidget(),
+              const SizedBox(height: 30),
               Container(
                 decoration: BoxDecoration(
                   color: const Color(0xff45557B),

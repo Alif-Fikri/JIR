@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/pages/auth/login.dart';
+import 'package:smartcitys/pages/auth/view/login.dart';
 import 'package:smartcitys/pages/profile/about.dart';
 import 'package:smartcitys/pages/profile/privacy_policy.dart';
-import 'package:smartcitys/pages/profile/settings/settings_page.dart';
+import 'package:smartcitys/pages/auth/view/delete_acc.dart';
 import 'package:smartcitys/pages/profile/terms_of_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smartcitys/services/auth_service/auth_api_service.dart';
+import 'package:smartcitys/pages/auth/service/auth_api_service.dart';
 
 class DeleteAccountController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();

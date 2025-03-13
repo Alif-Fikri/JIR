@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:smartcitys/app/controllers/crowd_controller.dart';
+import 'package:smartcitys/pages/home/crowd/controller/crowd_controller.dart';
 import 'package:smartcitys/helper/map.dart';
 import 'package:smartcitys/pages/home/crowd/crowd_marker.dart';
 

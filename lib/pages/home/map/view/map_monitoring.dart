@@ -5,10 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:smartcitys/helper/map.dart';
 import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
-import 'package:smartcitys/pages/home/map/detail_flood.dart';
-import 'package:smartcitys/pages/home/map/flood_controller.dart';
-import 'package:smartcitys/pages/home/map/menu_map_monitoring.dart';
-import 'package:smartcitys/pages/home/map/route_controller.dart';
+import 'package:smartcitys/pages/home/map/widget/detail_flood.dart';
+import 'package:smartcitys/pages/home/map/controller/flood_controller.dart';
+import 'package:smartcitys/pages/home/map/widget/menu_map_monitoring.dart';
+import 'package:smartcitys/pages/home/map/controller/route_controller.dart';
 
 class MapMonitoring extends StatelessWidget {
   final RouteController _routeController = Get.put(RouteController());

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:smartcitys/app/controllers/report_controller.dart';
-import 'package:smartcitys/pages/home/report/report_user.dart';
+import 'package:smartcitys/pages/home/report/controller/report_controller.dart';
+import 'package:smartcitys/pages/home/report/view/report_user.dart';
 
 class ReportPage extends StatelessWidget {
   final ReportController controller =

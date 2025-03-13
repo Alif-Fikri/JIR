@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:ui' as ui;
 
-import 'package:smartcitys/pages/home/map/route_controller.dart';
+import 'package:smartcitys/pages/home/map/controller/route_controller.dart';
 
 class ReusableMap extends StatefulWidget {
   final LatLng initialLocation;

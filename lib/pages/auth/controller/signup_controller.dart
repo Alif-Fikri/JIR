@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smartcitys/helper/menu.dart';
-import 'package:smartcitys/pages/auth/login.dart';
-import 'package:smartcitys/services/auth_service/auth_api_service.dart';
+import 'package:smartcitys/pages/auth/view/login.dart';
+import 'package:smartcitys/pages/auth/service/auth_api_service.dart';
 
 class SignupController extends GetxController {
   final AuthService _authService = Get.find();

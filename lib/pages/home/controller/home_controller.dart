@@ -7,9 +7,9 @@ import 'package:smartcitys/helper/weathertranslator.dart';
 
 class HomeController extends GetxController with StateMixin<Map<String, dynamic>> {
   final WeatherFactory _weatherFactory = WeatherFactory(dotenv.env['WEATHER_API_KEY']!);
-  final RxString temperature = "Loading...".obs;
-  final RxString location = "Loading...".obs;
-  final RxString weatherDescription = "Loading...".obs;
+  final RxString temperature = "".obs;
+  final RxString location = "".obs;
+  final RxString weatherDescription = "".obs;
   final RxString backgroundImage = "".obs;
   final RxString weatherImage = "".obs;
 
@@ -21,7 +21,7 @@ class HomeController extends GetxController with StateMixin<Map<String, dynamic>
 
   Future<void> _getLocationAndWeather() async {
     try {
-      // Check Location Permission
+
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -34,18 +34,15 @@ class HomeController extends GetxController with StateMixin<Map<String, dynamic>
         throw Exception('Location permission permanently denied');
       }
 
-      // Get Position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Get Weather
       Weather? weather = await _weatherFactory.currentWeatherByLocation(
         position.latitude,
         position.longitude,
       );
 
-      // Get Placemark
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,

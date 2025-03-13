@@ -54,7 +54,7 @@ class RouteController extends GetxController {
 
   void _checkRouteDeviation(LatLng currentLocation) async {
     if (routePoints.isEmpty || destination.value == null) return;
-    
+
     startPoint ??= userLocation.value;
 
     final nearestPointOnRoute = _findNearestPoint(currentLocation, routePoints);
