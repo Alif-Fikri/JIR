@@ -1,15 +1,15 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:smartcitys/app/routes/app_routes.dart';
-import 'package:weather/weather.dart';
-import 'dart:math' as math;
-import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:smartcitys/helper/weathertranslator.dart';
+import 'package:http/http.dart' as http;
+import 'package:smartcitys/app/routes/app_routes.dart';
 import 'package:smartcitys/helper/image_selector.dart';
-import 'package:get/get.dart';
+import 'package:smartcitys/helper/weathertranslator.dart';
+import 'package:smartcitys/pages/home/chat/chatbot.dart';
+import 'dart:math' as math;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,7 +20,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _animationController;
-  WeatherFactory wf = WeatherFactory(dotenv.env['WEATHER_API_KEY']!);
   String temperature = "Loading...";
   String location = "Loading...";
   String weatherDescription = "Loading...";
@@ -49,84 +48,64 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       weatherDescription = "Loading...";
     });
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            location = "Location permission denied";
+            temperature = "N/A";
+            weatherDescription = "N/A";
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
         setState(() {
-          location = "Location permission denied";
+          location = "Location permission permanently denied";
           temperature = "N/A";
           weatherDescription = "N/A";
         });
         return;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      setState(() {
-        location = "Location permission permanently denied";
-        temperature = "N/A";
-        weatherDescription = "N/A";
-      });
-      return;
-    }
-
-    try {
-      // Get the current location
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      print("Position: $position");
 
-      // Fetch weather data
-      Weather? weather;
-      try {
-        weather = await wf.currentWeatherByLocation(
-          position.latitude,
-          position.longitude,
-        );
-        print("Weather data fetched: $weather");
-      } catch (e) {
-        print("Error fetching weather data: $e");
-        weather = null;
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      String? locality = placemarks.first.locality;
+      location = locality?.replaceFirst("Kecamatan ", "") ?? "Unknown Location";
+
+      String kodeWilayah = getKodeWilayahBMKG(location);
+
+      final response = await http.get(Uri.parse(
+          'https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=$kodeWilayah'));
+      print("BMKG API Response: ${response.body}");
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load weather data');
       }
 
-      // Fetch placemark data
-      List<Placemark> placemarks;
-      try {
-        placemarks = await placemarkFromCoordinates(
-          position.latitude,
-          position.longitude,
-        );
-        print("Placemark data fetched: $placemarks");
-      } catch (e) {
-        print("Error fetching placemark data: $e");
-        placemarks = [];
-      }
+      final data = json.decode(response.body);
 
-      Placemark place =
-          placemarks.isNotEmpty ? placemarks.first : const Placemark();
+      final forecast = data['data']['forecast'][0];
+      final cuaca = forecast['cuaca'];
+      final suhuMin = forecast['temperature']['min'];
+      final suhuMax = forecast['temperature']['max'];
 
       setState(() {
-        if (weather != null && weather.temperature != null) {
-          temperature = "${weather.temperature!.celsius!.toStringAsFixed(1)}°";
-        } else {
-          temperature = "N/A";
-        }
-
-        location = place.locality?.replaceFirst("Kecamatan ", "") ??
-            "Unknown Location";
-
-        weatherDescription = weather?.weatherDescription != null
-            ? _translateWeatherDescription(weather!.weatherDescription!)
-            : "N/A";
-
-        print("Temperature: $temperature");
-        print("Location: $location");
-        print("Weather Description: $weatherDescription");
+        temperature = "$suhuMin°C - $suhuMax°C";
+        weatherDescription = WeatherTranslator.translate(cuaca);
       });
     } catch (e) {
-      print("Unexpected error: $e");
+      print("Error: $e");
       setState(() {
         location = "Error fetching location";
         temperature = "N/A";
@@ -135,8 +114,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  String _translateWeatherDescription(String? description) {
-    return WeatherTranslator.translate(description);
+  String getKodeWilayahBMKG(String? locality) {
+    switch (locality) {
+      case "Jakarta Selatan":
+        return "3173041004";
+      case "Jakarta Pusat":
+        return "3171031003";
+      case "Jakarta Utara":
+        return "3172031001";
+      case "Jakarta Barat":
+        return "3174031001";
+      case "Jakarta Timur":
+        return "3175031001";
+      default:
+        return "3171031003";
+    }
   }
 
   @override
@@ -144,10 +136,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final int currentHour = DateTime.now().hour;
     String backgroundImage =
         BackgroundImageSelector.getBackgroundImage(currentHour);
-    String translatedDescription =
-        _translateWeatherDescription(weatherDescription);
     String weatherImage =
-        BackgroundImageSelector.getImageForWeather(translatedDescription);
+        BackgroundImageSelector.getImageForWeather(weatherDescription);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -156,7 +146,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           SingleChildScrollView(
             child: Column(
               children: [
-                // Konten halaman
+                // Header
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(87),
@@ -181,6 +171,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
+
+                // Card Cuaca
                 Transform.translate(
                   offset: const Offset(0, -170),
                   child: Padding(
@@ -213,7 +205,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Image.asset(
-                                  (weatherImage),
+                                  weatherImage,
                                   width: 50,
                                   height: 37,
                                 ),

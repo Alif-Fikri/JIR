@@ -33,7 +33,7 @@ class ParksController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxDouble currentLat = 0.0.obs;
   final RxDouble currentLon = 0.0.obs;
-  final String baseUrl = "http://192.168.55.146:8000/parks/simple";
+  final String baseUrl = "http://localhost:8000/parks/simple";
   final RxString currentAddress = 'Mendapatkan lokasi...'.obs;
   final RxList<ParkSimple> nearbyParks = <ParkSimple>[].obs;
   final RxList<ParkSimple> otherParks = <ParkSimple>[].obs;
@@ -59,7 +59,7 @@ class ParksController extends GetxController {
       );
 
       Placemark place = placemarks.first;
-      currentAddress.value = [place.street, place.subLocality, place.locality]
+      currentAddress.value = [place.street, place.subLocality]
           .where((part) => part != null && part.isNotEmpty)
           .join(', ');
     } catch (e) {

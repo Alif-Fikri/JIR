@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,11 +16,51 @@ class ParkPage extends StatefulWidget {
 class _ParkPageState extends State<ParkPage> {
   final ParksController _controller = Get.put(ParksController());
   final TextEditingController _searchController = TextEditingController();
+  final PageController _pageController = PageController(viewportFraction: 0.9);
+  late Timer _timer;
+  int _currentPage = 0;
+  bool _isScrollingForward = true;
 
   @override
   void initState() {
     super.initState();
     _controller.getUserLocation();
+    _startAutoPlay();
+  }
+
+  void _startAutoPlay() {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_isScrollingForward) {
+        if (_currentPage < _controller.nearbyParks.length - 1) {
+          _currentPage++;
+        } else {
+          _isScrollingForward = false;
+          _currentPage--;
+        }
+      } else {
+        if (_currentPage > 0) {
+          _currentPage--;
+        } else {
+          _isScrollingForward = true;
+          _currentPage++;
+        }
+      }
+
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _timer.cancel();
+    super.dispose();
   }
 
   @override
@@ -263,27 +305,45 @@ class _ParkPageState extends State<ParkPage> {
 
   Widget _buildNearbyParks() {
     return SizedBox(
-      height: 160,
+      height: 180,
       child: Obx(
-        () => ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: _controller.nearbyParks.take(5).length,
-          separatorBuilder: (context, index) => const SizedBox(width: 10),
-          itemBuilder: (context, index) {
-            final park = _controller.nearbyParks[index];
-            final distance = _controller.calculateDistanceInMeters(
-                park.latitude, park.longitude);
+        () => _controller.nearbyParks.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : PageView.builder(
+                controller: _pageController,
+                itemCount: _controller.nearbyParks.length,
+                itemBuilder: (context, index) {
+                  final park = _controller.nearbyParks[index];
+                  final distance = _controller.calculateDistanceInMeters(
+                      park.latitude, park.longitude);
 
-            return _buildParkItem(
-              park.name,
-              _controller.formatDistance(distance),
-              park.street ?? 'Alamat tidak tersedia',
-              park.latitude,
-              park.longitude,
-            );
-          },
-        ),
+                  return AnimatedBuilder(
+                    animation: _pageController,
+                    builder: (context, child) {
+                      double value = 1.0;
+                      if (_pageController.position.haveDimensions) {
+                        value = _pageController.page! - index;
+                        value = (1 - (value.abs() * 0.2)).clamp(0.8, 1.0);
+                      }
+
+                      return Opacity(
+                        opacity: value.clamp(0.5, 1.0),
+                        child: Transform.scale(
+                          scale: value,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _buildParkItem(
+                      park.name,
+                      _controller.formatDistance(distance),
+                      park.street ?? 'Alamat tidak tersedia',
+                      park.latitude,
+                      park.longitude,
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }
@@ -299,7 +359,7 @@ class _ParkPageState extends State<ParkPage> {
         'lon': lon,
       }),
       child: Container(
-        width: 120,
+        width: 100,
         margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -315,20 +375,26 @@ class _ParkPageState extends State<ParkPage> {
         ),
         child: Column(
           children: [
-            Expanded(
+            Container(
+              height: 80,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+              ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: Image.asset(
                   'assets/images/park.png',
                   fit: BoxFit.cover,
                   width: double.infinity,
+                  height: double.infinity,
                 ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     name,
@@ -370,6 +436,7 @@ class _ParkPageState extends State<ParkPage> {
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: _controller.otherParks.take(20).length,
+        padding: const EdgeInsets.only(top: 8, bottom: 20),
         itemBuilder: (context, index) {
           final park = _controller.otherParks[index];
           final distance = _controller.calculateDistanceInMeters(
@@ -378,7 +445,7 @@ class _ParkPageState extends State<ParkPage> {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(15),
