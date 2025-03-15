@@ -61,6 +61,7 @@ dependencies:
   sensors: ^2.0.3
   sensors_plus: ^6.1.1
   shared_preferences: ^2.3.3
+  shimmer: ^3.0.0
   speech_to_text: ^7.0.0
   weather: ^3.1.1
   webview_flutter: ^4.0.0

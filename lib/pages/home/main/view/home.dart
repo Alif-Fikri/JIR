@@ -1,143 +1,27 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:http/http.dart' as http;
 import 'package:smartcitys/app/routes/app_routes.dart';
-import 'package:smartcitys/helper/image_selector.dart';
-import 'package:smartcitys/helper/weathertranslator.dart';
-import 'package:smartcitys/pages/home/chat/chatbot.dart';
+import 'package:smartcitys/pages/home/main/controller/home_controller.dart';
+import 'package:weather/weather.dart';
 import 'dart:math' as math;
+import 'package:smartcitys/pages/home/chat/chatbot.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:smartcitys/helper/weathertranslator.dart';
+import 'package:smartcitys/helper/image_selector.dart';
+import 'package:get/get.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomePage extends StatelessWidget {
+  HomePage({Key? key}) : super(key: key);
 
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  String temperature = "Loading...";
-  String location = "Loading...";
-  String weatherDescription = "Loading...";
-
-  @override
-  void initState() {
-    super.initState();
-    _getLocationAndWeather();
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _getLocationAndWeather() async {
-    setState(() {
-      location = "Loading...";
-      temperature = "Loading...";
-      weatherDescription = "Loading...";
-    });
-
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() {
-            location = "Location permission denied";
-            temperature = "N/A";
-            weatherDescription = "N/A";
-          });
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          location = "Location permission permanently denied";
-          temperature = "N/A";
-          weatherDescription = "N/A";
-        });
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      String? locality = placemarks.first.locality;
-      location = locality?.replaceFirst("Kecamatan ", "") ?? "Unknown Location";
-
-      String kodeWilayah = getKodeWilayahBMKG(location);
-
-      final response = await http.get(Uri.parse(
-          'https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=$kodeWilayah'));
-      print("BMKG API Response: ${response.body}");
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to load weather data');
-      }
-
-      final data = json.decode(response.body);
-
-      final forecast = data['data']['forecast'][0];
-      final cuaca = forecast['cuaca'];
-      final suhuMin = forecast['temperature']['min'];
-      final suhuMax = forecast['temperature']['max'];
-
-      setState(() {
-        temperature = "$suhuMin°C - $suhuMax°C";
-        weatherDescription = WeatherTranslator.translate(cuaca);
-      });
-    } catch (e) {
-      print("Error: $e");
-      setState(() {
-        location = "Error fetching location";
-        temperature = "N/A";
-        weatherDescription = "N/A";
-      });
-    }
-  }
-
-  String getKodeWilayahBMKG(String? locality) {
-    switch (locality) {
-      case "Jakarta Selatan":
-        return "3173041004";
-      case "Jakarta Pusat":
-        return "3171031003";
-      case "Jakarta Utara":
-        return "3172031001";
-      case "Jakarta Barat":
-        return "3174031001";
-      case "Jakarta Timur":
-        return "3175031001";
-      default:
-        return "3171031003";
-    }
-  }
+  final HomeController controller = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
     final int currentHour = DateTime.now().hour;
     String backgroundImage =
         BackgroundImageSelector.getBackgroundImage(currentHour);
-    String weatherImage =
-        BackgroundImageSelector.getImageForWeather(weatherDescription);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -146,7 +30,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           SingleChildScrollView(
             child: Column(
               children: [
-                // Header
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(87),
@@ -171,90 +54,98 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
+                Obx(() {
+                  String translatedDescription = WeatherTranslator.translate(
+                      controller.weatherDescription.value);
+                  String weatherImage =
+                      BackgroundImageSelector.getImageForWeather(
+                          translatedDescription);
 
-                // Card Cuaca
-                Transform.translate(
-                  offset: const Offset(0, -170),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            height: 250.0,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage(backgroundImage),
-                                fit: BoxFit.cover,
+                  return Transform.translate(
+                    offset: const Offset(0, -170),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              height: 250,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(backgroundImage),
+                                    fit: BoxFit.cover),
                               ),
                             ),
                           ),
-                        ),
-                        Positioned(
-                          bottom: 8,
-                          left: 8,
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.4),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Image.asset(
-                                  weatherImage,
-                                  width: 50,
-                                  height: 37,
-                                ),
-                                Text(
-                                  weatherDescription,
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
+                          Positioned(
+                            bottom: 8,
+                            left: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.4),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Image.asset(weatherImage,
+                                      width: 50, height: 37),
+                                  Obx(
+                                    () => Text(
+                                      controller.weatherDescription.value,
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  temperature,
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
+                                  Obx(
+                                    () => Text(
+                                      "${controller.temperature.value}°",
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  location,
-                                  style: GoogleFonts.inter(
-                                    color: Colors.white,
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: -20.0,
-                          right: -10.0,
-                          child: CircleAvatar(
-                            radius: 35,
-                            backgroundColor: Colors.white,
-                            child: Image.asset(
-                              'assets/images/path.png',
-                              width: 45,
-                              height: 45,
-                              color: Colors.black,
+                                  Obx(
+                                    () => Text(
+                                      controller.location.value,
+                                      style: GoogleFonts.inter(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                          Positioned(
+                            top: -20.0,
+                            right: -10.0,
+                            child: CircleAvatar(
+                              radius: 35,
+                              backgroundColor: Colors.white,
+                              child: Image.asset(
+                                'assets/images/path.png',
+                                width: 45,
+                                height: 45,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }),
                 Transform.translate(
                   offset: const Offset(0, -140),
                   child: Padding(
@@ -386,27 +277,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ),
           AnimatedBuilder(
-            animation: Listenable.merge([_animationController]),
+            animation: controller.animationController,
             builder: (context, child) {
               double bounce =
-                  math.sin(_animationController.value * 2 * math.pi) * 5;
+                  math.sin(controller.animationController.value * 2 * math.pi) *
+                      5;
               return Positioned(
                 bottom: 50 + bounce,
                 right: 25,
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChatbotOpeningPage(),
-                      ),
-                    );
-                  },
-                  child: Image.asset(
-                    'assets/images/robot.png',
-                    width: 70,
-                    height: 70,
-                  ),
+                  onTap: () => Get.to(() => const ChatbotOpeningPage()),
+                  child: Image.asset('assets/images/robot.png',
+                      width: 70, height: 70),
                 ),
               );
             },

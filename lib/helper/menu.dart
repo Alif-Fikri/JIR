@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/pages/home/home.dart';
+import 'package:smartcitys/pages/home/main/view/home.dart';
 import 'package:smartcitys/pages/notifications/notification.dart';
 import 'package:smartcitys/pages/profile/profile.dart';
 import 'package:smartcitys/pages/activity/activity.dart';
@@ -17,7 +17,7 @@ class _MenuState extends State<Menu> {
   int _selectedIndex = Get.arguments ?? 0; 
 
   final List<Widget> _pages = [
-    const HomePage(),
+    HomePage(),
     ActivityPage(),
     const NotificationPage(),
     const ProfilePage(),
