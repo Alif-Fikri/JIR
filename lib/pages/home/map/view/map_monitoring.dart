@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:smartcitys/helper/map.dart';
-import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
+import 'package:smartcitys/pages/home/flood/view/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/map/widget/detail_flood.dart';
 import 'package:smartcitys/pages/home/map/controller/flood_controller.dart';
 import 'package:smartcitys/pages/home/map/widget/menu_map_monitoring.dart';

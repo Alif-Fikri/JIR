@@ -9,7 +9,7 @@ import 'package:smartcitys/pages/auth/view/signup.dart';
 import 'package:smartcitys/pages/home/cctv/cctv_monitoring.dart';
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
 import 'package:smartcitys/pages/home/crowd/crowd_monitoring.dart';
-import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
+import 'package:smartcitys/pages/home/flood/view/flood_monitoring.dart';
 import 'package:smartcitys/pages/home/map/view/map_monitoring.dart';
 import 'package:smartcitys/pages/home/park/view/park.dart';
 import 'package:smartcitys/pages/home/park/view/park_detail.dart';
@@ -92,7 +92,7 @@ class AppRoutes {
     ),
     GetPage(
       name: flood,
-      page: () => const FloodMonitoringPage(),
+      page: () => FloodMonitoringPage(),
     ),
     GetPage(
       name: chatbot,

@@ -15,6 +15,9 @@ class LoadingPage extends StatelessWidget {
           height: 200,
           fit: BoxFit.contain,
           repeat: true,
+          delegates: LottieDelegates(
+            text: (dynamic text) => text == 'Skip' ? null : text,
+          ),
         ),
       ),
     );

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:smartcitys/app/routes/app_routes.dart';
+import 'package:smartcitys/helper/loading.dart';
 import 'package:smartcitys/pages/home/main/controller/home_controller.dart';
-import 'package:weather/weather.dart';
 import 'dart:math' as math;
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:smartcitys/helper/weathertranslator.dart';
 import 'package:smartcitys/helper/image_selector.dart';
 import 'package:get/get.dart';
@@ -19,6 +16,16 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const LoadingPage();
+      }
+
+      return _buildMainContent();
+    });
+  }
+
+  Widget _buildMainContent() {
     final int currentHour = DateTime.now().hour;
     String backgroundImage =
         BackgroundImageSelector.getBackgroundImage(currentHour);

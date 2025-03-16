@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:smartcitys/pages/home/flood/flood_monitoring.dart';
+import 'package:smartcitys/pages/home/flood/view/flood_monitoring.dart';
 
 class DisasterBottomSheet extends StatelessWidget {
   final String location;

@@ -39,9 +39,9 @@ class HomeController extends GetxController
   }
 
   Future<void> fetchData() async {
-    isLoading.value = true;
+    isLoading(true);
     await _getLocationAndWeather();
-    isLoading.value = false;
+    isLoading(false);
   }
 
   Future<void> _getLocationAndWeather() async {
