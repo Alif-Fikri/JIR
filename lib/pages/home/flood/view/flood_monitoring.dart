@@ -7,13 +7,13 @@ import 'package:smartcitys/pages/home/flood/controller/flood_controller.dart';
 
 class FloodMonitoringPage extends StatelessWidget {
   final LatLng? initialLocation;
-  final FloodMonitoringController controller = Get.put(FloodMonitoringController());
+  final FloodMonitoringController controller =
+      Get.put(FloodMonitoringController());
 
   FloodMonitoringPage({super.key, this.initialLocation});
 
   @override
   Widget build(BuildContext context) {
-
     if (initialLocation != null) {
       controller.currentLocation.value = initialLocation!;
     }
@@ -31,15 +31,11 @@ class FloodMonitoringPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          Obx(() {
-            return ReusableMap(
-              initialLocation: controller.currentLocation.value,
-              markers: controller.floodMarkers,
-              onMapCreated: (mapController) {
-                controller.mapController = mapController;
-              },
-            );
-          }),
+          Obx(() => ReusableMap(
+                markers: controller.floodMarkers,
+                initialLocation: controller.currentLocation.value,
+                onMapCreated: (mapCtrl) => controller.mapController = mapCtrl,
+              )),
           Positioned(
             top: 16,
             left: 16,
