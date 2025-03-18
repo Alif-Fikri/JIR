@@ -45,28 +45,30 @@ class WeatherPage extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             color: const Color(0xff6C6969)),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 5),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Icon(Icons.wb_sunny,
                               size: 100, color: Colors.yellow),
                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text('27° C',
                                   style: GoogleFonts.inter(
-                                      fontSize: 36,
+                                      fontSize: 50,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xff6C6969))),
                               Text('Cerah',
                                   style: GoogleFonts.inter(
-                                      fontSize: 20,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
                                       color: const Color(0xff6C6969))),
                               Text('27°/27° C',
                                   style: GoogleFonts.inter(
-                                      fontSize: 16,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
                                       color: const Color(0xff6C6969))),
                             ],
                           )

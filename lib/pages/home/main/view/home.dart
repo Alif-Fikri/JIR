@@ -3,11 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smartcitys/app/routes/app_routes.dart';
 import 'package:smartcitys/helper/loading.dart';
 import 'package:smartcitys/pages/home/main/controller/home_controller.dart';
-import 'dart:math' as math;
 import 'package:smartcitys/pages/home/chat/chatbot.dart';
-import 'package:smartcitys/helper/weathertranslator.dart';
-import 'package:smartcitys/helper/image_selector.dart';
 import 'package:get/get.dart';
+import 'dart:math' as math;
 
 class HomePage extends StatelessWidget {
   HomePage({Key? key}) : super(key: key);
@@ -20,16 +18,11 @@ class HomePage extends StatelessWidget {
       if (controller.isLoading.value) {
         return const LoadingPage();
       }
-
       return _buildMainContent();
     });
   }
 
   Widget _buildMainContent() {
-    final int currentHour = DateTime.now().hour;
-    String backgroundImage =
-        BackgroundImageSelector.getBackgroundImage(currentHour);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -37,6 +30,7 @@ class HomePage extends StatelessWidget {
           SingleChildScrollView(
             child: Column(
               children: [
+                // Header dengan Shadow
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(87),
@@ -44,9 +38,11 @@ class HomePage extends StatelessWidget {
                   ),
                   child: Container(
                     height: 308.0,
-                    color: const Color(0xFF45557B),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF45557B),
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 25.0, left: 25.0),
+                      padding: const EdgeInsets.only(top: 60.0),
                       child: Align(
                         alignment: Alignment.topCenter,
                         child: Text(
@@ -55,6 +51,13 @@ class HomePage extends StatelessWidget {
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 5.0,
+                                color: Colors.black.withOpacity(0.6),
+                                offset: const Offset(2, 2),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -62,12 +65,6 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 Obx(() {
-                  String translatedDescription = WeatherTranslator.translate(
-                      controller.weatherDescription.value);
-                  String weatherImage =
-                      BackgroundImageSelector.getImageForWeather(
-                          translatedDescription);
-
                   return Transform.translate(
                     offset: const Offset(0, -170),
                     child: Padding(
@@ -75,14 +72,29 @@ class HomePage extends StatelessWidget {
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              height: 250,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(backgroundImage),
-                                    fit: BoxFit.cover),
+                          Container(
+                            height: 250,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.4),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: AssetImage(
+                                      controller.backgroundImage.value,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -91,43 +103,50 @@ class HomePage extends StatelessWidget {
                             left: 8,
                             child: Container(
                               padding: const EdgeInsets.all(10),
+                              width: 110,
+                              height: 130,
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.4),
                                 borderRadius: BorderRadius.circular(15),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Image.asset(weatherImage,
-                                      width: 50, height: 37),
-                                  Obx(
-                                    () => Text(
-                                      controller.weatherDescription.value,
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+                                  SizedBox(
+                                    width: 80,
+                                    height: 50,
+                                    child: Image.asset(
+                                      controller.weatherIcon.value,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
-                                  Obx(
-                                    () => Text(
-                                      "${controller.temperature.value}°",
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+                                  const SizedBox(height: 5),
+                                  // Deskripsi Cuaca
+                                  Text(
+                                    controller.weatherDescription.value,
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                  Obx(
-                                    () => Text(
-                                      controller.location.value,
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontSize: 8,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+                                  // Suhu
+                                  Text(
+                                    "${controller.temperature.value}°",
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  // Lokasi
+                                  Text(
+                                    controller.location.value,
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   )
                                 ],

@@ -19,32 +19,37 @@ class DiagonalContainer extends StatelessWidget {
   }
 }
 
+Path getDiagonalPath(Size size) {
+  const radius = 20.0;
+  const diagonalHeight = 48.3;
+
+  Path path = Path();
+
+  path.moveTo(0, 0);
+  path.lineTo(size.width, 0);
+  path.lineTo(size.width, size.height - diagonalHeight - radius);
+  path.quadraticBezierTo(
+    size.width,
+    size.height - diagonalHeight,
+    size.width - radius,
+    size.height - diagonalHeight,
+  );
+  path.lineTo(radius, size.height);
+  path.quadraticBezierTo(
+    0,
+    size.height,
+    0,
+    size.height - radius,
+  );
+  path.close();
+
+  return path;
+}
+
 class DiagonalClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    final radius = 20.0;
-    final diagonalHeight = 48.3;
-
-    Path path = Path();
-
-    path.moveTo(0, 0); 
-    path.lineTo(size.width, 0); 
-    path.lineTo(size.width, size.height - diagonalHeight - radius);
-    path.quadraticBezierTo(
-      size.width,
-      size.height - diagonalHeight,
-      size.width - radius,
-      size.height - diagonalHeight,
-    );
-    path.lineTo(radius, size.height);
-    path.quadraticBezierTo(
-      0,
-      size.height,
-      0,
-      size.height - radius,
-    );
-    path.close();
-    return path;
+    return getDiagonalPath(size);
   }
 
   @override
@@ -54,17 +59,12 @@ class DiagonalClipper extends CustomClipper<Path> {
 class DiagonalShadowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    Path path = Path();
-    path.lineTo(0, size.height);
-    path.lineTo(size.width, size.height - 50);
-    path.lineTo(size.width, 0);
-    path.close();
-
+    Path path = getDiagonalPath(size);
     canvas.drawShadow(
       path,
       Colors.black.withOpacity(0.9),
-      6,
-      false,
+      5,
+      true,
     );
   }
 
