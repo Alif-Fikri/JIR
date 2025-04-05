@@ -5,7 +5,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:smartcitys/app/routes/app_routes.dart';
 import 'package:smartcitys/bindings/initial_binding.dart';
-import 'package:smartcitys/pages/home/main/view/home.dart';
 import 'package:smartcitys/services/internet_service/internet_service.dart';
 
 void main() async {
@@ -29,10 +28,6 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoutes.initial,
       initialBinding: InitialBinding(),
       getPages: AppRoutes.getPages,
-      unknownRoute: GetPage(
-        name: '/home',
-        page: () => HomePage(),
-      ),
     );
   }
 }

@@ -24,9 +24,11 @@ import 'package:smartcitys/helper/no_connection.dart';
 import 'package:smartcitys/pages/auth/view/change_password_page.dart';
 import 'package:smartcitys/pages/auth/view/delete_acc.dart';
 import 'package:smartcitys/pages/profile/terms_of_service.dart';
+import 'package:smartcitys/pages/splashscreen/splashscreen.dart';
 
 class AppRoutes {
-  static const initial = home;
+  static const initial = splash;
+  static const splash = '/splash';
   //auth
   static const login = '/login';
   static const signup = '/signup';
@@ -59,6 +61,12 @@ class AppRoutes {
   static const noInternet = '/no-internet';
 
   static final getPages = [
+    GetPage(
+      name: splash,
+      page: () => const SplashScreen(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
     GetPage(
       name: login,
       page: () => LoginPage(),

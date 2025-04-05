@@ -15,7 +15,7 @@ class TemperatureChart extends StatelessWidget {
           minY: 10,
           maxY: 40,
           backgroundColor: Colors.white,
-          gridData: FlGridData(show: false),
+          gridData: const FlGridData(show: false),
           borderData: FlBorderData(
             border: const Border(
               left: BorderSide(color: Colors.black, width: 1),
@@ -73,8 +73,8 @@ class TemperatureChart extends StatelessWidget {
                 interval: 1,
               ),
             ),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
           lineBarsData: [
             LineChartBarData(
@@ -83,7 +83,7 @@ class TemperatureChart extends StatelessWidget {
               color: Colors.blue[800],
               barWidth: 3,
               isStrokeCapRound: true,
-              dotData: FlDotData(show: false),
+              dotData: const FlDotData(show: false),
             ),
           ],
           extraLinesData: ExtraLinesData(

@@ -24,7 +24,7 @@ class WeatherPage extends StatelessWidget {
                       Row(
                         children: [
                           IconButton(
-                            icon: Icon(Icons.arrow_back),
+                            icon: const Icon(Icons.arrow_back),
                             color: const Color(0xff355469),
                             onPressed: () {
                               Navigator.pop(context);
@@ -146,7 +146,7 @@ class WeatherPage extends StatelessWidget {
             ),
             const SizedBox(height: 25),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Center(
                 child: Text('Hari ini',
                     style: GoogleFonts.inter(

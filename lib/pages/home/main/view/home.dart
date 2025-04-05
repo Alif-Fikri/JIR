@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 import 'dart:math' as math;
 
 class HomePage extends StatelessWidget {
-  HomePage({Key? key}) : super(key: key);
+  HomePage({super.key});
 
   final HomeController controller = Get.put(HomeController());
 

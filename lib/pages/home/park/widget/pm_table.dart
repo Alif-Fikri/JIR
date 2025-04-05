@@ -10,9 +10,8 @@ class PMTableWidget extends StatefulWidget {
 }
 
 class _PMTableWidgetState extends State<PMTableWidget> {
-  bool _showTable = false; // state untuk menampilkan/menyembunyikan tabel
+  bool _showTable = false; 
 
-  // Simulasi data Konsentrasi PM per jam (bisa diganti dengan data asli dari API)
   List<Map<String, String>> _generatePMData() {
     List<Map<String, String>> data = [];
     DateTime now = DateTime.now();
@@ -20,7 +19,7 @@ class _PMTableWidgetState extends State<PMTableWidget> {
       DateTime time = now.subtract(Duration(hours: i));
       data.add({
         'time': DateFormat('HH:00').format(time),
-        'pm': '39.1', // contoh nilai PM, bisa dinamis
+        'pm': '39.1', 
       });
     }
     return data;
@@ -71,7 +70,7 @@ class _PMTableWidgetState extends State<PMTableWidget> {
                 ),
                 child: DataTable(
                   columnSpacing: 90,
-                  headingRowColor: MaterialStateColor.resolveWith(
+                  headingRowColor: WidgetStateColor.resolveWith(
                     (states) => const Color(0xff45557B),
                   ),
                   headingTextStyle: GoogleFonts.inter(
@@ -94,7 +93,7 @@ class _PMTableWidgetState extends State<PMTableWidget> {
                   rows: pmData
                       .map(
                         (item) => DataRow(
-                          color: MaterialStateColor.resolveWith(
+                          color: WidgetStateColor.resolveWith(
                             (states) => pmData.indexOf(item) % 2 == 0
                                 ? Colors.white
                                 : Colors.grey[200]!,
