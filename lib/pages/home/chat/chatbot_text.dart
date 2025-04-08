@@ -1,11 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'dart:async';
 import 'dart:math';
-import 'package:smartcitys/helper/voicefrequency.dart';
-import 'package:smartcitys/services/chat_service/chat_api_service.dart';
+import 'package:JIR/helper/voicefrequency.dart';
+import 'package:JIR/services/chat_service/chat_api_service.dart';
 
 class ChatBotPage extends StatefulWidget {
   const ChatBotPage({super.key});

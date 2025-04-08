@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/pages/home/weather/diagonal_container.dart';
+import 'package:JIR/pages/home/weather/diagonal_container.dart';
 
 class WeatherPage extends StatelessWidget {
   const WeatherPage({super.key});

@@ -3,12 +3,12 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:smartcitys/helper/map.dart';
-import 'package:smartcitys/pages/home/flood/view/flood_monitoring.dart';
-import 'package:smartcitys/pages/home/map/widget/detail_flood.dart';
-import 'package:smartcitys/pages/home/map/controller/flood_controller.dart';
-import 'package:smartcitys/pages/home/map/widget/menu_map_monitoring.dart';
-import 'package:smartcitys/pages/home/map/controller/route_controller.dart';
+import 'package:JIR/helper/map.dart';
+import 'package:JIR/pages/home/flood/view/flood_monitoring.dart';
+import 'package:JIR/pages/home/map/widget/detail_flood.dart';
+import 'package:JIR/pages/home/map/controller/flood_controller.dart';
+import 'package:JIR/pages/home/map/widget/menu_map_monitoring.dart';
+import 'package:JIR/pages/home/map/controller/route_controller.dart';
 
 class MapMonitoring extends StatelessWidget {
   final RouteController _routeController = Get.put(RouteController());
@@ -156,7 +156,7 @@ class MapMonitoring extends StatelessWidget {
           },
           onChanged: (value) {
             if (value.isEmpty) {
-              _routeController.clearRoute(); 
+              _routeController.clearRoute();
               _searchFocusNode.unfocus();
             }
             _routeController.handleSearch(value);

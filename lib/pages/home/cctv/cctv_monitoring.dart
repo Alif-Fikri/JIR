@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:smartcitys/pages/home/cctv/cctv_webview.dart';
+import 'package:JIR/pages/home/cctv/cctv_webview.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:smartcitys/helper/map.dart';
+import 'package:JIR/helper/map.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CCTVPage extends StatelessWidget {
@@ -30,7 +30,7 @@ class CCTVPage extends StatelessWidget {
     ),
   ];
 
-   CCTVPage({super.key});
+  CCTVPage({super.key});
 
   @override
   Widget build(BuildContext context) {

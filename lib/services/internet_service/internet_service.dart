@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
-import 'package:smartcitys/app/routes/app_routes.dart';
-import 'package:smartcitys/helper/no_connection.dart';
+import 'package:JIR/app/routes/app_routes.dart';
+import 'package:JIR/helper/no_connection.dart';
 
 class InternetService extends GetxController {
   final Connectivity connectivity = Connectivity();
@@ -32,7 +32,6 @@ class InternetService extends GetxController {
           () => const NoInternetPage(),
           transition: Transition.fade,
           duration: const Duration(milliseconds: 300),
-          
         );
       }
     } else {
@@ -43,7 +42,6 @@ class InternetService extends GetxController {
         } else {
           Get.offAllNamed(AppRoutes.home);
         }
-      
       }
     }
   }

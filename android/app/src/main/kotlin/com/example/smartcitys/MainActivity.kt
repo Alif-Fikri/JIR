@@ -1,4 +1,4 @@
-package com.example.smartcitys
+package com.example.JIR
 
 import io.flutter.embedding.android.FlutterActivity
 

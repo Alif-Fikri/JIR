@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/pages/auth/controller/delete_acc_controller.dart';
-import 'package:smartcitys/pages/auth/view/change_password_page.dart';
+import 'package:JIR/pages/auth/controller/delete_acc_controller.dart';
+import 'package:JIR/pages/auth/view/change_password_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});

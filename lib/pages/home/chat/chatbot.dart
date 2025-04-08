@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/pages/home/chat/chatbot_text.dart';
+import 'package:JIR/pages/home/chat/chatbot_text.dart';
 
 class ChatbotOpeningPage extends StatelessWidget {
   const ChatbotOpeningPage({super.key});

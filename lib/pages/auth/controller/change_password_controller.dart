@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smartcitys/pages/auth/service/auth_api_service.dart';
+import 'package:JIR/pages/auth/service/auth_api_service.dart';
 
 class ChangePasswordController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();

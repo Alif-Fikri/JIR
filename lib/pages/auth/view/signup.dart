@@ -2,8 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/pages/auth/controller/signup_controller.dart';
-import 'package:smartcitys/app/routes/app_routes.dart';
+import 'package:JIR/pages/auth/controller/signup_controller.dart';
+import 'package:JIR/app/routes/app_routes.dart';
 
 class SignupPage extends GetView<SignupController> {
   final fixedWidth = 350.0;
@@ -16,7 +16,7 @@ class SignupPage extends GetView<SignupController> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-    canPop: false,
+      canPop: false,
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Center(

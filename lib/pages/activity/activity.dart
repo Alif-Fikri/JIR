@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/pages/home/report/controller/report_controller.dart';
-import 'package:smartcitys/pages/home/report/widget/report_card.dart';
+import 'package:JIR/pages/home/report/controller/report_controller.dart';
+import 'package:JIR/pages/home/report/widget/report_card.dart';
 
 class ActivityPage extends StatelessWidget {
   final ReportController controller = Get.find<ReportController>();

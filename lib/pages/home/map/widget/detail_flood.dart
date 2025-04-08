@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:smartcitys/pages/home/flood/view/flood_monitoring.dart';
+import 'package:JIR/pages/home/flood/view/flood_monitoring.dart';
 
 class DisasterBottomSheet extends StatelessWidget {
   final String location;
@@ -76,7 +76,8 @@ class DetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const DetailRow({super.key, 
+  const DetailRow({
+    super.key,
     required this.icon,
     required this.label,
     required this.value,
@@ -207,7 +208,8 @@ class _FloodMonitoringBottomSheetState
                 child: Text(
                   "Selengkapnya",
                   style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold, color: const Color(0xff45557B)),
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xff45557B)),
                 ),
               ),
             ),

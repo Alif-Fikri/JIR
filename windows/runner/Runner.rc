@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "smartcitys" "\0"
+            VALUE "FileDescription", "JIR" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "smartcitys" "\0"
+            VALUE "InternalName", "JIR" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "smartcitys.exe" "\0"
-            VALUE "ProductName", "smartcitys" "\0"
+            VALUE "OriginalFilename", "JIR.exe" "\0"
+            VALUE "ProductName", "JIR" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

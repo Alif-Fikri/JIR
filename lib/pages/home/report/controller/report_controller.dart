@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:smartcitys/helper/menu.dart';
-import 'package:smartcitys/pages/home/report/widget/report_loading.dart';
+import 'package:JIR/helper/menu.dart';
+import 'package:JIR/pages/home/report/widget/report_loading.dart';
 
 class ReportController extends GetxController {
   final imageFile = Rxn<File>();

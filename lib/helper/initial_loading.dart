@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:smartcitys/app/routes/app_routes.dart';
-import 'package:smartcitys/helper/no_connection.dart';
-import 'package:smartcitys/services/internet_service/internet_service.dart';
-
+import 'package:JIR/app/routes/app_routes.dart';
+import 'package:JIR/helper/no_connection.dart';
+import 'package:JIR/services/internet_service/internet_service.dart';
 
 class InitialLoadingPage extends StatefulWidget {
   const InitialLoadingPage({super.key});

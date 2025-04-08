@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/app/routes/app_routes.dart';
-import 'package:smartcitys/helper/loading.dart';
-import 'package:smartcitys/pages/home/main/controller/home_controller.dart';
-import 'package:smartcitys/pages/home/chat/chatbot.dart';
+import 'package:JIR/app/routes/app_routes.dart';
+import 'package:JIR/helper/loading.dart';
+import 'package:JIR/pages/home/main/controller/home_controller.dart';
+import 'package:JIR/pages/home/chat/chatbot.dart';
 import 'package:get/get.dart';
 import 'dart:math' as math;
 

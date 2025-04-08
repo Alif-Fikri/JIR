@@ -4,9 +4,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:smartcitys/pages/home/flood/widgets/flood_item_data.dart';
-import 'package:smartcitys/services/flood_service/flood_api_service.dart';
-import 'package:smartcitys/pages/home/flood/widgets/radar_map.dart';
+import 'package:JIR/pages/home/flood/widgets/flood_item_data.dart';
+import 'package:JIR/services/flood_service/flood_api_service.dart';
+import 'package:JIR/pages/home/flood/widgets/radar_map.dart';
 
 class FloodMonitoringController extends GetxController {
   var currentLocation = const LatLng(-6.200000, 106.816666).obs;
@@ -20,9 +20,9 @@ class FloodMonitoringController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    mapController = MapController(); 
+    mapController = MapController();
     _fetchFloodData();
-    getCurrentLocation(); 
+    getCurrentLocation();
   }
 
   // GET FLOOD DATA
@@ -31,7 +31,7 @@ class FloodMonitoringController extends GetxController {
       final service = FloodService();
       final data = await service.fetchFloodData();
 
-      floodData.assignAll(data); 
+      floodData.assignAll(data);
 
       final markers = data.map((item) {
         double lat = double.tryParse(item["LATITUDE"].toString()) ?? 0.0;

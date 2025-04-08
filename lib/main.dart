@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:smartcitys/app/routes/app_routes.dart';
-import 'package:smartcitys/bindings/initial_binding.dart';
-import 'package:smartcitys/services/internet_service/internet_service.dart';
+import 'package:JIR/app/routes/app_routes.dart';
+import 'package:JIR/bindings/initial_binding.dart';
+import 'package:JIR/services/internet_service/internet_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

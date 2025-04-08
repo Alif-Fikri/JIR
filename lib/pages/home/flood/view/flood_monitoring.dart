@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:smartcitys/helper/map.dart';
-import 'package:smartcitys/pages/home/flood/controller/flood_controller.dart';
+import 'package:JIR/helper/map.dart';
+import 'package:JIR/pages/home/flood/controller/flood_controller.dart';
 
 class FloodMonitoringPage extends StatelessWidget {
   final LatLng? initialLocation;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smartcitys/pages/auth/service/auth_api_service.dart';
+import 'package:JIR/pages/auth/service/auth_api_service.dart';
 
 class DeleteAccountController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
@@ -11,7 +11,7 @@ class DeleteAccountController extends GetxController {
     try {
       isLoading(true);
       final response = await _authService.deleteAccount(password);
-      
+
       if (response['success']) {
         Get.offAllNamed('/login');
         Get.snackbar(

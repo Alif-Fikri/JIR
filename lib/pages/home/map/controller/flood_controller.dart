@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:smartcitys/pages/home/flood/view/flood_monitoring.dart';
-import 'package:smartcitys/pages/home/map/widget/detail_flood.dart';
-import 'package:smartcitys/services/flood_service/flood_api_service.dart';
+import 'package:JIR/pages/home/flood/view/flood_monitoring.dart';
+import 'package:JIR/pages/home/map/widget/detail_flood.dart';
+import 'package:JIR/services/flood_service/flood_api_service.dart';
 
 class FloodController extends GetxController {
   final FloodService _floodService = FloodService();

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smartcitys/helper/menu.dart';
-import 'package:smartcitys/pages/auth/view/login.dart';
-import 'package:smartcitys/pages/auth/service/auth_api_service.dart';
+import 'package:JIR/helper/menu.dart';
+import 'package:JIR/pages/auth/view/login.dart';
+import 'package:JIR/pages/auth/service/auth_api_service.dart';
 
 class SignupController extends GetxController {
   final AuthService _authService = Get.find();
-  
+
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
-  
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
   final RxBool isTermsAccepted = false.obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
@@ -51,7 +52,7 @@ class SignupController extends GetxController {
     } else {
       errorMessage.value = response['message'];
     }
-    
+
     isLoading.value = false;
   }
 

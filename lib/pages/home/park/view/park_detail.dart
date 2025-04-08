@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:smartcitys/pages/home/park/widget/airquality_chart.dart';
-import 'package:smartcitys/pages/home/park/widget/pm_table.dart';
-import 'package:smartcitys/pages/home/park/widget/temperature_chart.dart';
+import 'package:JIR/pages/home/park/widget/airquality_chart.dart';
+import 'package:JIR/pages/home/park/widget/pm_table.dart';
+import 'package:JIR/pages/home/park/widget/temperature_chart.dart';
 
 class ParkDetail extends StatelessWidget {
   const ParkDetail({super.key});

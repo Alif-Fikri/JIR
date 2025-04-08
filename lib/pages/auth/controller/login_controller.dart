@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smartcitys/helper/menu.dart';
-import 'package:smartcitys/pages/auth/service/auth_api_service.dart';
-import 'package:smartcitys/pages/auth/service/google_api_auth.dart';
+import 'package:JIR/helper/menu.dart';
+import 'package:JIR/pages/auth/service/auth_api_service.dart';
+import 'package:JIR/pages/auth/service/google_api_auth.dart';
 
 class LoginController extends GetxController {
   final AuthService _authService = Get.find();
   final GoogleAuthService _googleAuthService = Get.find();
-  
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  
+
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
 
   void login() async {
     isLoading.value = true;
     errorMessage.value = '';
-    
+
     final result = await _authService.login(
       emailController.text,
       passwordController.text,
@@ -28,7 +28,7 @@ class LoginController extends GetxController {
     } else {
       errorMessage.value = result['message'];
     }
-    
+
     isLoading.value = false;
   }
 

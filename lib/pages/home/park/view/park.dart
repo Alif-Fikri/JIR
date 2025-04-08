@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smartcitys/app/routes/app_routes.dart';
-import 'package:smartcitys/pages/home/park/controller/park_controller.dart';
+import 'package:JIR/app/routes/app_routes.dart';
+import 'package:JIR/pages/home/park/controller/park_controller.dart';
 
 class ParkPage extends StatefulWidget {
   const ParkPage({super.key});

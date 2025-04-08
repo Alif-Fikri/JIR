@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:smartcitys/bindings/auth_binding.dart';
-import 'package:smartcitys/bindings/home_binding.dart';
-import 'package:smartcitys/bindings/report_binding.dart';
+import 'package:JIR/bindings/auth_binding.dart';
+import 'package:JIR/bindings/home_binding.dart';
+import 'package:JIR/bindings/report_binding.dart';
 
 class InitialBinding implements Bindings {
   @override

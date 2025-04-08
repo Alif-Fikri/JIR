@@ -1,4 +1,4 @@
-name: smartcitys
+name: JIR
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -41,6 +41,7 @@ dependencies:
   flutter_draggable_widget: ^0.0.1
   flutter_launcher_icons: ^0.14.3
   flutter_map: ^6.1.0
+  flutter_native_splash: ^2.4.1
   flutter_screenutil: ^5.9.3
   flutter_typeahead: ^5.2.0
   geocoding: ^3.0.0
@@ -78,6 +79,14 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/images/jir_logo4.png"
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/images/jir_logo5.png
+  android: true
+  ios: true
+  android_gravity: center
+  fullscreen: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

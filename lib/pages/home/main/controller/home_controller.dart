@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:smartcitys/pages/home/weather/weather_helper.dart';
+import 'package:JIR/pages/home/weather/weather_helper.dart';
 import 'package:weather/weather.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-class HomeController extends GetxController with GetSingleTickerProviderStateMixin {
+class HomeController extends GetxController
+    with GetSingleTickerProviderStateMixin {
   late AnimationController animationController;
 
   var temperature = 'Loading...'.obs;
@@ -65,16 +66,20 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
         position.longitude,
       );
 
-      final place = placemarks.isNotEmpty ? placemarks.first : const Placemark();
+      final place =
+          placemarks.isNotEmpty ? placemarks.first : const Placemark();
 
-      temperature.value = weather.temperature?.celsius?.toStringAsFixed(1) ?? 'N/A';
-      location.value = place.locality?.replaceFirst("Kecamatan ", "") ?? 'Unknown Location';
-      weatherDescription.value = WeatherHelper.translateWeather(weather.weatherDescription);
-      weatherIcon.value = WeatherHelper.getImageForWeather(weather.weatherDescription);
+      temperature.value =
+          weather.temperature?.celsius?.toStringAsFixed(1) ?? 'N/A';
+      location.value =
+          place.locality?.replaceFirst("Kecamatan ", "") ?? 'Unknown Location';
+      weatherDescription.value =
+          WeatherHelper.translateWeather(weather.weatherDescription);
+      weatherIcon.value =
+          WeatherHelper.getImageForWeather(weather.weatherDescription);
 
       final currentHour = DateTime.now().hour;
       backgroundImage.value = WeatherHelper.getBackgroundImage(currentHour);
-
     } catch (e) {
       debugPrint('Error: $e');
       _setError('Failed to fetch data');
@@ -101,7 +106,8 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     }
 
     if (permission == LocationPermission.deniedForever) {
-      _setError('Location permission permanently denied. Please enable location in settings.');
+      _setError(
+          'Location permission permanently denied. Please enable location in settings.');
       return false;
     }
 
@@ -112,7 +118,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     location.value = message;
     temperature.value = 'N/A';
     weatherDescription.value = 'N/A';
-    weatherIcon.value = 'assets/images/Cuaca Smart City Icon-01.png'; 
+    weatherIcon.value = 'assets/images/Cuaca Smart City Icon-01.png';
     final currentHour = DateTime.now().hour;
     backgroundImage.value = WeatherHelper.getBackgroundImage(currentHour);
   }
