@@ -15,6 +15,7 @@ class Menu extends StatefulWidget {
 
 class _MenuState extends State<Menu> {
   int _selectedIndex = Get.arguments ?? 0;
+  bool isLoggedIn = false;
 
   final List<Widget> _pages = [
     HomePage(),
@@ -24,9 +25,48 @@ class _MenuState extends State<Menu> {
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if ((index == 1 || index == 3) && !isLoggedIn) {
+      _showLoginDialog();
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
+
+  void _showLoginDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('Login Diperlukan',
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          content: Text(
+              'Untuk mengakses fitur ini, Anda perlu memiliki akun terlebih dahulu.',
+              style: GoogleFonts.inter()),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Get.toNamed('/signup');
+              },
+              child: Text('Register',
+                  style: GoogleFonts.inter(color: Color(0xffE45835))),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Get.toNamed('/login');
+              },
+              child: Text('Login',
+                  style: GoogleFonts.inter(color: Color(0xffE45835))),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

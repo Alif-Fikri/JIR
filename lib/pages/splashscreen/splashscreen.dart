@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen>
     _waveController.forward();
     setState(() => showBlueBackground = true);
     await Future.delayed(const Duration(seconds: 2));
-    Get.off(() => AppRoutes.home);
+    Get.offNamed(AppRoutes.home);
   }
 
   @override

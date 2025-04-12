@@ -1,3 +1,4 @@
+import 'package:JIR/pages/auth/widget/helper_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +17,14 @@ class LoginPage extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.black,
+          onPressed: () => Get.toNamed(AppRoutes.home),
+        ),
+      ),
       backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
@@ -46,20 +55,20 @@ class LoginPage extends GetView<LoginController> {
                 ),
               ),
               const SizedBox(height: 20),
-              _buildTextField(
+              buildTextField(
                 controller: controller.emailController,
                 label: 'Username/Email',
                 icon: 'assets/images/person.png',
               ),
               const SizedBox(height: 25),
-              _buildTextField(
+              buildTextField(
                 controller: controller.passwordController,
                 label: 'Password',
                 icon: 'assets/images/password.png',
                 isObscure: true,
               ),
               Obx(() => controller.errorMessage.isNotEmpty
-                  ? _buildErrorMessage(controller.errorMessage.value)
+                  ? buildErrorMessage(controller.errorMessage.value)
                   : const SizedBox.shrink()),
               const SizedBox(height: 25),
               SizedBox(
@@ -82,7 +91,7 @@ class LoginPage extends GetView<LoginController> {
                           'Sign In',
                           style: GoogleFonts.inter(
                             textStyle: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 14,
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
                             ),
@@ -113,13 +122,10 @@ class LoginPage extends GetView<LoginController> {
                 children: <Widget>[
                   Expanded(
                     child: Container(
-                      height: 1, // Ketebalan garis
+                      height: 1,
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            Colors.transparent,
-                            Colors.grey
-                          ], // Gradien ujung yang lancip
+                          colors: [Colors.transparent, Colors.grey],
                         ),
                       ),
                     ),
@@ -136,13 +142,10 @@ class LoginPage extends GetView<LoginController> {
                   ),
                   Expanded(
                     child: Container(
-                      height: 1, // Ketebalan garis
+                      height: 1,
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            Colors.grey,
-                            Colors.transparent
-                          ], // Gradien ujung yang lancip
+                          colors: [Colors.grey, Colors.transparent],
                         ),
                       ),
                     ),
@@ -161,7 +164,7 @@ class LoginPage extends GetView<LoginController> {
                       color: Colors.black.withOpacity(0.2),
                       spreadRadius: 1,
                       blurRadius: 5,
-                      offset: const Offset(0, 5), // Posisi bayangan
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
@@ -217,78 +220,6 @@ class LoginPage extends GetView<LoginController> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String icon,
-    bool isObscure = false,
-  }) {
-    return SizedBox(
-      width: fixedWidth,
-      height: fixedHeight,
-      child: TextField(
-        controller: controller,
-        obscureText: isObscure,
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: Colors.black,
-        ),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: const Color(0xFFF6F6F6),
-          labelText: label,
-          labelStyle: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            color: Colors.black,
-          ),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(
-                bottom: 15.0, top: 15.0, left: 30, right: 10),
-            child: Image.asset(
-              icon,
-              width: 16,
-              height: 16,
-            ),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorMessage(String message) {
-    return Container(
-      width: fixedWidth,
-      alignment: Alignment.centerRight,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            const Icon(
-              Icons.info,
-              color: Colors.red,
-              size: 16,
-            ),
-            Text(
-              message,
-              style: GoogleFonts.inter(
-                textStyle: const TextStyle(
-                  color: Colors.red,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -8,12 +8,10 @@ class ChangePasswordController extends GetxController {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
-  // Observables
   var isObscuredNew = true.obs;
   var isObscuredConfirm = true.obs;
   var isLoading = false.obs;
 
-  // Validations
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password cannot be empty';
