@@ -48,7 +48,7 @@ class SignupController extends GetxController {
     );
 
     if (response['success']) {
-      Get.offAll(() => const Menu());
+      Get.offAll(() => LoginPage());
     } else {
       errorMessage.value = response['message'];
     }

@@ -147,10 +147,14 @@ class AppRoutes {
     GetPage(
       name: termsOfService,
       page: () => const TermsOfService(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: privacyPolicy,
       page: () => const PrivacyPolicy(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: settings,

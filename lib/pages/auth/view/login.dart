@@ -77,7 +77,6 @@ class LoginPage extends GetView<LoginController> {
                 child: ElevatedButton(
                   onPressed: controller.login,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -183,7 +182,6 @@ class LoginPage extends GetView<LoginController> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

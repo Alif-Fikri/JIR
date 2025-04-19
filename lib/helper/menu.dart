@@ -5,6 +5,7 @@ import 'package:JIR/pages/home/main/view/home.dart';
 import 'package:JIR/pages/notifications/notification.dart';
 import 'package:JIR/pages/profile/profile.dart';
 import 'package:JIR/pages/activity/activity.dart';
+import 'package:hive/hive.dart';
 
 class Menu extends StatefulWidget {
   const Menu({super.key});
@@ -23,6 +24,20 @@ class _MenuState extends State<Menu> {
     const NotificationPage(),
     const ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    var box = await Hive.openBox('authBox');
+    final token = box.get('token');
+    setState(() {
+      isLoggedIn = token != null && token.isNotEmpty;
+    });
+  }
 
   void _onItemTapped(int index) {
     if ((index == 1 || index == 3) && !isLoggedIn) {

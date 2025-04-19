@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
 
 class AuthService {
-  final String baseUrl = 'http://localhost:8000/auth';
+  final String baseUrl = 'http://192.168.1.11:8000/auth';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     final url = Uri.parse('$baseUrl/login');
@@ -46,7 +46,7 @@ class AuthService {
       } else {
         return {'success': false, 'message': 'Signup failed'};
       }
-      } catch (e) {
+    } catch (e) {
       return {'success': false, 'message': 'Unable to connect to the server'};
     }
   }

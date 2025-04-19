@@ -17,7 +17,9 @@ class SignupPage extends GetView<SignupController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        elevation: 0,
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -84,11 +86,10 @@ class SignupPage extends GetView<SignupController> {
                   ? buildErrorMessage(controller.errorMessage.value)
                   : const SizedBox.shrink()),
               const SizedBox(height: 10),
-              // Terms and Conditions Checkbox
               SizedBox(
                 width: fixedWidth,
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Obx(() => Checkbox(
                           activeColor: Colors.white,
@@ -97,29 +98,67 @@ class SignupPage extends GetView<SignupController> {
                           onChanged: (value) =>
                               controller.isTermsAccepted.value = value ?? false,
                         )),
+                    const SizedBox(width: 2),
                     Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          text: 'I have read and accept the general ',
-                          style: GoogleFonts.inter(
-                            textStyle: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
+                      child: Wrap(
+                        children: [
+                          Text(
+                            'I have read and accept the ',
+                            style: GoogleFonts.inter(
+                              textStyle: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
-                          children: [
-                            TextSpan(
-                              text: 'terms, use, and privacy policy',
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size(0, 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () {
+                              Get.toNamed(AppRoutes.termsOfService);
+                            },
+                            child: Text(
+                              'terms of service',
                               style: GoogleFonts.inter(
                                 textStyle: const TextStyle(
-                                  color: Color(0xFF005FCB),
                                   fontSize: 12,
+                                  color: Color(0xFF005FCB),
                                 ),
                               ),
-                              recognizer: TapGestureRecognizer()..onTap = () {},
                             ),
-                          ],
-                        ),
+                          ),
+                          Text(
+                            ' and ',
+                            style: GoogleFonts.inter(
+                              textStyle: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size(0, 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            onPressed: () {
+                              Get.toNamed(AppRoutes.privacyPolicy);
+                            },
+                            child: Text(
+                              'privacy policy',
+                              style: GoogleFonts.inter(
+                                textStyle: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF005FCB),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -132,7 +171,6 @@ class SignupPage extends GetView<SignupController> {
                 child: ElevatedButton(
                   onPressed: controller.validateAndRegister,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

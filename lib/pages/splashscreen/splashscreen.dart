@@ -14,7 +14,9 @@ class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
   bool showBlueBackground = false;
 
-  late AnimationController _waveController;
+  late final AnimationController _waveController;
+  late final Animation<double> firstLogoOpacity;
+  late final Animation<double> secondLogoOpacity;
 
   @override
   void initState() {
@@ -22,19 +24,29 @@ class _SplashScreenState extends State<SplashScreen>
     _waveController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..addListener(() {
-        if (_waveController.value >= 0.5 && mounted) {
-          setState(() {});
-        }
-      });
+    );
+
+    firstLogoOpacity = Tween(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _waveController,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+      ),
+    );
+
+    secondLogoOpacity = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _waveController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+      ),
+    );
 
     _startSplashSequence();
   }
 
-  void _startSplashSequence() async {
+  Future<void> _startSplashSequence() async {
     await Future.delayed(const Duration(seconds: 2));
-    _waveController.forward();
     setState(() => showBlueBackground = true);
+    await _waveController.forward();
     await Future.delayed(const Duration(seconds: 2));
     Get.offNamed(AppRoutes.home);
   }
@@ -53,14 +65,16 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          if (_waveController.value < 0.5)
-            Center(
+          FadeTransition(
+            opacity: firstLogoOpacity,
+            child: Center(
               child: Image.asset(
                 'assets/images/jir_logo.png',
                 width: 200,
                 height: 200,
               ),
             ),
+          ),
           if (showBlueBackground)
             AnimatedBuilder(
               animation: _waveController,
@@ -92,8 +106,9 @@ class _SplashScreenState extends State<SplashScreen>
                 );
               },
             ),
-          if (_waveController.value >= 0.5)
-            Stack(
+          FadeTransition(
+            opacity: secondLogoOpacity,
+            child: Stack(
               children: [
                 Center(
                   child: Image.asset(
@@ -102,9 +117,9 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
                 Positioned(
-                  bottom: 40,
                   left: 0,
                   right: 0,
+                  bottom: 40,
                   child: Center(
                     child: Text(
                       'JIR',
@@ -118,6 +133,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ],
             ),
+          ),
         ],
       ),
     );
@@ -126,43 +142,20 @@ class _SplashScreenState extends State<SplashScreen>
 
 class ComplexWaveClipper extends CustomClipper<Path> {
   final double progress;
-
   ComplexWaveClipper(this.progress);
 
   @override
   Path getClip(Size size) {
     final path = Path();
-    final heightProgress = size.height * progress;
+    final h = size.height * progress;
 
-    path.lineTo(0, heightProgress - 80);
-
-    path.cubicTo(
-      size.width * 0.1,
-      heightProgress + 20,
-      size.width * 0.2,
-      heightProgress - 100,
-      size.width * 0.3,
-      heightProgress - 20,
-    );
-
-    path.cubicTo(
-      size.width * 0.4,
-      heightProgress + 60,
-      size.width * 0.5,
-      heightProgress - 100,
-      size.width * 0.6,
-      heightProgress - 10,
-    );
-
-    path.cubicTo(
-      size.width * 0.7,
-      heightProgress + 40,
-      size.width * 0.8,
-      heightProgress - 120,
-      size.width,
-      heightProgress - 40,
-    );
-
+    path.lineTo(0, h - 80);
+    path.cubicTo(size.width * 0.1, h + 20, size.width * 0.2, h - 100,
+        size.width * 0.3, h - 20);
+    path.cubicTo(size.width * 0.4, h + 60, size.width * 0.5, h - 100,
+        size.width * 0.6, h - 10);
+    path.cubicTo(size.width * 0.7, h + 40, size.width * 0.8, h - 120,
+        size.width, h - 40);
     path.lineTo(size.width, 0);
     path.close();
 
@@ -170,6 +163,5 @@ class ComplexWaveClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(ComplexWaveClipper oldClipper) =>
-      oldClipper.progress != progress;
+  bool shouldReclip(ComplexWaveClipper old) => old.progress != progress;
 }
