@@ -27,9 +27,11 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Settings'),
-        titleTextStyle: GoogleFonts.inter(
-            fontWeight: FontWeight.w700, color: Colors.white, fontSize: 24),
+        title: Text(
+          'Settings',
+          style: GoogleFonts.inter(
+              fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
+        ),
         backgroundColor: const Color(0xff45557B),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -70,10 +72,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: const Color(0xff45557B))),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ChangePasswordPage()));
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) => ChangePasswordPage(),
+                );
               },
             ),
             const Divider(color: Color(0xffDEDEDE)),
