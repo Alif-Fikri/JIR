@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:JIR/helper/loading.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
@@ -85,7 +86,9 @@ class ParksController extends GetxController {
         otherParks.value = allParks.skip(5).take(20).toList();
       }
     } catch (e) {
-      errorMessage.value = 'Gagal memuat data taman: $e';
+      Future.delayed(Duration.zero, () {
+        Get.off(() => const LoadingPage());
+      });
     } finally {
       isLoading.value = false;
     }

@@ -19,13 +19,29 @@ class ReportCard extends StatelessWidget {
     required this.imageUrl,
   });
 
+  void _showFullImage(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: InteractiveViewer(
+          child: imageUrl.startsWith('http')
+              ? Image.network(imageUrl, fit: BoxFit.contain)
+              : Image.file(File(imageUrl), fit: BoxFit.contain),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(width: 0.2)),
+        borderRadius: BorderRadius.circular(10),
+        side: const BorderSide(width: 0.2),
+      ),
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -43,7 +59,9 @@ class ReportCard extends StatelessWidget {
                   child: Text(
                     username,
                     style: GoogleFonts.inter(
-                        fontSize: 15, fontWeight: FontWeight.bold),
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Row(
@@ -67,21 +85,41 @@ class ReportCard extends StatelessWidget {
                 style: GoogleFonts.inter(fontSize: 14),
               ),
             ),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: imageUrl.startsWith('http')
-                  ? Image.network(
-                      imageUrl,
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    )
-                  : Image.file(
-                      File(imageUrl),
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: imageUrl.startsWith('http')
+                      ? Image.network(
+                          imageUrl,
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.file(
+                          File(imageUrl),
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => _showFullImage(context),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.fullscreen,
+                          color: Colors.white, size: 20),
                     ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

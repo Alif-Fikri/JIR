@@ -8,64 +8,112 @@ class ReportFormPage extends StatelessWidget {
 
   ReportFormPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: _buildAppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(30.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildImagePreview(),
-              const SizedBox(height: 20),
-              _buildDescriptionField(),
-              const SizedBox(height: 30),
-              _buildSubmitButton(),
-            ],
+  void _showFullImage(BuildContext context) {
+    final file = controller.imageFile.value;
+    if (file == null) return;
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: InteractiveViewer(
+          child: Image.file(
+            file,
+            fit: BoxFit.contain,
           ),
         ),
       ),
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: Text(
-        'Laporan Baru',
-        style: GoogleFonts.inter(
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-          color: Colors.white,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: _buildAppBar(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(30.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildImagePreview(context),
+            const SizedBox(height: 20),
+            _buildDescriptionField(),
+            const SizedBox(height: 30),
+            _buildSubmitButton(),
+          ],
         ),
-      ),
-      backgroundColor: const Color(0xff45557B),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => Get.back(),
       ),
     );
   }
 
-  Widget _buildImagePreview() {
-    return Obx(() => controller.imageFile.value != null
-        ? Column(
+  AppBar _buildAppBar() => AppBar(
+        title: Text(
+          'Laporan Baru',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xff45557B),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
+      );
+
+  Widget _buildImagePreview(BuildContext context) {
+    return Obx(() {
+      final file = controller.imageFile.value;
+      if (file == null) return const SizedBox.shrink();
+
+      return Column(
+        children: [
+          Stack(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
+              Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.hardEdge,
                 child: Image.file(
-                  controller.imageFile.value!,
-                  height: 200,
+                  file,
                   width: double.infinity,
+                  height: 200,
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 10),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () => _showFullImage(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.fullscreen, color: Colors.white),
+                  ),
+                ),
+              ),
             ],
-          )
-        : const SizedBox.shrink());
+          ),
+          const SizedBox(height: 10),
+        ],
+      );
+    });
   }
 
   Widget _buildDescriptionField() {
@@ -86,17 +134,14 @@ class ReportFormPage extends StatelessWidget {
           decoration: InputDecoration(
             hintText: "Tambahkan deskripsi...",
             border: OutlineInputBorder(
-              // Border warna biru
               borderSide: const BorderSide(color: Color(0xff45557B)),
               borderRadius: BorderRadius.circular(10),
             ),
             enabledBorder: OutlineInputBorder(
-              // Border saat tidak aktif
               borderSide: const BorderSide(color: Color(0xff45557B)),
               borderRadius: BorderRadius.circular(10),
             ),
             focusedBorder: OutlineInputBorder(
-              // Border saat fokus
               borderSide: const BorderSide(color: Color(0xff45557B), width: 2),
               borderRadius: BorderRadius.circular(10),
             ),

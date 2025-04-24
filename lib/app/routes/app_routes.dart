@@ -143,6 +143,8 @@ class AppRoutes {
     GetPage(
       name: about,
       page: () => const AboutPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: termsOfService,
@@ -159,6 +161,8 @@ class AppRoutes {
     GetPage(
       name: settings,
       page: () => const SettingsPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     //     GetPage(
     //   name: logout,
@@ -167,6 +171,8 @@ class AppRoutes {
     GetPage(
       name: changePassword,
       page: () => ChangePasswordPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     //     GetPage(
     //   name: deleteAccount,
