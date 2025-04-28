@@ -1,21 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WeatherService {
-  final String apiKey = dotenv.env['WEATHER_APIDEV_KEY']!;
   final double lat = -6.229728; // Jakarta
   final double lon = 106.689431;
+  final String baseUrl = 'http://127.0.0.1:8000';
 
-  Future<Map<String, dynamic>> fetchWeatherForecast() async {
-    final url =
-        'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&units=metric&appid=$apiKey';
+  Future<Map<String, dynamic>> fetchWeather() async {
+    final url = Uri.parse('$baseUrl/weather?lat=$lat&lon=$lon');
 
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data;
+      return jsonDecode(response.body);
     } else {
       throw Exception('Failed to fetch weather data: ${response.statusCode}');
     }

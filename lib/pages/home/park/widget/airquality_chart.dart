@@ -66,7 +66,7 @@ class AirQualityChart extends StatelessWidget {
                 ),
                 barTouchData: BarTouchData(
                     touchTooltipData: BarTouchTooltipData(
-                  tooltipBgColor: Colors.grey,
+                  // tooltipBgColor: Colors.grey,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     return BarTooltipItem(
                         rod.toY.toInt().toString(),

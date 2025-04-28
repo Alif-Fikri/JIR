@@ -14,7 +14,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await initializeDateFormatting('id_ID', null);
   runApp(const MyApp());
-  Get.put(InternetService());
+  // Get.put(InternetService());
 }
 
 class MyApp extends StatelessWidget {
