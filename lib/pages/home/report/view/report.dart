@@ -7,7 +7,6 @@ import 'package:JIR/pages/home/report/view/report_user.dart';
 
 class ReportPage extends StatelessWidget {
   final ReportController controller = Get.find<ReportController>();
-
   ReportPage({super.key});
 
   @override

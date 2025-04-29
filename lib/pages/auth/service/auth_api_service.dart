@@ -1,11 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
 
 class AuthService {
-  final String baseUrl = 'http://192.168.1.11:8000/auth';
+  final String baseUrl = 'http://192.168.0.126:8000/auth';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
+    if (email.isEmpty || password.isEmpty) {
+      return {
+        'success': false,
+        'message': 'Email and password cannot be empty'
+      };
+    }
+
     final url = Uri.parse('$baseUrl/login');
 
     try {
@@ -19,35 +27,65 @@ class AuthService {
         final data = jsonDecode(response.body);
         await _saveToken(data['access_token']);
         return {'success': true, 'message': 'Login successful'};
+      } else if (response.statusCode == 400) {
+        final data = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': data['detail'] ?? 'Invalid request'
+        };
       } else if (response.statusCode == 401) {
         return {'success': false, 'message': 'Invalid email or password'};
       } else {
-        return {'success': false, 'message': 'Server error. Please try again'};
+        return {
+          'success': false,
+          'message': 'Server error (${response.statusCode})'
+        };
       }
+    } on SocketException {
+      return {'success': false, 'message': 'No Internet connection'};
+    } on FormatException {
+      return {'success': false, 'message': 'Invalid response format'};
     } catch (e) {
-      return {'success': false, 'message': 'Unable to connect to the server'};
+      return {'success': false, 'message': 'Unexpected error: $e'};
     }
   }
 
   Future<Map<String, dynamic>> signup(
       String username, String email, String password) async {
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      return {'success': false, 'message': 'All fields are required'};
+    }
+
     final url = Uri.parse('$baseUrl/signup');
 
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(
-            {'username': username, 'email': email, 'password': password}),
+        body: jsonEncode({
+          'username': username,
+          'email': email,
+          'password': password,
+        }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return {'success': true, 'message': 'Signup successful'};
+      } else if (response.statusCode == 400) {
+        final data = jsonDecode(response.body);
+        return {'success': false, 'message': data['detail'] ?? 'Signup failed'};
       } else {
-        return {'success': false, 'message': 'Signup failed'};
+        return {
+          'success': false,
+          'message': 'Server error (${response.statusCode})'
+        };
       }
+    } on SocketException {
+      return {'success': false, 'message': 'No Internet connection'};
+    } on FormatException {
+      return {'success': false, 'message': 'Invalid response format'};
     } catch (e) {
-      return {'success': false, 'message': 'Unable to connect to the server'};
+      return {'success': false, 'message': 'Unexpected error: $e'};
     }
   }
 
@@ -114,9 +152,39 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>> logout() async {
+    final token = await _getToken();
+    final url = Uri.parse('$baseUrl/logout');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      await _clearToken();
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Logged out successfully'};
+      } else {
+        return {
+          'success': false,
+          'message': 'Server logout failed (${response.statusCode})'
+        };
+      }
+    } catch (e) {
+      await _clearToken(); 
+      return {'success': false, 'message': 'Connection error'};
+    }
+  }
+
   Future<void> _saveToken(String token) async {
     var box = await Hive.openBox('authBox');
     await box.put('token', token);
+    print('Token saved: $token');
   }
 
   Future<String?> _getToken() async {
@@ -127,5 +195,6 @@ class AuthService {
   Future<void> _clearToken() async {
     var box = await Hive.openBox('authBox');
     await box.delete('token');
+    print('Token cleared');
   }
 }

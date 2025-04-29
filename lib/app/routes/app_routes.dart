@@ -87,7 +87,7 @@ class AppRoutes {
     ),
     GetPage(
       name: profile,
-      page: () => const ProfilePage(),
+      page: () => ProfilePage(),
     ),
     GetPage(
       name: notification,

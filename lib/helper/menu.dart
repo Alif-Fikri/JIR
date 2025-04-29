@@ -1,3 +1,4 @@
+import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,7 +23,7 @@ class _MenuState extends State<Menu> {
     HomePage(),
     ActivityPage(),
     const NotificationPage(),
-    const ProfilePage(),
+    ProfilePage(),
   ];
 
   @override
@@ -56,8 +57,9 @@ class _MenuState extends State<Menu> {
         return AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: Colors.white,
           title: Text('Login Diperlukan',
-              style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+              style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
           content: Text(
               'Untuk mengakses fitur ini, Anda perlu memiliki akun terlebih dahulu.',
               style: GoogleFonts.inter()),
@@ -65,18 +67,20 @@ class _MenuState extends State<Menu> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Get.toNamed('/signup');
+                Get.toNamed(AppRoutes.signup);
               },
               child: Text('Register',
-                  style: GoogleFonts.inter(color: Color(0xffE45835))),
+                  style: GoogleFonts.inter(
+                      color: Color(0xffE45835), fontWeight: FontWeight.w600)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Get.toNamed('/login');
+                Get.toNamed(AppRoutes.login);
               },
               child: Text('Login',
-                  style: GoogleFonts.inter(color: Color(0xffE45835))),
+                  style: GoogleFonts.inter(
+                      color: Color(0xffE45835), fontWeight: FontWeight.w600)),
             ),
           ],
         );

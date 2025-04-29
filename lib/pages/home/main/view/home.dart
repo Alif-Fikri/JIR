@@ -1,3 +1,4 @@
+import 'package:JIR/pages/home/report/controller/report_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/app/routes/app_routes.dart';
@@ -113,7 +114,8 @@ class HomePage extends StatelessWidget {
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       SizedBox(
@@ -132,7 +134,7 @@ class HomePage extends StatelessWidget {
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
                                         ),
-                                      ),                              
+                                      ),
                                       Text(
                                         "${controller.temperature.value}°",
                                         style: GoogleFonts.inter(
@@ -256,7 +258,10 @@ class HomePage extends StatelessWidget {
                               label: 'Cuaca',
                             ),
                             featureIcon(
-                              onPressed: () => Get.toNamed(AppRoutes.lapor),
+                              onPressed: () {
+                                Get.lazyPut(() => ReportController());
+                                Get.toNamed(AppRoutes.lapor);
+                              },
                               imagePath: 'assets/images/laporan.png',
                               label: 'Laporan',
                             ),

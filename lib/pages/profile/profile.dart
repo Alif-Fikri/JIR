@@ -1,54 +1,16 @@
+import 'package:JIR/pages/auth/controller/logout_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:JIR/pages/auth/view/login.dart';
 import 'package:JIR/pages/profile/about.dart';
 import 'package:JIR/pages/profile/privacy_policy.dart';
 import 'package:JIR/pages/auth/view/delete_acc.dart';
 import 'package:JIR/pages/profile/terms_of_service.dart';
-import 'package:http/http.dart' as http;
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  ProfilePage({super.key});
 
-  Future<void> handleLogout(BuildContext context) async {
-    try {
-      final box = Hive.box('authBox');
-      final token = box.get('token');
-
-      if (token == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No token found. Please log in again.')),
-        );
-        return;
-      }
-
-      final response = await http.post(
-        Uri.parse('http://localhost:8000/auth/logout'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        await box.delete('token');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to logout. Please try again.')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    }
-  }
+  final LogoutController logoutController = Get.put(LogoutController());
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +134,12 @@ class ProfilePage extends StatelessWidget {
                     icon: Image.asset('assets/images/logout.png', width: 24),
                     text: "Logout",
                     onTap: () {
-                      LogoutDialog.show(context, handleLogout);
+                      LogoutDialog.show(
+                        context,
+                        (context) async {
+                          await logoutController.logout();
+                        },
+                      );
                     },
                   ),
                 ],
@@ -247,63 +214,61 @@ class LogoutDialog {
             ),
           ),
           actions: [
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: const Color(0xff4B5C82)),
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                        ),
-                        child: FittedBox(
-                          child: Text(
-                            'Cancel',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: const Color(0xff4B5C82)),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                      ),
+                      child: FittedBox(
+                        child: Text(
+                          'Cancel',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                              color: const Color(0xff4B5C82), width: 1.5)),
-                      child: TextButton(
-                        onPressed: () async {
-                          Navigator.of(context).pop();
-                          await onLogout(context);
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: const Color(0xFF435482),
-                        ),
-                        child: FittedBox(
-                          child: Text(
-                            'Log Out',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                            color: const Color(0xff4B5C82), width: 1.5)),
+                    child: TextButton(
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        await onLogout(context);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF435482),
+                      ),
+                      child: FittedBox(
+                        child: Text(
+                          'Log Out',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         );

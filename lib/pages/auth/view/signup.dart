@@ -10,9 +10,7 @@ class SignupPage extends GetView<SignupController> {
   final fixedWidth = 350.0;
   final fixedHeight = 50.0;
 
-  SignupPage({super.key}) {
-    Get.put(SignupController());
-  }
+  const SignupPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,15 +28,14 @@ class SignupPage extends GetView<SignupController> {
       backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                height: 115.0,
-                width: fixedWidth,
-                color: Colors.grey,
+              Image.asset(
+                'assets/images/jir_logo3.png',
+                width: 100,
+                height: 100,
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -89,6 +86,7 @@ class SignupPage extends GetView<SignupController> {
               SizedBox(
                 width: fixedWidth,
                 child: Row(
+                  spacing: 8,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Obx(() => Checkbox(
@@ -131,7 +129,7 @@ class SignupPage extends GetView<SignupController> {
                             ),
                           ),
                           Text(
-                            ' and ',
+                            'and ',
                             style: GoogleFonts.inter(
                               textStyle: const TextStyle(
                                 color: Colors.black,
