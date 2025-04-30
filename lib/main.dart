@@ -5,7 +5,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/bindings/initial_binding.dart';
-import 'package:JIR/services/internet_service/internet_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +27,7 @@ class MyApp extends StatelessWidget {
       initialRoute: AppRoutes.initial,
       initialBinding: InitialBinding(),
       getPages: AppRoutes.getPages,
+      navigatorKey: Get.key,
     );
   }
 }

@@ -195,6 +195,7 @@ class AuthService {
   Future<void> _clearToken() async {
     var box = await Hive.openBox('authBox');
     await box.delete('token');
+    await box.close();
     print('Token cleared');
   }
 }
