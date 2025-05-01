@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
+import 'package:JIR/helper/custom_snackbar.dart';
 
 class DeleteAccountController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
@@ -8,26 +9,30 @@ class DeleteAccountController extends GetxController {
   final RxString password = ''.obs;
 
   Future<void> deleteAccount(String password) async {
+    isLoading(true);
     try {
-      isLoading(true);
       final response = await _authService.deleteAccount(password);
 
       if (response['success']) {
         Get.offAllNamed('/login');
-        Get.snackbar(
-          'Success',
-          'Account deleted successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
+        CustomSnackbar.show(
+          context: Get.context!,
+          message: "Akun berhasil dihapus",
+          imageAssetPath: 'assets/images/jir_logo3.png',
         );
       } else {
-        Get.snackbar(
-          'Error',
-          response['message'],
-          snackPosition: SnackPosition.BOTTOM,
+        CustomSnackbar.show(
+          context: Get.context!,
+          message: response['message'] ?? "Gagal menghapus akun",
+          imageAssetPath: 'assets/images/jir_logo3.png',
         );
       }
+    } catch (e) {
+      CustomSnackbar.show(
+        context: Get.context!,
+        message: "Terjadi kesalahan saat menghapus akun",
+        imageAssetPath: 'assets/images/jir_logo3.png',
+      );
     } finally {
       isLoading(false);
     }

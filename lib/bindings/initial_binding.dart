@@ -1,3 +1,4 @@
+import 'package:JIR/bindings/profile_binding.dart';
 import 'package:get/get.dart';
 import 'package:JIR/bindings/auth_binding.dart';
 import 'package:JIR/bindings/home_binding.dart';
@@ -9,5 +10,6 @@ class InitialBinding implements Bindings {
     AuthBinding().dependencies();
     ReportBinding().dependencies();
     HomeBinding().dependencies();
+    ProfileBinding().dependencies();
   }
 }

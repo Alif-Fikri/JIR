@@ -1,3 +1,5 @@
+import 'package:JIR/bindings/initial_binding.dart';
+import 'package:JIR/bindings/profile_binding.dart';
 import 'package:get/get.dart';
 import 'package:JIR/bindings/auth_binding.dart';
 import 'package:JIR/bindings/home_binding.dart';
@@ -66,28 +68,31 @@ class AppRoutes {
       page: () => const SplashScreen(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
+      binding: InitialBinding(),
     ),
     GetPage(
       name: login,
       page: () => LoginPage(),
-      binding: AuthBinding(),
+      binding: InitialBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: signup,
       page: () => SignupPage(),
-      binding: AuthBinding(),
+      binding: InitialBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: home,
       page: () => const Menu(),
+      binding: InitialBinding(),
     ),
     GetPage(
       name: profile,
       page: () => ProfilePage(),
+      binding: InitialBinding(),
     ),
     GetPage(
       name: notification,
@@ -129,12 +134,12 @@ class AppRoutes {
     GetPage(
       name: peta,
       page: () => MapMonitoring(),
-      binding: HomeBinding(),
+      binding: InitialBinding(),
     ),
     GetPage(
       name: lapor,
       page: () => ReportPage(),
-      binding: ReportBinding(),
+      binding: InitialBinding(),
     ),
     //     GetPage(
     //   name: report,
@@ -163,6 +168,7 @@ class AppRoutes {
       page: () => const SettingsPage(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
+      binding: InitialBinding(),
     ),
     //     GetPage(
     //   name: logout,
@@ -173,6 +179,7 @@ class AppRoutes {
       page: () => ChangePasswordPage(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
+      binding: InitialBinding(),
     ),
     //     GetPage(
     //   name: deleteAccount,

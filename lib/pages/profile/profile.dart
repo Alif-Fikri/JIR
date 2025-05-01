@@ -1,4 +1,5 @@
 import 'package:JIR/pages/auth/controller/logout_controller.dart';
+import 'package:JIR/pages/profile/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +12,7 @@ class ProfilePage extends StatelessWidget {
   ProfilePage({super.key});
 
   final LogoutController logoutController = Get.put(LogoutController());
+  final ProfileController pc = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -35,26 +37,26 @@ class ProfilePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Hi, Smoggy !',
-                      style: GoogleFonts.inter(
-                        fontSize: 22,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    Obx(() => Text(
+                          'Hi, ${pc.name.value} !',
+                          style: GoogleFonts.inter(
+                            fontSize: 22,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        )),
                     const SizedBox(height: 5),
-                    Text(
-                      'smoggy.mail@gmail.com',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.white,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    Obx(() => Text(
+                          pc.email.value,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        )),
                   ],
                 ),
               ),

@@ -1,3 +1,4 @@
+import 'package:JIR/helper/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
@@ -14,17 +15,20 @@ class ChangePasswordController extends GetxController {
 
   String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password cannot be empty';
+      return 'Password tidak boleh kosong';
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return 'Password minimal 6 karakter';
     }
     return null;
   }
 
   String? validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Konfirmasi password tidak boleh kosong';
+    }
     if (value != newPasswordController.text) {
-      return 'Passwords do not match';
+      return 'Password tidak cocok';
     }
     return null;
   }
@@ -32,15 +36,24 @@ class ChangePasswordController extends GetxController {
   Future<void> changePassword() async {
     if (isLoading.value) return;
 
-    final newPasswordError = validatePassword(newPasswordController.text);
-    final confirmPasswordError =
+    // validasi
+    final newPwdError = validatePassword(newPasswordController.text);
+    final confirmPwdError =
         validateConfirmPassword(confirmPasswordController.text);
 
-    if (newPasswordError != null || confirmPasswordError != null) {
-      Get.snackbar(
-        'Error',
-        'Please fix the errors in the form',
-        snackPosition: SnackPosition.BOTTOM,
+    if (newPwdError != null) {
+      CustomSnackbar.show(
+        context: Get.context!,
+        message: newPwdError,
+        imageAssetPath: 'assets/images/jir_logo3.png',
+      );
+      return;
+    }
+    if (confirmPwdError != null) {
+      CustomSnackbar.show(
+        context: Get.context!,
+        message: confirmPwdError,
+        imageAssetPath: 'assets/images/jir_logo3.png',
       );
       return;
     }
@@ -54,25 +67,23 @@ class ChangePasswordController extends GetxController {
 
       if (response['success']) {
         Get.back();
-        Get.snackbar(
-          'Success',
-          'Password changed successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
+        CustomSnackbar.show(
+          context: Get.context!,
+          message: "Password berhasil diubah",
+          imageAssetPath: 'assets/images/jir_logo3.png',
         );
       } else {
-        Get.snackbar(
-          'Error',
-          response['message'],
-          snackPosition: SnackPosition.BOTTOM,
+        CustomSnackbar.show(
+          context: Get.context!,
+          message: response['message'] ?? "Gagal mengubah password",
+          imageAssetPath: 'assets/images/jir_logo3.png',
         );
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'An error occurred. Please try again',
-        snackPosition: SnackPosition.BOTTOM,
+      CustomSnackbar.show(
+        context: Get.context!,
+        message: "Terjadi kesalahan. Silakan coba lagi.",
+        imageAssetPath: 'assets/images/jir_logo3.png',
       );
     } finally {
       isLoading(false);

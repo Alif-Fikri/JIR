@@ -1,4 +1,3 @@
-import 'package:JIR/pages/home/report/controller/report_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/app/routes/app_routes.dart';
@@ -259,7 +258,6 @@ class HomePage extends StatelessWidget {
                             ),
                             featureIcon(
                               onPressed: () {
-                                Get.lazyPut(() => ReportController());
                                 Get.toNamed(AppRoutes.lapor);
                               },
                               imagePath: 'assets/images/laporan.png',
@@ -271,9 +269,7 @@ class HomePage extends StatelessWidget {
                     ),
                     Transform.translate(
                       offset: const Offset(0, -80),
-                      child: Container(
-                        child: Image.asset('assets/images/line2.png'),
-                      ),
+                      child: Image.asset('assets/images/line2.png'),
                     ),
                     const SizedBox(height: 16),
                     Transform.translate(

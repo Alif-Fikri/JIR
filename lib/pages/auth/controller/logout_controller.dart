@@ -1,9 +1,9 @@
 import 'package:JIR/app/routes/app_routes.dart';
+import 'package:JIR/helper/custom_snackbar.dart';
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 
 class LogoutController extends GetxController {
   final AuthService _authService = AuthService();
@@ -15,26 +15,17 @@ class LogoutController extends GetxController {
     final response = await _authService.logout();
 
     if (response['success']) {
-      await Future.delayed(
-          Duration(milliseconds: 300));
-      Fluttertoast.showToast(
-        msg: "Logout successful!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
+      CustomSnackbar.show(
+        context: Get.context!,
+        message: "Anda berhasil logout",
+        imageAssetPath: 'assets/images/jir_logo3.png',
       );
-      Get.reset();
-      Get.offAllNamed(AppRoutes.splash);
+      Get.offAllNamed(AppRoutes.login);
     } else {
-      Fluttertoast.showToast(
-        msg: response['message'],
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
+      CustomSnackbar.show(
+        context: Get.context!,
+        message: "Logout anda gagal, coba lagi nanti!.",
+        imageAssetPath: 'assets/images/jir_logo3.png',
       );
     }
 

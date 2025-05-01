@@ -176,8 +176,28 @@ class AuthService {
         };
       }
     } catch (e) {
-      await _clearToken(); 
+      await _clearToken();
       return {'success': false, 'message': 'Connection error'};
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchProfile() async {
+    final token = await _getToken();
+    if (token == null) throw Exception('Not authenticated');
+
+    final url = Uri.parse('$baseUrl/me');
+    final resp = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (resp.statusCode == 200) {
+      return jsonDecode(resp.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to fetch profile (${resp.statusCode})');
     }
   }
 
