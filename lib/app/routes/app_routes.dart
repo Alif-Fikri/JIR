@@ -16,7 +16,7 @@ import 'package:JIR/pages/home/map/view/map_monitoring.dart';
 import 'package:JIR/pages/home/park/view/park.dart';
 import 'package:JIR/pages/home/park/view/park_detail.dart';
 import 'package:JIR/pages/home/report/view/report.dart';
-import 'package:JIR/pages/home/weather/weather.dart';
+import 'package:JIR/pages/home/weather/view/weather.dart';
 import 'package:JIR/pages/notifications/notification.dart';
 import 'package:JIR/pages/profile/about.dart';
 import 'package:JIR/pages/profile/privacy_policy.dart';
@@ -125,7 +125,7 @@ class AppRoutes {
     ),
     GetPage(
       name: cuaca,
-      page: () => const WeatherPage(),
+      page: () => WeatherPage(),
     ),
     GetPage(
       name: cctv,

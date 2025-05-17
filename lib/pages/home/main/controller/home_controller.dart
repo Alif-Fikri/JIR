@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:JIR/pages/home/weather/weather_helper.dart';
+import 'package:JIR/pages/home/weather/widget/weather_helper.dart';
 import 'package:weather/weather.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
