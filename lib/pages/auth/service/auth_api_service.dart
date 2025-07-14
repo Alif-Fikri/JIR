@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:hive/hive.dart';
+import 'package:JIR/config.dart';
 
 class AuthService {
-  final String baseUrl = 'http://192.168.0.126:8000/auth';
+  final String authUrl = '$mainUrl/auth';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     if (email.isEmpty || password.isEmpty) {
@@ -14,7 +15,7 @@ class AuthService {
       };
     }
 
-    final url = Uri.parse('$baseUrl/login');
+    final url = Uri.parse('$authUrl/login');
 
     try {
       final response = await http.post(
@@ -56,7 +57,7 @@ class AuthService {
       return {'success': false, 'message': 'All fields are required'};
     }
 
-    final url = Uri.parse('$baseUrl/signup');
+    final url = Uri.parse('$authUrl/signup');
 
     try {
       final response = await http.post(
@@ -90,7 +91,7 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> deleteAccount(String password) async {
-    final url = Uri.parse('$baseUrl/delete-account');
+    final url = Uri.parse('$authUrl/delete-account');
     final token = await _getToken();
 
     try {
@@ -118,7 +119,7 @@ class AuthService {
     String oldPassword,
     String newPassword,
   ) async {
-    final url = Uri.parse('$baseUrl/change-password');
+    final url = Uri.parse('$authUrl/change-password');
     final token = await _getToken();
 
     if (token == null) {
@@ -154,7 +155,7 @@ class AuthService {
 
   Future<Map<String, dynamic>> logout() async {
     final token = await _getToken();
-    final url = Uri.parse('$baseUrl/logout');
+    final url = Uri.parse('$authUrl/logout');
 
     try {
       final response = await http.post(
@@ -185,7 +186,7 @@ class AuthService {
     final token = await _getToken();
     if (token == null) throw Exception('Not authenticated');
 
-    final url = Uri.parse('$baseUrl/me');
+    final url = Uri.parse('$authUrl/me');
     final resp = await http.get(
       url,
       headers: {

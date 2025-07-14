@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:JIR/config.dart';
 
 class CrowdController extends GetxController {
   final RxMap<String, dynamic> liveData = <String, dynamic>{}.obs;
@@ -35,7 +36,7 @@ class CrowdController extends GetxController {
     try {
       isLoading(true);
       final response =
-          await http.get(Uri.parse('http://localhost:8000/get_predictions'));
+          await http.get(Uri.parse('$mainUrl/get_predictions'));
       print(response.body);
 
       if (response.statusCode == 200) {

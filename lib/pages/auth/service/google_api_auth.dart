@@ -1,6 +1,7 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:JIR/config.dart';
 
 class GoogleAuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -20,7 +21,7 @@ class GoogleAuthService {
       }
 
       final response = await http.post(
-        Uri.parse("http://localhost:8000/auth/google/callback"),
+        Uri.parse("$mainUrl/auth/google/callback"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"id_token": idToken}),
       );

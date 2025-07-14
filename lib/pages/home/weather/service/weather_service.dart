@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:JIR/config.dart';
 
 class WeatherService {
   final double lat = -6.229728; // Jakarta
   final double lon = 106.689431;
-  final String baseUrl = 'http://192.168.0.126:8000';
+  final String weatherUrl = mainUrl;
 
   Future<Map<String, dynamic>> fetchWeather() async {
-    final url = Uri.parse('$baseUrl/weather?lat=$lat&lon=$lon');
+    final url = Uri.parse('$weatherUrl/weather?lat=$lat&lon=$lon');
 
     final response = await http.get(url);
 

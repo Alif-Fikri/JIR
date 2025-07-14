@@ -1,9 +1,9 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../config.dart';
+import 'package:JIR/config.dart';
 
 class FloodService {
-  final String url = "$baseUrl/api/flood/data";
+  final String url = "$mainUrl/api/flood/data";
 
   Future<List<Map<String, dynamic>>> fetchFloodData() async {
     try {

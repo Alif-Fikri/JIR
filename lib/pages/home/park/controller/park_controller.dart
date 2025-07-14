@@ -4,6 +4,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:JIR/config.dart';
 
 class ParkSimple {
   final String name;
@@ -34,7 +35,7 @@ class ParksController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxDouble currentLat = 0.0.obs;
   final RxDouble currentLon = 0.0.obs;
-  final String baseUrl = "http://localhost:8000/parks/simple";
+  final String parkUrl = "$mainUrl/parks/simple";
   final RxString currentAddress = 'Mendapatkan lokasi...'.obs;
   final RxList<ParkSimple> nearbyParks = <ParkSimple>[].obs;
   final RxList<ParkSimple> otherParks = <ParkSimple>[].obs;
@@ -72,7 +73,7 @@ class ParksController extends GetxController {
     try {
       isLoading.value = true;
 
-      final response = await http.get(Uri.parse(baseUrl));
+      final response = await http.get(Uri.parse(parkUrl));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
