@@ -1,38 +1,35 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config.dart';
 
 class FloodService {
-  final String url = "https://poskobanjir.dsdadki.web.id/datatmalaststatus.json";
-
-  get floodData => null;
+  final String url = "$baseUrl/api/flood/data";
 
   Future<List<Map<String, dynamic>>> fetchFloodData() async {
     try {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        List<dynamic> jsonData = json.decode(response.body);
+        final decoded = json.decode(response.body);
+        final List<dynamic> jsonData = decoded["data"];
 
-        // data yg dikonsum
-        List<Map<String, dynamic>> filteredData = jsonData.map((item) {
-          return {
-            "NAMA_PINTU_AIR": item["NAMA_PINTU_AIR"],
-            "LATITUDE": item["LATITUDE"],
-            "LONGITUDE": item["LONGITUDE"],
-            "RECORD_STATUS": item["RECORD_STATUS"],
-            "TINGGI_AIR": item["TINGGI_AIR"],
-            "TINGGI_AIR_SEBELUMNYA": item["TINGGI_AIR_SEBELUMNYA"],
-            "TANGGAL": item["TANGGAL"],
-            "STATUS_SIAGA": item["STATUS_SIAGA"]
-          };
-        }).toList();
-
-        return filteredData;
+        return jsonData
+            .map<Map<String, dynamic>>((item) => {
+                  "NAMA_PINTU_AIR": item["NAMA_PINTU_AIR"],
+                  "LATITUDE": item["LATITUDE"],
+                  "LONGITUDE": item["LONGITUDE"],
+                  "RECORD_STATUS": item["RECORD_STATUS"],
+                  "TINGGI_AIR": item["TINGGI_AIR"],
+                  "TINGGI_AIR_SEBELUMNYA": item["TINGGI_AIR_SEBELUMNYA"],
+                  "TANGGAL": item["TANGGAL"],
+                  "STATUS_SIAGA": item["STATUS_SIAGA"]
+                })
+            .toList();
       } else {
-        throw Exception("Failed to load data");
+        throw Exception("Gagal memuat data dari backend");
       }
     } catch (e) {
-      print("Error: $e");
+      print("Error saat ambil data banjir: $e");
       return [];
     }
   }

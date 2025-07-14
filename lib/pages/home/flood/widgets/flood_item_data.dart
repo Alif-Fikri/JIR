@@ -104,7 +104,6 @@ class FloodInfoBottomSheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header Title dalam satu Container
           Container(
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: const BoxDecoration(
@@ -122,10 +121,7 @@ class FloodInfoBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(height: 10),
-
-          // Grafik
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: SizedBox(
@@ -186,10 +182,7 @@ class FloodInfoBottomSheet extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(height: 10),
-
-          // Keterangan di bawah chart
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: FittedBox(
