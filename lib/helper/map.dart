@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:JIR/pages/home/map/controller/route_controller.dart';
@@ -31,13 +32,15 @@ class ReusableMap extends StatefulWidget {
 }
 
 class ReusableMapState extends State<ReusableMap>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   late final MapController _mapController;
   LatLng? _lastUserLocation;
   bool _shouldUpdateMap = true;
   bool _isRouteInitialized = false;
   List<LatLng>? _lastRoutePoints;
   final distance = const Distance();
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
 
   @override
   bool get wantKeepAlive => true;
@@ -46,7 +49,26 @@ class ReusableMapState extends State<ReusableMap>
   void initState() {
     super.initState();
     _mapController = MapController();
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween(begin: 0.8, end: 1.2).animate(
+      CurvedAnimation(
+        parent: _pulseController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     _initMapPosition();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
   }
 
   void _initMapPosition() {
@@ -133,7 +155,7 @@ class ReusableMapState extends State<ReusableMap>
     if (distance(widget.userLocation!, widget.destination!) <
         destinationThreshold) {
       setState(() {
-        widget.routePoints!.clear(); // Hapus semua rute
+        widget.routePoints!.clear();
       });
     }
   }
@@ -151,27 +173,76 @@ class ReusableMapState extends State<ReusableMap>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        return SizedBox(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          child: FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: widget.initialLocation,
-              initialZoom: 15.0,
-              interactionOptions: const InteractionOptions(
-                flags: InteractiveFlag.drag |
-                    InteractiveFlag.flingAnimation |
-                    InteractiveFlag.pinchMove |
-                    InteractiveFlag.pinchZoom,
+        return Stack(
+          children: [
+            SizedBox(
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              child: FlutterMap(
+                mapController: _mapController,
+                options: MapOptions(
+                  initialCenter: widget.initialLocation,
+                  initialZoom: 15.0,
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.drag |
+                        InteractiveFlag.flingAnimation |
+                        InteractiveFlag.pinchMove |
+                        InteractiveFlag.pinchZoom,
+                  ),
+                ),
+                children: [
+                  _buildTileLayer(),
+                  _buildRouteLayer(),
+                  _buildMarkers(),
+                ],
               ),
             ),
-            children: [
-              _buildTileLayer(),
-              _buildMarkers(),
-              _buildRouteLayer(),
-            ],
-          ),
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: Column(
+                children: [
+                  FloatingActionButton(
+                    mini: true,
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    heroTag: 'zoomIn',
+                    onPressed: () {
+                      _mapController.move(
+                        _mapController.camera.center,
+                        _mapController.camera.zoom + 1,
+                      );
+                    },
+                    child: const Icon(Icons.add, color: Colors.blue),
+                  ),
+                  const SizedBox(height: 10),
+                  FloatingActionButton(
+                    mini: true,
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    heroTag: 'zoomOut',
+                    onPressed: () {
+                      _mapController.move(
+                        _mapController.camera.center,
+                        _mapController.camera.zoom - 1,
+                      );
+                    },
+                    child: const Icon(Icons.remove, color: Colors.blue),
+                  ),
+                  const SizedBox(height: 10),
+                  FloatingActionButton(
+                    mini: true,
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    heroTag: 'myLocation',
+                    onPressed: () {
+                      if (widget.userLocation != null) {
+                        _mapController.move(widget.userLocation!, 15.0);
+                      }
+                    },
+                    child: const Icon(Icons.my_location, color: Colors.blue),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
@@ -181,9 +252,10 @@ class ReusableMapState extends State<ReusableMap>
     return TileLayer(
       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
+      userAgentPackageName: 'com.example.JIR',
       tileBuilder: (context, tileWidget, tile) {
         return AnimatedOpacity(
-          opacity: 0.9,
+          opacity: 0.95,
           duration: const Duration(milliseconds: 300),
           child: tileWidget,
         );
@@ -197,19 +269,38 @@ class ReusableMapState extends State<ReusableMap>
       if (widget.userLocation != null)
         Marker(
           point: widget.userLocation!,
-          width: 48,
-          height: 48,
-          child: const _UserLocationMarker(),
+          width: 60,
+          height: 60,
+          child: ScaleTransition(
+            scale: _pulseAnimation,
+            child: const _UserLocationMarker(),
+          ),
         ),
       if (widget.destination != null)
         Marker(
           point: widget.destination!,
-          width: 40,
-          height: 40,
-          child: const Icon(
-            Icons.location_pin,
-            color: Colors.red,
-            size: 40,
+          width: 50,
+          height: 50,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              ScaleTransition(
+                scale: _pulseAnimation,
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              const Icon(
+                Icons.location_pin,
+                color: Colors.red,
+                size: 40,
+              ),
+            ],
           ),
         ),
     ];
@@ -249,15 +340,21 @@ class _UserLocationMarker extends StatelessWidget {
       return Stack(
         alignment: Alignment.center,
         children: [
-          // Arah mata angin
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+          ),
           Transform.rotate(
-            angle: (currentHeading * (pi / 180)),
+            angle: (currentHeading * (math.pi / 180)),
             child: CustomPaint(
               size: const Size(48, 48),
               painter: _DirectionLightPainter(),
             ),
           ),
-          // Icon tengah
           Container(
             width: 24,
             height: 24,
@@ -265,6 +362,14 @@ class _UserLocationMarker extends StatelessWidget {
               color: Colors.blue.shade700,
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 5,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 2),
+                )
+              ],
             ),
           ),
         ],
@@ -277,15 +382,20 @@ class _DirectionLightPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.blue
+      ..color = Colors.blue.withOpacity(0.7)
       ..style = PaintingStyle.fill;
-    size = const Size(48, 48);
+
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.2)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
 
     final path = ui.Path()
       ..moveTo(size.width / 2, 0)
       ..lineTo(size.width * 0.4, size.height * 0.3)
       ..lineTo(size.width * 0.6, size.height * 0.3)
       ..close();
+
+    canvas.drawPath(path, shadowPaint);
 
     canvas.drawPath(path, paint);
   }

@@ -35,7 +35,7 @@ class ParksController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxDouble currentLat = 0.0.obs;
   final RxDouble currentLon = 0.0.obs;
-  final String parkUrl = "$mainUrl/parks/simple";
+  final String parkUrl = "$mainUrl/api/parks/simple";
   final RxString currentAddress = 'Mendapatkan lokasi...'.obs;
   final RxList<ParkSimple> nearbyParks = <ParkSimple>[].obs;
   final RxList<ParkSimple> otherParks = <ParkSimple>[].obs;

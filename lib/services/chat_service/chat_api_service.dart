@@ -11,7 +11,7 @@ class ChatService {
   static Future<String> getChatResponse(String message) async {
     try {
       final response = await http.post(
-        Uri.parse('$chatUrl/get_response'),
+        Uri.parse('$chatUrl/api/chat/get_response'),
         headers: headers,
         body: jsonEncode({'message': message}),
       );

@@ -1,14 +1,15 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:JIR/config.dart';
 
 class RouteController extends GetxController {
   final Dio _dio = Dio();
+  final String baseUrl = mainUrl;
   final RxList<Map<String, dynamic>> routeSteps = <Map<String, dynamic>>[].obs;
   final RxString selectedVehicle = 'motorcycle'.obs;
   final RxBool isLoading = false.obs;
@@ -86,22 +87,44 @@ class RouteController extends GetxController {
     return nearest;
   }
 
+  // Future<void> _fetchNewRoute(LatLng start, LatLng end) async {
+  //   try {
+  //     final profile = selectedVehicle.value == 'motorcycle' ? 'bike' : 'car';
+  //     final url = "http://router.project-osrm.org/route/v1/$profile/"
+  //         "${start.longitude},${start.latitude};"
+  //         "${end.longitude},${end.latitude}"
+  //         "?overview=full&steps=true&geometries=geojson";
+
+  //     final response = await _dio.get(url);
+  //     _parseRouteData(response.data);
+
+  //     Get.snackbar("Info", "Rute diperbarui",
+  //         duration: const Duration(seconds: 2),
+  //         snackPosition: SnackPosition.TOP);
+  //   } catch (e) {
+  //     Get.snackbar("Error", "Gagal memperbarui rute");
+  //   }
+  // }
+
   Future<void> _fetchNewRoute(LatLng start, LatLng end) async {
     try {
-      final profile = selectedVehicle.value == 'motorcycle' ? 'bike' : 'car';
-      final url = "http://router.project-osrm.org/route/v1/$profile/"
-          "${start.longitude},${start.latitude};"
-          "${end.longitude},${end.latitude}"
-          "?overview=full&steps=true&geometries=geojson";
+      final response = await _dio.post(
+        '$baseUrl/routing',
+        data: {
+          'start_lat': start.latitude,
+          'start_lon': start.longitude,
+          'end_lat': end.latitude,
+          'end_lon': end.longitude,
+          'vehicle': selectedVehicle.value,
+        },
+      );
 
-      final response = await _dio.get(url);
       _parseRouteData(response.data);
-
       Get.snackbar("Info", "Rute diperbarui",
           duration: const Duration(seconds: 2),
           snackPosition: SnackPosition.TOP);
     } catch (e) {
-      Get.snackbar("Error", "Gagal memperbarui rute");
+      Get.snackbar("Error", "Gagal memperbarui rute: ${e.toString()}");
     }
   }
 
@@ -114,10 +137,10 @@ class RouteController extends GetxController {
     });
   }
 
-  void _handleRotation(double dx, double dy) {
-    final angle = atan2(dy, dx);
-    userHeading(angle * (180 / pi));
-  }
+  // void _handleRotation(double dx, double dy) {
+  //   final angle = atan2(dy, dx);
+  //   userHeading(angle * (180 / pi));
+  // }
 
   Future<void> _getUserLocation() async {
     try {
@@ -150,19 +173,29 @@ class RouteController extends GetxController {
 
     routePoints.clear();
     routeSteps.clear();
+    isLoading(true);
 
     try {
-      final profile = selectedVehicle.value == 'motorcycle' ? 'bike' : 'car';
-      final url = "http://router.project-osrm.org/route/v1/$profile/"
-          "${userLocation.value!.longitude},${userLocation.value!.latitude};"
-          "${destination.value!.longitude},${destination.value!.latitude}"
-          "?overview=full&steps=true&geometries=geojson";
-
-      final response = await _dio.get(url);
-
-      if (response.statusCode != 200) throw Exception('Gagal mendapatkan rute');
+      final response = await _dio.post(
+        '$baseUrl/api/routing/',
+        data: {
+          'start_lat': userLocation.value!.latitude,
+          'start_lon': userLocation.value!.longitude,
+          'end_lat': destination.value!.latitude,
+          'end_lon': destination.value!.longitude,
+          'vehicle': selectedVehicle.value,
+        },
+        options: Options(
+          contentType: Headers.jsonContentType,
+          sendTimeout: const Duration(seconds: 10),
+        ),
+      );
 
       _parseRouteData(response.data);
+    } on DioException catch (e) {
+      final errorMsg = e.response?.data?['detail'] ?? e.message;
+      Get.snackbar("Error", "Gagal memuat rute: $errorMsg",
+          backgroundColor: Colors.red);
     } catch (e) {
       Get.snackbar("Error", "Gagal memuat rute: ${e.toString()}",
           backgroundColor: Colors.red);
@@ -173,45 +206,47 @@ class RouteController extends GetxController {
 
   void _parseRouteData(Map<String, dynamic> data) {
     try {
-      final coordinates = data['routes'][0]['geometry']['coordinates'];
-      routePoints(coordinates
-          .map<LatLng>((coord) => LatLng(coord[1], coord[0]))
-          .toList());
-      print("Route found: ${coordinates.length} points");
-      final legs = data['routes'][0]['legs'];
-      if (legs != null && legs.isNotEmpty) {
-        final leg = legs[0];
-        routeSteps(List<Map<String, dynamic>>.from(leg["steps"].map((step) {
-          final maneuver = step['maneuver'];
-          return {
-            'instruction': parseManeuver(maneuver),
-            'name': step['name'] ?? 'Jalan tanpa nama',
-            'distance': step['distance'],
-            'type': maneuver?['type'],
-            'modifier': maneuver?['modifier'],
-          };
-        })));
-        final alternatives = data['alternatives'] ?? [];
-        if (alternatives.isNotEmpty) {
-          _alternativeRoutes.value =
-              alternatives.map((alt) => _parseAlternativeRoute(alt)).toList();
-        }
-      }
+      final coordinates = data['route_points'] as List;
+      routePoints.value = coordinates
+          .map<LatLng>(
+              (coord) => LatLng(coord[1] as double, coord[0] as double))
+          .toList();
+
+      final steps = data['steps'] as List;
+      routeSteps.value = steps.map<Map<String, dynamic>>((step) {
+        return {
+          'instruction': step['instruction'] as String? ?? '',
+          'name': step['name'] as String? ?? 'Jalan tanpa nama',
+          'distance': step['distance'] as double? ?? 0.0,
+          'type': step['type'] as String?,
+          'modifier': step['modifier'] as String?,
+        };
+      }).toList();
+
+      final alternatives = data['alternatives'] as List? ?? [];
+      _alternativeRoutes.value = alternatives.map<List<LatLng>>((alt) {
+        return (alt as List)
+            .map<LatLng>(
+                (coord) => LatLng(coord[1] as double, coord[0] as double))
+            .toList();
+      }).toList();
+
+      print("Route found: ${routePoints.length} points");
     } catch (e) {
-      throw Exception('Format data tidak valid');
+      throw Exception('Format data tidak valid: ${e.toString()}');
     }
   }
 
-  List<LatLng> _parseAlternativeRoute(Map<String, dynamic> altData) {
-    try {
-      final coordinates = altData['geometry']['coordinates'];
-      return coordinates
-          .map<LatLng>((coord) => LatLng(coord[1], coord[0]))
-          .toList();
-    } catch (e) {
-      throw Exception('Format alternatif tidak valid');
-    }
-  }
+  // List<LatLng> _parseAlternativeRoute(Map<String, dynamic> altData) {
+  //   try {
+  //     final coordinates = altData['geometry']['coordinates'];
+  //     return coordinates
+  //         .map<LatLng>((coord) => LatLng(coord[1], coord[0]))
+  //         .toList();
+  //   } catch (e) {
+  //     throw Exception('Format alternatif tidak valid');
+  //   }
+  // }
 
   void useAlternativeRoute(int index) {
     if (index < _alternativeRoutes.length) {
@@ -221,53 +256,48 @@ class RouteController extends GetxController {
 
   Future<void> fetchSearchSuggestions(String query) async {
     if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+
     _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
       if (query.isEmpty) {
         searchSuggestions.clear();
         return;
       }
 
-      if (_searchCache.containsKey(query)) {
-        searchSuggestions(_searchCache[query]!);
-        return;
-      }
-
       try {
-        final response = await _dio.get(
-          "https://nominatim.openstreetmap.org/search",
-          queryParameters: {
-            'q': query,
-            'format': 'json',
-            'addressdetails': 1,
-            'countrycodes': 'id',
-            'viewbox': '106.4,-6.4,107.0,-6.0',
-            'bounded': 1,
-            'limit': 10,
-          },
-        );
-
-        List<Map<String, dynamic>> results =
-            List<Map<String, dynamic>>.from(response.data);
+        final params = {
+          'query': query,
+          'limit': 5,
+        };
 
         if (userLocation.value != null) {
-          results = results.map((item) {
-            final lat = double.tryParse(item['lat']?.toString() ?? '0') ?? 0;
-            final lon = double.tryParse(item['lon']?.toString() ?? '0') ?? 0;
-            return {
-              ...item,
-              'distance':
-                  calculateDistance(userLocation.value!, LatLng(lat, lon))
-            };
-          }).toList()
-            ..sort((a, b) =>
-                (a['distance'] as double).compareTo(b['distance'] as double));
+          params['lat'] = userLocation.value!.latitude;
+          params['lon'] = userLocation.value!.longitude;
         }
 
-        final finalResults = results.take(5).toList();
-        _searchCache[query] = finalResults;
-        searchSuggestions(finalResults);
+        final response = await _dio.get(
+          '$baseUrl/api/search',
+          queryParameters: params,
+          options: Options(
+            sendTimeout: const Duration(seconds: 5),
+          ),
+        );
+
+        searchSuggestions.value =
+            (response.data as List).map<Map<String, dynamic>>((item) {
+          return {
+            'display_name': item['display_name'] as String,
+            'lat': item['lat'] as double,
+            'lon': item['lon'] as double,
+            'type': item['type'] as String? ?? 'unknown',
+            'address': item['address'] as Map<String, dynamic>? ?? {},
+            'distance': item['distance'] as double?,
+          };
+        }).toList();
+      } on DioException catch (e) {
+        final errorMsg = e.response?.data?['detail'] ?? e.message;
+        Get.snackbar("Error", "Pencarian gagal: $errorMsg");
       } catch (e) {
-        Get.snackbar("Error", "Gagal memuat saran lokasi");
+        Get.snackbar("Error", "Pencarian gagal: ${e.toString()}");
       }
     });
   }

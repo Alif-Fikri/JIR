@@ -8,7 +8,7 @@ class WeatherService {
   final String weatherUrl = mainUrl;
 
   Future<Map<String, dynamic>> fetchWeather() async {
-    final url = Uri.parse('$weatherUrl/weather?lat=$lat&lon=$lon');
+    final url = Uri.parse('$weatherUrl/api/weather?lat=$lat&lon=$lon');
 
     final response = await http.get(url);
 

@@ -21,7 +21,7 @@ class GoogleAuthService {
       }
 
       final response = await http.post(
-        Uri.parse("$mainUrl/auth/google/callback"),
+        Uri.parse("$mainUrl/api/auth/google/callback"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"id_token": idToken}),
       );

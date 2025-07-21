@@ -36,7 +36,7 @@ class CrowdController extends GetxController {
     try {
       isLoading(true);
       final response =
-          await http.get(Uri.parse('$mainUrl/get_predictions'));
+          await http.get(Uri.parse('$mainUrl/api/get_predictions'));
       print(response.body);
 
       if (response.statusCode == 200) {

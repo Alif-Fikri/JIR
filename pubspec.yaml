@@ -40,6 +40,7 @@ dependencies:
   flutter_draggable_gridview: ^0.0.13
   flutter_launcher_icons: ^0.14.3
   flutter_map: ^8.1.1
+  flutter_map_tile_caching: ^10.1.1
   flutter_native_splash: ^2.4.1
   flutter_screenutil: ^5.9.3
   flutter_typeahead: ^5.2.0

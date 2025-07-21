@@ -5,7 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:JIR/config.dart';
 
 class AuthService {
-  final String authUrl = '$mainUrl/auth';
+  final String authUrl = '$mainUrl/api/auth';
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     if (email.isEmpty || password.isEmpty) {
