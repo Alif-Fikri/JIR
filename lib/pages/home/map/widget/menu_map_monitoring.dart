@@ -111,8 +111,6 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
               ),
             );
           }),
-
-          // Main Button
           Positioned(
             bottom: 0,
             child: GestureDetector(

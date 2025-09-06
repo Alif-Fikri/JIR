@@ -37,7 +37,6 @@ class FloodInfoBottomSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Drag Handle
             Container(
               width: 50,
               height: 5,
@@ -69,7 +68,6 @@ class FloodInfoBottomSheet extends StatelessWidget {
     );
   }
 
-  // Widget untuk menampilkan informasi Status, Tinggi Air, dan Lokasi
   Widget _infoItem(String iconPath, String value, String label) {
     return Row(
       children: [

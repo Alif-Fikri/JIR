@@ -15,57 +15,136 @@ class DisasterBottomSheet extends StatelessWidget {
     required this.onViewLocation,
   });
 
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'Normal':
+        return Colors.green;
+      case 'Sedang':
+        return Colors.yellow[700]!;
+      case 'Siaga 1':
+        return Colors.orange[700]!;
+      case 'Siaga 2':
+        return Colors.orange[700]!;
+      case 'Siaga 3':
+        return Colors.red[700]!;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'Normal':
+        return 'Normal (Aman)';
+      case 'Sedang':
+        return 'Sedang (Aman)';
+      case 'Siaga 1':
+        return 'Siaga 1 (Waspada)';
+      case 'Siaga 2':
+        return 'Siaga 2 (Bahaya)';
+      case 'Siaga 3':
+        return 'Siaga 3 (Darurat)';
+      default:
+        return 'Status Tidak Diketahui';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text('Detail Lokasi',
-              style:
-                  GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          DetailRow(
-            icon: Icons.location_on,
-            label: 'Lokasi',
-            value: location,
-          ),
-          DetailRow(
-            icon: Icons.warning,
-            label: 'Status Siaga',
-            value: status,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onViewLocation,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF45557B),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+    final statusColor = _getStatusColor(status);
+    final statusText = _getStatusText(status);
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              child: Text('Lihat Lokasi di Peta',
-                  style: GoogleFonts.inter(color: Colors.white)),
             ),
-          ),
-          const SizedBox(height: 8),
-        ],
+            const SizedBox(height: 16),
+            Text('Detail Lokasi Banjir',
+                style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF45557B))),
+            const SizedBox(height: 16),
+            DetailRow(
+              icon: Icons.location_on,
+              iconColor: const Color(0xFF45557B),
+              label: 'Lokasi',
+              value: location,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: statusColor, width: 1),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning, color: statusColor),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Status Siaga',
+                            style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[700])),
+                        Text(statusText,
+                            style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: statusColor)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onViewLocation,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF45557B),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+                child: Text('Lihat Lokasi di Peta',
+                    style: GoogleFonts.inter(
+                        fontSize: 16, fontWeight: FontWeight.w600)),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }
@@ -73,37 +152,44 @@ class DisasterBottomSheet extends StatelessWidget {
 
 class DetailRow extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String label;
   final String value;
 
   const DetailRow({
     super.key,
     required this.icon,
+    this.iconColor = Colors.grey,
     required this.label,
     required this.value,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF45557B), size: 24),
-          const SizedBox(width: 16),
-          Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: iconColor, size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style:
-                      GoogleFonts.inter(fontSize: 12, color: Colors.grey[600])),
+                  style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[700])),
+              const SizedBox(height: 4),
               Text(value,
                   style: GoogleFonts.inter(
-                      fontSize: 14, fontWeight: FontWeight.w500)),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87)),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -129,10 +215,8 @@ class _FloodMonitoringBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    // Dibataskan jumlah data yang ditampilkan jika showAll = false
-    List<Map<String, dynamic>> displayedData = showAll
-        ? widget.floodData
-        : widget.floodData.take(5).toList(); // Tampilkan hanya 5 pertama
+    List<Map<String, dynamic>> displayedData =
+        showAll ? widget.floodData : widget.floodData.take(5).toList();
 
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -159,7 +243,6 @@ class _FloodMonitoringBottomSheetState
                   fontWeight: FontWeight.bold,
                   color: const Color(0xff45557B))),
           const Divider(),
-          // Daftar banjir dengan bullet warna
           Expanded(
             child: ListView.builder(
               controller: widget.scrollController,
@@ -218,7 +301,6 @@ class _FloodMonitoringBottomSheetState
     );
   }
 
-  // Bullet indikator siaga
   Widget _statusIndicator(String status) {
     String cleanedStatus = status.replaceAll("Status: ", "");
 

@@ -22,8 +22,6 @@ class FloodController extends GetxController {
     isLoading(true);
     try {
       final data = await _floodService.fetchFloodData();
-
-      // Membersihkan "Status: "
       final cleanedData = data.map((item) {
         return {
           ...item,

@@ -25,7 +25,6 @@ class FloodMonitoringController extends GetxController {
     getCurrentLocation();
   }
 
-  // GET FLOOD DATA
   Future<void> _fetchFloodData() async {
     try {
       final service = FloodService();

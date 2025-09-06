@@ -16,6 +16,7 @@ class RouteController extends GetxController {
   final RxList<LatLng> routePoints = <LatLng>[].obs;
   final Rx<LatLng?> userLocation = Rx<LatLng?>(null);
   final Rx<LatLng?> destination = Rx<LatLng?>(null);
+  final RxList<LatLng> optimizedWaypoints = <LatLng>[].obs;
   final RxList<List<LatLng>> _alternativeRoutes = RxList<List<LatLng>>([]);
   final RxDouble userHeading = 0.0.obs;
   final RxList<Map<String, dynamic>> searchSuggestions =
@@ -87,29 +88,10 @@ class RouteController extends GetxController {
     return nearest;
   }
 
-  // Future<void> _fetchNewRoute(LatLng start, LatLng end) async {
-  //   try {
-  //     final profile = selectedVehicle.value == 'motorcycle' ? 'bike' : 'car';
-  //     final url = "http://router.project-osrm.org/route/v1/$profile/"
-  //         "${start.longitude},${start.latitude};"
-  //         "${end.longitude},${end.latitude}"
-  //         "?overview=full&steps=true&geometries=geojson";
-
-  //     final response = await _dio.get(url);
-  //     _parseRouteData(response.data);
-
-  //     Get.snackbar("Info", "Rute diperbarui",
-  //         duration: const Duration(seconds: 2),
-  //         snackPosition: SnackPosition.TOP);
-  //   } catch (e) {
-  //     Get.snackbar("Error", "Gagal memperbarui rute");
-  //   }
-  // }
-
   Future<void> _fetchNewRoute(LatLng start, LatLng end) async {
     try {
       final response = await _dio.post(
-        '$baseUrl/routing',
+        '$baseUrl/routing/optimized-route',
         data: {
           'start_lat': start.latitude,
           'start_lon': start.longitude,
@@ -119,7 +101,7 @@ class RouteController extends GetxController {
         },
       );
 
-      _parseRouteData(response.data);
+      _parseOptimizedRouteData(response.data);
       Get.snackbar("Info", "Rute diperbarui",
           duration: const Duration(seconds: 2),
           snackPosition: SnackPosition.TOP);
@@ -136,11 +118,6 @@ class RouteController extends GetxController {
       }
     });
   }
-
-  // void _handleRotation(double dx, double dy) {
-  //   final angle = atan2(dy, dx);
-  //   userHeading(angle * (180 / pi));
-  // }
 
   Future<void> _getUserLocation() async {
     try {
@@ -165,19 +142,20 @@ class RouteController extends GetxController {
 
   void updateVehicle(String vehicle) {
     selectedVehicle.value = vehicle;
-    fetchRoute();
+    fetchOptimizedRoute();
   }
 
-  Future<void> fetchRoute() async {
+  Future<void> fetchOptimizedRoute() async {
     if (userLocation.value == null || destination.value == null) return;
 
     routePoints.clear();
     routeSteps.clear();
+    optimizedWaypoints.clear();
     isLoading(true);
 
     try {
       final response = await _dio.post(
-        '$baseUrl/api/routing/',
+        '$baseUrl/api/routing/optimized-route',
         data: {
           'start_lat': userLocation.value!.latitude,
           'start_lon': userLocation.value!.longitude,
@@ -187,11 +165,11 @@ class RouteController extends GetxController {
         },
         options: Options(
           contentType: Headers.jsonContentType,
-          sendTimeout: const Duration(seconds: 10),
+          sendTimeout: const Duration(seconds: 30),
         ),
       );
 
-      _parseRouteData(response.data);
+      _parseOptimizedRouteData(response.data);
     } on DioException catch (e) {
       final errorMsg = e.response?.data?['detail'] ?? e.message;
       Get.snackbar("Error", "Gagal memuat rute: $errorMsg",
@@ -204,49 +182,84 @@ class RouteController extends GetxController {
     }
   }
 
-  void _parseRouteData(Map<String, dynamic> data) {
+  void _parseOptimizedRouteData(Map<String, dynamic> data) {
     try {
-      final coordinates = data['route_points'] as List;
-      routePoints.value = coordinates
-          .map<LatLng>(
-              (coord) => LatLng(coord[1] as double, coord[0] as double))
-          .toList();
-
-      final steps = data['steps'] as List;
-      routeSteps.value = steps.map<Map<String, dynamic>>((step) {
-        return {
-          'instruction': step['instruction'] as String? ?? '',
-          'name': step['name'] as String? ?? 'Jalan tanpa nama',
-          'distance': step['distance'] as double? ?? 0.0,
-          'type': step['type'] as String?,
-          'modifier': step['modifier'] as String?,
-        };
+      final waypoints = data['waypoints'] as List? ?? [];
+      optimizedWaypoints.value = waypoints.map<LatLng>((wp) {
+        if (wp is List && wp.length >= 2) {
+          return LatLng((wp[0] as num).toDouble(), (wp[1] as num).toDouble());
+        } else {
+          throw Exception('Invalid waypoint format: $wp');
+        }
       }).toList();
 
-      final alternatives = data['alternatives'] as List? ?? [];
+      final routeData = data['route'] as Map<String, dynamic>?;
+      if (routeData == null) {
+        throw Exception('Route data is null');
+      }
+
+      final routes = routeData['routes'] as List?;
+      if (routes == null || routes.isEmpty) {
+        throw Exception('No routes found in response');
+      }
+
+      final mainRoute = routes[0] as Map<String, dynamic>;
+      final geometry = mainRoute['geometry'] as Map<String, dynamic>?;
+      if (geometry == null) {
+        throw Exception('Geometry data is null');
+      }
+
+      final coordinates = geometry['coordinates'] as List? ?? [];
+      routePoints.value = coordinates.map<LatLng>((coord) {
+        if (coord is List && coord.length >= 2) {
+          return LatLng(
+              (coord[1] as num).toDouble(), (coord[0] as num).toDouble());
+        } else {
+          throw Exception('Invalid coordinate format: $coord');
+        }
+      }).toList();
+
+      final legs = mainRoute['legs'] as List?;
+      if (legs != null && legs.isNotEmpty) {
+        final leg = legs[0] as Map<String, dynamic>;
+        final steps = leg['steps'] as List? ?? [];
+
+        routeSteps.value = steps.map<Map<String, dynamic>>((step) {
+          final stepMap = step as Map<String, dynamic>;
+          final maneuver = stepMap['maneuver'] as Map<String, dynamic>?;
+
+          return {
+            'instruction': parseManeuver(maneuver),
+            'name': stepMap['name'] as String? ?? 'Jalan tanpa nama',
+            'distance': (stepMap['distance'] as num?)?.toDouble() ?? 0.0,
+            'type': maneuver?['type'] as String?,
+            'modifier': maneuver?['modifier'] as String?,
+          };
+        }).toList();
+      }
+
+      final alternatives = routeData['alternatives'] as List? ?? [];
       _alternativeRoutes.value = alternatives.map<List<LatLng>>((alt) {
-        return (alt as List)
-            .map<LatLng>(
-                (coord) => LatLng(coord[1] as double, coord[0] as double))
-            .toList();
+        final altMap = alt as Map<String, dynamic>;
+        final altGeometry = altMap['geometry'] as Map<String, dynamic>?;
+        final altCoordinates = altGeometry?['coordinates'] as List? ?? [];
+
+        return altCoordinates.map<LatLng>((coord) {
+          if (coord is List && coord.length >= 2) {
+            return LatLng(
+                (coord[1] as num).toDouble(), (coord[0] as num).toDouble());
+          } else {
+            throw Exception('Invalid alternative coordinate format: $coord');
+          }
+        }).toList();
       }).toList();
 
-      print("Route found: ${routePoints.length} points");
+      print(
+          "Optimized route found: ${routePoints.length} points, ${optimizedWaypoints.length} waypoints");
     } catch (e) {
       throw Exception('Format data tidak valid: ${e.toString()}');
     }
   }
-
-  // List<LatLng> _parseAlternativeRoute(Map<String, dynamic> altData) {
-  //   try {
-  //     final coordinates = altData['geometry']['coordinates'];
-  //     return coordinates
-  //         .map<LatLng>((coord) => LatLng(coord[1], coord[0]))
-  //         .toList();
-  //   } catch (e) {
-  //     throw Exception('Format alternatif tidak valid');
-  //   }
-  // }
 
   void useAlternativeRoute(int index) {
     if (index < _alternativeRoutes.length) {
@@ -315,7 +328,6 @@ class RouteController extends GetxController {
     final exit = maneuver['keluar'];
     final roadName = maneuver['name'] ?? '';
 
-    // Fungsi konversi angka ke urutan (1 -> pertama, 2 -> kedua, dst)
     String exitIndonesian(int? exitNum) {
       if (exitNum == null) return '';
       switch (exitNum) {
@@ -425,12 +437,11 @@ class RouteController extends GetxController {
 
   static String formatDistance(num distance) {
     if (distance < 1000) {
-      return '${distance.toStringAsFixed(0)} meter'; // 850 -> 850 meter
+      return '${distance.toStringAsFixed(0)} meter';
     }
-    return '${(distance / 1000).toStringAsFixed(1)} km'; // 1250 -> 1.3 km
+    return '${(distance / 1000).toStringAsFixed(1)} km';
   }
 
-  // Helper method untuk tipe lokasi
   static String getLocationType(String type) {
     const typeTranslations = {
       'administrative': 'Wilayah Administratif',
@@ -446,7 +457,7 @@ class RouteController extends GetxController {
   void updateLocations(LatLng start, LatLng end) {
     userLocation(start);
     destination(end);
-    fetchRoute();
+    fetchOptimizedRoute();
   }
 
   void handleSearch(String query) {
@@ -463,6 +474,7 @@ class RouteController extends GetxController {
   void clearRoute() {
     routePoints.clear();
     routeSteps.clear();
+    optimizedWaypoints.clear();
     destination.value = null;
     searchSuggestions.clear();
     update();

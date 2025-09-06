@@ -13,6 +13,7 @@ class ReusableMap extends StatefulWidget {
   final LatLng? userLocation;
   final LatLng? destination;
   final List<LatLng>? routePoints;
+  final List<LatLng>? waypoints; 
   final Function(MapController)? onMapCreated;
   final double? userHeading;
 
@@ -24,6 +25,7 @@ class ReusableMap extends StatefulWidget {
     this.userLocation,
     this.destination,
     this.routePoints,
+    this.waypoints, 
     this.userHeading,
   });
 
@@ -38,6 +40,7 @@ class ReusableMapState extends State<ReusableMap>
   bool _shouldUpdateMap = true;
   bool _isRouteInitialized = false;
   List<LatLng>? _lastRoutePoints;
+  List<LatLng>? _lastWaypoints;
   final distance = const Distance();
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -93,8 +96,10 @@ class ReusableMapState extends State<ReusableMap>
     }
 
     if (!_isRouteInitialized ||
-        !_areRoutesEqual(widget.routePoints, _lastRoutePoints)) {
+        !_areRoutesEqual(widget.routePoints, _lastRoutePoints) ||
+        !_areRoutesEqual(widget.waypoints, _lastWaypoints)) {
       _lastRoutePoints = widget.routePoints;
+      _lastWaypoints = widget.waypoints;
       _updateMapBounds();
       _isRouteInitialized = true;
     }
@@ -110,9 +115,27 @@ class ReusableMapState extends State<ReusableMap>
   }
 
   void _updateMapBounds() {
-    if (widget.routePoints == null || widget.routePoints!.isEmpty) return;
+    List<LatLng> allPoints = [];
 
-    final bounds = LatLngBounds.fromPoints(widget.routePoints!);
+    if (widget.routePoints != null) {
+      allPoints.addAll(widget.routePoints!);
+    }
+
+    if (widget.waypoints != null) {
+      allPoints.addAll(widget.waypoints!);
+    }
+
+    if (widget.userLocation != null) {
+      allPoints.add(widget.userLocation!);
+    }
+
+    if (widget.destination != null) {
+      allPoints.add(widget.destination!);
+    }
+
+    if (allPoints.isEmpty) return;
+
+    final bounds = LatLngBounds.fromPoints(allPoints);
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (!mounted) return;
@@ -135,8 +158,6 @@ class ReusableMapState extends State<ReusableMap>
 
   void _filterPassedRoutePoints() {
     if (widget.userLocation == null || widget.routePoints == null) return;
-
-    // Jarak minimum agar dianggap "sudah dilewati" (misal: 10 meter)
     const double thresholdDistance = 10.0;
 
     setState(() {
@@ -148,8 +169,6 @@ class ReusableMapState extends State<ReusableMap>
 
   void _checkIfDestinationReached() {
     if (widget.userLocation == null || widget.destination == null) return;
-
-    // Jarak agar dianggap "sampai tujuan" (misal: 20 meter)
     const double destinationThreshold = 20.0;
 
     if (distance(widget.userLocation!, widget.destination!) <
@@ -193,6 +212,7 @@ class ReusableMapState extends State<ReusableMap>
                 children: [
                   _buildTileLayer(),
                   _buildRouteLayer(),
+                  _buildWaypointsLayer(), 
                   _buildMarkers(),
                 ],
               ),
@@ -263,6 +283,24 @@ class ReusableMapState extends State<ReusableMap>
     );
   }
 
+  Widget _buildWaypointsLayer() {
+    if (widget.waypoints == null || widget.waypoints!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return PolylineLayer(
+      polylines: [
+        Polyline(
+          points: widget.waypoints!,
+          strokeWidth: 3.0,
+          color: Colors.orange.withOpacity(0.7),
+          borderColor: Colors.orange.withOpacity(0.3),
+          borderStrokeWidth: 2,
+        ),
+      ],
+    );
+  }
+
   MarkerLayer _buildMarkers() {
     final markers = [
       ...widget.markers,
@@ -303,6 +341,19 @@ class ReusableMapState extends State<ReusableMap>
             ],
           ),
         ),
+      if (widget.waypoints != null)
+        ...widget.waypoints!.map((waypoint) {
+          return Marker(
+            point: waypoint,
+            width: 30,
+            height: 30,
+            child: const Icon(
+              Icons.location_pin,
+              color: Colors.orange,
+              size: 30,
+            ),
+          );
+        }).toList(),
     ];
 
     return MarkerLayer(

@@ -144,7 +144,7 @@ class ParkDetail extends StatelessWidget {
                                 ),
                                 border: Border.all(
                                   color: const Color(0xff45557B),
-                                  width: 1.0, // Ketebalan border
+                                  width: 1.0, 
                                 ),
                                 boxShadow: [
                                   BoxShadow(

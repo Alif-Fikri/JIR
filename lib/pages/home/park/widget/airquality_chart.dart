@@ -95,7 +95,7 @@ class AirQualityChart extends StatelessWidget {
     ];
 
     return List.generate(20, (index) {
-      double value = random.nextDouble() * 300; // data dummy acak
+      double value = random.nextDouble() * 300; 
       Color barColor = value < 50
           ? colors[0]
           : value < 100
