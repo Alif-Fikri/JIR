@@ -60,12 +60,16 @@ class RouteController extends GetxController {
     startPoint ??= userLocation.value;
 
     final nearestPointOnRoute = _findNearestPoint(currentLocation, routePoints);
-    final distanceToRoute =
-        calculateDistance(currentLocation, nearestPointOnRoute);
+    final distanceToRoute = calculateDistance(
+      currentLocation,
+      nearestPointOnRoute,
+    );
 
     final totalDistance = calculateDistance(startPoint!, destination.value!);
-    final remainingDistance =
-        calculateDistance(currentLocation, destination.value!);
+    final remainingDistance = calculateDistance(
+      currentLocation,
+      destination.value!,
+    );
 
     if (remainingDistance < totalDistance * 0.2) return;
 
@@ -102,9 +106,12 @@ class RouteController extends GetxController {
       );
 
       _parseOptimizedRouteData(response.data);
-      Get.snackbar("Info", "Rute diperbarui",
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.TOP);
+      Get.snackbar(
+        "Info",
+        "Rute diperbarui",
+        duration: const Duration(seconds: 2),
+        snackPosition: SnackPosition.TOP,
+      );
     } catch (e) {
       Get.snackbar("Error", "Gagal memperbarui rute: ${e.toString()}");
     }
@@ -135,8 +142,11 @@ class RouteController extends GetxController {
       Position position = await Geolocator.getCurrentPosition();
       userLocation(LatLng(position.latitude, position.longitude));
     } catch (e) {
-      Get.snackbar("Peringatan", "Gagal mendapatkan lokasi",
-          backgroundColor: Colors.orange);
+      Get.snackbar(
+        "Peringatan",
+        "Gagal mendapatkan lokasi",
+        backgroundColor: Colors.orange,
+      );
     }
   }
 
@@ -172,11 +182,17 @@ class RouteController extends GetxController {
       _parseOptimizedRouteData(response.data);
     } on DioException catch (e) {
       final errorMsg = e.response?.data?['detail'] ?? e.message;
-      Get.snackbar("Error", "Gagal memuat rute: $errorMsg",
-          backgroundColor: Colors.red);
+      Get.snackbar(
+        "Error",
+        "Gagal memuat rute: $errorMsg",
+        backgroundColor: Colors.red,
+      );
     } catch (e) {
-      Get.snackbar("Error", "Gagal memuat rute: ${e.toString()}",
-          backgroundColor: Colors.red);
+      Get.snackbar(
+        "Error",
+        "Gagal memuat rute: ${e.toString()}",
+        backgroundColor: Colors.red,
+      );
     } finally {
       isLoading(false);
     }
@@ -185,13 +201,17 @@ class RouteController extends GetxController {
   void _parseOptimizedRouteData(Map<String, dynamic> data) {
     try {
       final waypoints = data['waypoints'] as List? ?? [];
-      optimizedWaypoints.value = waypoints.map<LatLng>((wp) {
-        if (wp is List && wp.length >= 2) {
-          return LatLng((wp[0] as num).toDouble(), (wp[1] as num).toDouble());
-        } else {
-          throw Exception('Invalid waypoint format: $wp');
-        }
-      }).toList();
+      optimizedWaypoints.value =
+          waypoints.map<LatLng>((wp) {
+            if (wp is List && wp.length >= 2) {
+              return LatLng(
+                (wp[0] as num).toDouble(),
+                (wp[1] as num).toDouble(),
+              );
+            } else {
+              throw Exception('Invalid waypoint format: $wp');
+            }
+          }).toList();
 
       final routeData = data['route'] as Map<String, dynamic>?;
       if (routeData == null) {
@@ -210,52 +230,62 @@ class RouteController extends GetxController {
       }
 
       final coordinates = geometry['coordinates'] as List? ?? [];
-      routePoints.value = coordinates.map<LatLng>((coord) {
-        if (coord is List && coord.length >= 2) {
-          return LatLng(
-              (coord[1] as num).toDouble(), (coord[0] as num).toDouble());
-        } else {
-          throw Exception('Invalid coordinate format: $coord');
-        }
-      }).toList();
+      routePoints.value =
+          coordinates.map<LatLng>((coord) {
+            if (coord is List && coord.length >= 2) {
+              return LatLng(
+                (coord[1] as num).toDouble(),
+                (coord[0] as num).toDouble(),
+              );
+            } else {
+              throw Exception('Invalid coordinate format: $coord');
+            }
+          }).toList();
 
       final legs = mainRoute['legs'] as List?;
       if (legs != null && legs.isNotEmpty) {
         final leg = legs[0] as Map<String, dynamic>;
         final steps = leg['steps'] as List? ?? [];
 
-        routeSteps.value = steps.map<Map<String, dynamic>>((step) {
-          final stepMap = step as Map<String, dynamic>;
-          final maneuver = stepMap['maneuver'] as Map<String, dynamic>?;
+        routeSteps.value =
+            steps.map<Map<String, dynamic>>((step) {
+              final stepMap = step as Map<String, dynamic>;
+              final maneuver = stepMap['maneuver'] as Map<String, dynamic>?;
 
-          return {
-            'instruction': parseManeuver(maneuver),
-            'name': stepMap['name'] as String? ?? 'Jalan tanpa nama',
-            'distance': (stepMap['distance'] as num?)?.toDouble() ?? 0.0,
-            'type': maneuver?['type'] as String?,
-            'modifier': maneuver?['modifier'] as String?,
-          };
-        }).toList();
+              return {
+                'instruction': parseManeuver(maneuver),
+                'name': stepMap['name'] as String? ?? 'Jalan tanpa nama',
+                'distance': (stepMap['distance'] as num?)?.toDouble() ?? 0.0,
+                'type': maneuver?['type'] as String?,
+                'modifier': maneuver?['modifier'] as String?,
+              };
+            }).toList();
       }
 
       final alternatives = routeData['alternatives'] as List? ?? [];
-      _alternativeRoutes.value = alternatives.map<List<LatLng>>((alt) {
-        final altMap = alt as Map<String, dynamic>;
-        final altGeometry = altMap['geometry'] as Map<String, dynamic>?;
-        final altCoordinates = altGeometry?['coordinates'] as List? ?? [];
+      _alternativeRoutes.value =
+          alternatives.map<List<LatLng>>((alt) {
+            final altMap = alt as Map<String, dynamic>;
+            final altGeometry = altMap['geometry'] as Map<String, dynamic>?;
+            final altCoordinates = altGeometry?['coordinates'] as List? ?? [];
 
-        return altCoordinates.map<LatLng>((coord) {
-          if (coord is List && coord.length >= 2) {
-            return LatLng(
-                (coord[1] as num).toDouble(), (coord[0] as num).toDouble());
-          } else {
-            throw Exception('Invalid alternative coordinate format: $coord');
-          }
-        }).toList();
-      }).toList();
+            return altCoordinates.map<LatLng>((coord) {
+              if (coord is List && coord.length >= 2) {
+                return LatLng(
+                  (coord[1] as num).toDouble(),
+                  (coord[0] as num).toDouble(),
+                );
+              } else {
+                throw Exception(
+                  'Invalid alternative coordinate format: $coord',
+                );
+              }
+            }).toList();
+          }).toList();
 
       print(
-          "Optimized route found: ${routePoints.length} points, ${optimizedWaypoints.length} waypoints");
+        "Optimized route found: ${routePoints.length} points, ${optimizedWaypoints.length} waypoints",
+      );
     } catch (e) {
       throw Exception('Format data tidak valid: ${e.toString()}');
     }
@@ -277,10 +307,7 @@ class RouteController extends GetxController {
       }
 
       try {
-        final params = {
-          'query': query,
-          'limit': 5,
-        };
+        final params = {'query': query, 'limit': 5};
 
         if (userLocation.value != null) {
           params['lat'] = userLocation.value!.latitude;
@@ -290,22 +317,20 @@ class RouteController extends GetxController {
         final response = await _dio.get(
           '$baseUrl/api/search',
           queryParameters: params,
-          options: Options(
-            sendTimeout: const Duration(seconds: 5),
-          ),
+          options: Options(sendTimeout: const Duration(seconds: 5)),
         );
 
         searchSuggestions.value =
             (response.data as List).map<Map<String, dynamic>>((item) {
-          return {
-            'display_name': item['display_name'] as String,
-            'lat': item['lat'] as double,
-            'lon': item['lon'] as double,
-            'type': item['type'] as String? ?? 'unknown',
-            'address': item['address'] as Map<String, dynamic>? ?? {},
-            'distance': item['distance'] as double?,
-          };
-        }).toList();
+              return {
+                'display_name': item['display_name'] as String,
+                'lat': item['lat'] as double,
+                'lon': item['lon'] as double,
+                'type': item['type'] as String? ?? 'unknown',
+                'address': item['address'] as Map<String, dynamic>? ?? {},
+                'distance': item['distance'] as double?,
+              };
+            }).toList();
       } on DioException catch (e) {
         final errorMsg = e.response?.data?['detail'] ?? e.message;
         Get.snackbar("Error", "Pencarian gagal: $errorMsg");

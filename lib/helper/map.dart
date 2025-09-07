@@ -13,7 +13,7 @@ class ReusableMap extends StatefulWidget {
   final LatLng? userLocation;
   final LatLng? destination;
   final List<LatLng>? routePoints;
-  final List<LatLng>? waypoints; 
+  final List<LatLng>? waypoints;
   final Function(MapController)? onMapCreated;
   final double? userHeading;
 
@@ -25,7 +25,7 @@ class ReusableMap extends StatefulWidget {
     this.userLocation,
     this.destination,
     this.routePoints,
-    this.waypoints, 
+    this.waypoints,
     this.userHeading,
   });
 
@@ -59,10 +59,7 @@ class ReusableMapState extends State<ReusableMap>
     )..repeat(reverse: true);
 
     _pulseAnimation = Tween(begin: 0.8, end: 1.2).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
     _initMapPosition();
@@ -203,7 +200,8 @@ class ReusableMapState extends State<ReusableMap>
                   initialCenter: widget.initialLocation,
                   initialZoom: 15.0,
                   interactionOptions: const InteractionOptions(
-                    flags: InteractiveFlag.drag |
+                    flags:
+                        InteractiveFlag.drag |
                         InteractiveFlag.flingAnimation |
                         InteractiveFlag.pinchMove |
                         InteractiveFlag.pinchZoom,
@@ -212,7 +210,7 @@ class ReusableMapState extends State<ReusableMap>
                 children: [
                   _buildTileLayer(),
                   _buildRouteLayer(),
-                  _buildWaypointsLayer(), 
+                  _buildWaypointsLayer(),
                   _buildMarkers(),
                 ],
               ),
@@ -333,11 +331,7 @@ class ReusableMapState extends State<ReusableMap>
                   ),
                 ),
               ),
-              const Icon(
-                Icons.location_pin,
-                color: Colors.red,
-                size: 40,
-              ),
+              const Icon(Icons.location_pin, color: Colors.red, size: 40),
             ],
           ),
         ),
@@ -356,10 +350,7 @@ class ReusableMapState extends State<ReusableMap>
         }).toList(),
     ];
 
-    return MarkerLayer(
-      markers: markers,
-      rotate: false,
-    );
+    return MarkerLayer(markers: markers, rotate: false);
   }
 
   Widget _buildRouteLayer() {
@@ -419,7 +410,7 @@ class _UserLocationMarker extends StatelessWidget {
                   blurRadius: 5,
                   spreadRadius: 1,
                   offset: const Offset(0, 2),
-                )
+                ),
               ],
             ),
           ),
@@ -432,19 +423,22 @@ class _UserLocationMarker extends StatelessWidget {
 class _DirectionLightPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.blue.withOpacity(0.7)
-      ..style = PaintingStyle.fill;
+    final paint =
+        Paint()
+          ..color = Colors.blue.withOpacity(0.7)
+          ..style = PaintingStyle.fill;
 
-    final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.2)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    final shadowPaint =
+        Paint()
+          ..color = Colors.black.withOpacity(0.2)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
 
-    final path = ui.Path()
-      ..moveTo(size.width / 2, 0)
-      ..lineTo(size.width * 0.4, size.height * 0.3)
-      ..lineTo(size.width * 0.6, size.height * 0.3)
-      ..close();
+    final path =
+        ui.Path()
+          ..moveTo(size.width / 2, 0)
+          ..lineTo(size.width * 0.4, size.height * 0.3)
+          ..lineTo(size.width * 0.6, size.height * 0.3)
+          ..close();
 
     canvas.drawPath(path, shadowPaint);
 
