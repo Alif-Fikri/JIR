@@ -92,6 +92,21 @@ class RouteController extends GetxController {
     return nearest;
   }
 
+  void selectVehicle(String vehicleKey) {
+    if (vehicleKey != 'motorcycle' && vehicleKey != 'car') return;
+    selectedVehicle.value = vehicleKey;
+    if (destination.value != null) {
+      fetchOptimizedRoute();
+    }
+  }
+
+  void editStepInstruction(int index, String newInstruction) {
+    if (index < 0 || index >= routeSteps.length) return;
+    final updated = Map<String, dynamic>.from(routeSteps[index]);
+    updated['instruction'] = newInstruction;
+    routeSteps[index] = updated;
+  }
+
   Future<void> _fetchNewRoute(LatLng start, LatLng end) async {
     try {
       final response = await _dio.post(
@@ -201,17 +216,16 @@ class RouteController extends GetxController {
   void _parseOptimizedRouteData(Map<String, dynamic> data) {
     try {
       final waypoints = data['waypoints'] as List? ?? [];
-      optimizedWaypoints.value =
-          waypoints.map<LatLng>((wp) {
-            if (wp is List && wp.length >= 2) {
-              return LatLng(
-                (wp[0] as num).toDouble(),
-                (wp[1] as num).toDouble(),
-              );
-            } else {
-              throw Exception('Invalid waypoint format: $wp');
-            }
-          }).toList();
+      optimizedWaypoints.value = waypoints.map<LatLng>((wp) {
+        if (wp is List && wp.length >= 2) {
+          return LatLng(
+            (wp[0] as num).toDouble(),
+            (wp[1] as num).toDouble(),
+          );
+        } else {
+          throw Exception('Invalid waypoint format: $wp');
+        }
+      }).toList();
 
       final routeData = data['route'] as Map<String, dynamic>?;
       if (routeData == null) {
@@ -230,58 +244,55 @@ class RouteController extends GetxController {
       }
 
       final coordinates = geometry['coordinates'] as List? ?? [];
-      routePoints.value =
-          coordinates.map<LatLng>((coord) {
-            if (coord is List && coord.length >= 2) {
-              return LatLng(
-                (coord[1] as num).toDouble(),
-                (coord[0] as num).toDouble(),
-              );
-            } else {
-              throw Exception('Invalid coordinate format: $coord');
-            }
-          }).toList();
+      routePoints.value = coordinates.map<LatLng>((coord) {
+        if (coord is List && coord.length >= 2) {
+          return LatLng(
+            (coord[1] as num).toDouble(),
+            (coord[0] as num).toDouble(),
+          );
+        } else {
+          throw Exception('Invalid coordinate format: $coord');
+        }
+      }).toList();
 
       final legs = mainRoute['legs'] as List?;
       if (legs != null && legs.isNotEmpty) {
         final leg = legs[0] as Map<String, dynamic>;
         final steps = leg['steps'] as List? ?? [];
 
-        routeSteps.value =
-            steps.map<Map<String, dynamic>>((step) {
-              final stepMap = step as Map<String, dynamic>;
-              final maneuver = stepMap['maneuver'] as Map<String, dynamic>?;
+        routeSteps.value = steps.map<Map<String, dynamic>>((step) {
+          final stepMap = step as Map<String, dynamic>;
+          final maneuver = stepMap['maneuver'] as Map<String, dynamic>?;
 
-              return {
-                'instruction': parseManeuver(maneuver),
-                'name': stepMap['name'] as String? ?? 'Jalan tanpa nama',
-                'distance': (stepMap['distance'] as num?)?.toDouble() ?? 0.0,
-                'type': maneuver?['type'] as String?,
-                'modifier': maneuver?['modifier'] as String?,
-              };
-            }).toList();
+          return {
+            'instruction': parseManeuver(maneuver),
+            'name': stepMap['name'] as String? ?? 'Jalan tanpa nama',
+            'distance': (stepMap['distance'] as num?)?.toDouble() ?? 0.0,
+            'type': maneuver?['type'] as String?,
+            'modifier': maneuver?['modifier'] as String?,
+          };
+        }).toList();
       }
 
       final alternatives = routeData['alternatives'] as List? ?? [];
-      _alternativeRoutes.value =
-          alternatives.map<List<LatLng>>((alt) {
-            final altMap = alt as Map<String, dynamic>;
-            final altGeometry = altMap['geometry'] as Map<String, dynamic>?;
-            final altCoordinates = altGeometry?['coordinates'] as List? ?? [];
+      _alternativeRoutes.value = alternatives.map<List<LatLng>>((alt) {
+        final altMap = alt as Map<String, dynamic>;
+        final altGeometry = altMap['geometry'] as Map<String, dynamic>?;
+        final altCoordinates = altGeometry?['coordinates'] as List? ?? [];
 
-            return altCoordinates.map<LatLng>((coord) {
-              if (coord is List && coord.length >= 2) {
-                return LatLng(
-                  (coord[1] as num).toDouble(),
-                  (coord[0] as num).toDouble(),
-                );
-              } else {
-                throw Exception(
-                  'Invalid alternative coordinate format: $coord',
-                );
-              }
-            }).toList();
-          }).toList();
+        return altCoordinates.map<LatLng>((coord) {
+          if (coord is List && coord.length >= 2) {
+            return LatLng(
+              (coord[1] as num).toDouble(),
+              (coord[0] as num).toDouble(),
+            );
+          } else {
+            throw Exception(
+              'Invalid alternative coordinate format: $coord',
+            );
+          }
+        }).toList();
+      }).toList();
 
       print(
         "Optimized route found: ${routePoints.length} points, ${optimizedWaypoints.length} waypoints",
@@ -322,15 +333,15 @@ class RouteController extends GetxController {
 
         searchSuggestions.value =
             (response.data as List).map<Map<String, dynamic>>((item) {
-              return {
-                'display_name': item['display_name'] as String,
-                'lat': item['lat'] as double,
-                'lon': item['lon'] as double,
-                'type': item['type'] as String? ?? 'unknown',
-                'address': item['address'] as Map<String, dynamic>? ?? {},
-                'distance': item['distance'] as double?,
-              };
-            }).toList();
+          return {
+            'display_name': item['display_name'] as String,
+            'lat': item['lat'] as double,
+            'lon': item['lon'] as double,
+            'type': item['type'] as String? ?? 'unknown',
+            'address': item['address'] as Map<String, dynamic>? ?? {},
+            'distance': item['distance'] as double?,
+          };
+        }).toList();
       } on DioException catch (e) {
         final errorMsg = e.response?.data?['detail'] ?? e.message;
         Get.snackbar("Error", "Pencarian gagal: $errorMsg");

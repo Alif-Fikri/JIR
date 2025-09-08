@@ -1,4 +1,5 @@
 import 'package:JIR/pages/home/flood/widgets/radar_map.dart';
+import 'package:JIR/pages/home/map/widget/route_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
@@ -53,96 +54,106 @@ class MapMonitoring extends StatelessWidget {
   Widget _buildMap() {
     final FloodController controller = Get.find<FloodController>();
 
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
+    return GetX<FloodController>(
+      builder: (controller) {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      final floodMarkers = controller.floodData.map((item) {
-        final lat =
-            double.tryParse(item['LATITUDE']?.toString() ?? '0.0') ?? 0.0;
-        final lng =
-            double.tryParse(item['LONGITUDE']?.toString() ?? '0.0') ?? 0.0;
+        final floodMarkers = controller.floodData.map((item) {
+          final lat =
+              double.tryParse(item['LATITUDE']?.toString() ?? '0.0') ?? 0.0;
+          final lng =
+              double.tryParse(item['LONGITUDE']?.toString() ?? '0.0') ?? 0.0;
 
-        return Marker(
-          point: LatLng(lat, lng),
-          child: GestureDetector(
+          return Marker(
+            point: LatLng(lat, lng),
+            child: GestureDetector(
               onTap: () => _showDisasterDetails(item),
-              child: RadarMarker(color: Colors.red)),
-        );
-      }).toList();
-      final waypointMarkers =
-          _routeController.optimizedWaypoints.map((waypoint) {
-        return Marker(
-          point: waypoint,
-          width: 30,
-          height: 30,
-          child: const Icon(
-            Icons.location_pin,
-            color: Colors.orange,
-            size: 30,
-          ),
-        );
-      }).toList();
+              child: RadarMarker(color: Colors.red),
+            ),
+          );
+        }).toList();
 
-      final allMarkers = [...floodMarkers, ...waypointMarkers];
+        return GetX<RouteController>(
+          builder: (routeController) {
+            final waypointMarkers =
+                routeController.optimizedWaypoints.map((waypoint) {
+              return Marker(
+                point: waypoint,
+                width: 30,
+                height: 30,
+                child: const Icon(
+                  Icons.location_pin,
+                  color: Colors.orange,
+                  size: 30,
+                ),
+              );
+            }).toList();
 
-      return ReusableMap(
-        initialLocation: const LatLng(-6.2088, 106.8456),
-        markers: allMarkers,
-        userLocation: _routeController.userLocation.value,
-        userHeading: _routeController.userHeading.value,
-        destination: _routeController.destination.value,
-        routePoints: _routeController.routePoints,
-        waypoints: _routeController.optimizedWaypoints,
-      );
-    });
+            final allMarkers = [...floodMarkers, ...waypointMarkers];
+
+            return ReusableMap(
+              initialLocation: const LatLng(-6.2088, 106.8456),
+              markers: allMarkers,
+              userLocation: routeController.userLocation.value,
+              userHeading: routeController.userHeading.value,
+              destination: routeController.destination.value,
+              routePoints: routeController.routePoints,
+              waypoints: routeController.optimizedWaypoints,
+            );
+          },
+        );
+      },
+    );
   }
 
   Widget _buildOptimizedRouteInfo() {
     return Positioned(
       top: 80,
       right: 16,
-      child: Obx(() {
-        if (_routeController.optimizedWaypoints.isEmpty) {
-          return const SizedBox();
-        }
+      child: GetX<RouteController>(
+        builder: (controller) {
+          if (controller.optimizedWaypoints.isEmpty) {
+            return const SizedBox();
+          }
 
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Rute Dioptimalkan',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
+          return Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${_routeController.optimizedWaypoints.length} waypoint',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Rute Dioptimalkan',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      }),
+                const SizedBox(height: 4),
+                Text(
+                  '${controller.optimizedWaypoints.length} waypoint',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -273,25 +284,27 @@ class MapMonitoring extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (lat != null && lon != null)
-          Obx(() {
-            final distance = _routeController.userLocation.value != null
-                ? RouteController.calculateDistance(
-                      _routeController.userLocation.value!,
-                      LatLng(lat, lon),
-                    ) /
-                    1000
-                : null;
+          Builder(
+            builder: (context) {
+              final distance = _routeController.userLocation.value != null
+                  ? RouteController.calculateDistance(
+                        _routeController.userLocation.value!,
+                        LatLng(lat, lon),
+                      ) /
+                      1000
+                  : null;
 
-            return distance != null
-                ? Text(
-                    '${distance.toStringAsFixed(1)} km dari lokasi Anda',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  )
-                : const SizedBox.shrink();
-          }),
+              return distance != null
+                  ? Text(
+                      '${distance.toStringAsFixed(1)} km dari lokasi Anda',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    )
+                  : const SizedBox.shrink();
+            },
+          ),
         Text(
           RouteController.getLocationType(suggestion['type']),
           style: GoogleFonts.inter(
@@ -317,14 +330,22 @@ class MapMonitoring extends StatelessWidget {
     return Positioned(
       bottom: 20,
       right: 20,
-      child: Obx(() => Visibility(
-            visible: _routeController.routeSteps.isNotEmpty,
+      child: GetX<RouteController>(
+        builder: (controller) {
+          return Visibility(
+            visible: controller.routeSteps.isNotEmpty,
             child: FloatingActionButton(
               backgroundColor: const Color(0xff45557B),
               child: const Icon(Icons.directions, color: Colors.white),
-              onPressed: () => Get.bottomSheet(RouteBottomSheetContent()),
+              onPressed: () => Get.bottomSheet(
+                RouteBottomSheetWidget(),
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+              ),
             ),
-          )),
+          );
+        },
+      ),
     );
   }
 

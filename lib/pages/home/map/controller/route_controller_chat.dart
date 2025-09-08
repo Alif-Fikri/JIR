@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'package:JIR/services/chat_service/chat_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'chat_service.dart';
 
 class RouteControllerForChat extends GetxController
     with GetTickerProviderStateMixin {
@@ -64,8 +64,12 @@ class RouteControllerForChat extends GetxController
       final pos = await Geolocator.getCurrentPosition();
       userLocation.value = LatLng(pos.latitude, pos.longitude);
 
-      _positionStream =
-          Geolocator.getPositionStream(distanceFilter: 5).listen((p) {
+      _positionStream = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.best,
+          distanceFilter: 5,
+        ),
+      ).listen((p) {
         userLocation.value = LatLng(p.latitude, p.longitude);
         if (isNavigating.value) _checkNextStep();
       });

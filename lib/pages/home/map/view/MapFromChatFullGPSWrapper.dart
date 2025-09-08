@@ -1,8 +1,8 @@
+import 'package:JIR/pages/home/map/controller/route_controller_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
-import 'route_controller_chat.dart';
 
 class MapFromChatFullGPSNav extends StatelessWidget {
   const MapFromChatFullGPSNav({super.key});
@@ -15,22 +15,22 @@ class MapFromChatFullGPSNav extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Navigation Mode")),
       body: Obx(() {
-        if (controller.polylinePoints.isNotEmpty) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            mapController.fitBounds(
-              LatLngBounds.fromPoints(controller.polylinePoints),
-              options: const FitBoundsOptions(padding: EdgeInsets.all(50)),
-            );
-          });
-        }
+        // if (controller.polylinePoints.isNotEmpty) {
+        //   WidgetsBinding.instance.addPostFrameCallback((_) {
+        //     mapController.fitBounds(
+        //       LatLngBounds.fromPoints(controller.polylinePoints),
+        //       options: const FitBoundsOptions(padding: EdgeInsets.all(50)),
+        //     );
+        //   });
+        // }
 
         return Stack(
           children: [
             FlutterMap(
               mapController: mapController,
               options: MapOptions(
-                center: controller.userLocation.value ?? LatLng(0, 0),
-                zoom: 15,
+                // center: controller.userLocation.value ?? LatLng(0, 0),
+                // zoom: 15,
                 maxZoom: 18,
                 minZoom: 5,
               ),
@@ -56,7 +56,7 @@ class MapFromChatFullGPSNav extends StatelessWidget {
                         point: controller.startLocation.value!,
                         width: 40,
                         height: 40,
-                        builder: (_) => const Icon(Icons.my_location,
+                        child: Icon(Icons.my_location,
                             color: Colors.green, size: 30),
                       ),
                     if (controller.endLocation.value != null)
@@ -64,21 +64,21 @@ class MapFromChatFullGPSNav extends StatelessWidget {
                         point: controller.endLocation.value!,
                         width: 40,
                         height: 40,
-                        builder: (_) => const Icon(Icons.location_on,
+                        child: Icon(Icons.location_on,
                             color: Colors.red, size: 30),
                       ),
                     ...controller.waypoints.map((wp) => Marker(
                           point: wp,
                           width: 30,
                           height: 30,
-                          builder: (_) => const Icon(Icons.circle,
+                          child: Icon(Icons.circle,
                               color: Colors.orange, size: 15),
                         )),
                     ...controller.floodMarkers.map((f) => Marker(
                           point: f,
                           width: 30,
                           height: 30,
-                          builder: (_) => const Icon(Icons.warning,
+                          child: Icon(Icons.warning,
                               color: Colors.redAccent, size: 25),
                         )),
                     if (controller.userLocation.value != null)
@@ -86,7 +86,7 @@ class MapFromChatFullGPSNav extends StatelessWidget {
                         point: controller.userLocation.value!,
                         width: 50,
                         height: 50,
-                        builder: (_) => AnimatedBuilder(
+                        child: AnimatedBuilder(
                           animation: controller.pulseController,
                           builder: (_, child) {
                             return Transform.rotate(
@@ -120,7 +120,6 @@ class MapFromChatFullGPSNav extends StatelessWidget {
                 ),
               ],
             ),
-            // Bottom Sheet Steps
             if (controller.steps.isNotEmpty)
               Positioned(
                 bottom: 60,
@@ -151,7 +150,6 @@ class MapFromChatFullGPSNav extends StatelessWidget {
                   }),
                 ),
               ),
-            // Floating Button Toggle Navigation
             Positioned(
               bottom: 10,
               right: 10,
