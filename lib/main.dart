@@ -1,19 +1,87 @@
+import 'dart:convert';
+import 'package:JIR/app/routes/app_routes.dart';
+import 'package:JIR/bindings/initial_binding.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:JIR/app/routes/app_routes.dart';
-import 'package:JIR/bindings/initial_binding.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
+
+const taskName = "floodCheckTask";
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    if (task == taskName) {
+      try {
+        final res = await http
+            .get(Uri.parse("${dotenv.env['MAIN_URL']}/api/flood/data"));
+        if (res.statusCode == 200) {
+          final decoded = json.decode(res.body);
+          final List<dynamic> jsonData = decoded["data"];
+
+          if (jsonData.isNotEmpty) {
+            final latest = jsonData.first;
+
+            const androidDetails = AndroidNotificationDetails(
+              'flood_channel',
+              'Flood Alerts',
+              channelDescription: 'Notifikasi banjir otomatis',
+              importance: Importance.max,
+              priority: Priority.high,
+            );
+            const iosDetails = DarwinNotificationDetails();
+            const notifDetails =
+                NotificationDetails(android: androidDetails, iOS: iosDetails);
+
+            await flutterLocalNotificationsPlugin.show(
+              0,
+              "Update Banjir: ${latest["NAMA_PINTU_AIR"]}",
+              "Status: ${latest["STATUS_SIAGA"]} • Tinggi Air: ${latest["TINGGI_AIR"]}",
+              notifDetails,
+            );
+          }
+        }
+      } catch (e) {
+        print("Error fetch flood data: $e");
+      }
+    }
+    return Future.value(true);
+  });
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Hive.initFlutter();
   await Hive.openBox('authBox');
+  await Hive.openBox('notifications');
   await dotenv.load(fileName: ".env");
   await initializeDateFormatting('id_ID', null);
+  const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const iosInit = DarwinInitializationSettings();
+  await flutterLocalNotificationsPlugin.initialize(
+    const InitializationSettings(android: androidInit, iOS: iosInit),
+  );
+
+  await Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: true,
+  );
+
+  await Workmanager().registerPeriodicTask(
+    "floodTaskUnique",
+    taskName,
+    frequency: const Duration(minutes: 15),
+    initialDelay: const Duration(seconds: 10),
+  );
+
   runApp(const MyApp());
-  // Get.put(InternetService());
 }
 
 class MyApp extends StatelessWidget {

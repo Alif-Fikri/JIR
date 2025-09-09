@@ -1,12 +1,21 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
 import 'package:JIR/helper/custom_snackbar.dart';
 
 class DeleteAccountController extends GetxController {
-  final AuthService _authService = Get.find<AuthService>();
+  late final AuthService _authService;
   final RxBool isLoading = false.obs;
   final RxString password = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    if (Get.isRegistered<AuthService>()) {
+      _authService = Get.find<AuthService>();
+    } else {
+      _authService = AuthService();
+    }
+  }
 
   Future<void> deleteAccount(String password) async {
     isLoading(true);

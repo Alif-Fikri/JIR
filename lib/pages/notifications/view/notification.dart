@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -9,44 +11,62 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
-  List<NotificationModel> notifications = [
-    NotificationModel(
-      id: 1,
-      icon: 'assets/images/peringatan.png',
-      title: 'Peringatan Potensi Banjir di Area Anda',
-      message:
-          'Hati-hati! Curah hujan tinggi diprediksi pada 14:00 WIB di area Anda. Waspadai genangan air dan cari jalur alternatif.',
-      time: '1 hari yang lalu',
-    ),
-    NotificationModel(
-      id: 2,
-      icon: 'assets/images/info.png',
-      title: 'Peringatan Aksi Demo di Lokasi Terdekat',
-      message:
-          'Aksi demo besar terdeteksi di sekitar Kantor Gubernur. Hindari area tersebut untuk menghindari kemacetan dan risiko keamanan.',
-      time: '1 hari yang lalu',
-    ),
-    NotificationModel(
-      id: 3,
-      icon: 'assets/images/suhu.png',
-      title: 'Perkiraan Cuaca Hari Ini',
-      message:
-          'Cuaca hari ini cerah dengan suhu 30°C. Pastikan Anda tetap terhidrasi jika beraktivitas di luar ruangan.',
-      time: '1 hari yang lalu',
-    ),
-  ];
+  List<NotificationModel> notifications = [];
 
-  void _deleteSelected() {
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  Future<void> _loadNotifications() async {
+    final box = Hive.box('notifications');
+    final List list = box.get('list', defaultValue: []);
     setState(() {
-      notifications.removeWhere((notification) => notification.isChecked);
+      notifications = list
+          .map((item) => NotificationModel(
+                id: item['id'],
+                icon: item['icon'],
+                title: item['title'],
+                message: item['message'],
+                time: item['time'],
+                isChecked: item['isChecked'] ?? false,
+              ))
+          .toList();
     });
   }
 
-  void _toggleCheck(int id, bool value) {
+  Future<void> _saveNotifications() async {
+    final box = Hive.box('notifications');
+    await box.put(
+        'list',
+        notifications
+            .map((n) => {
+                  "id": n.id,
+                  "icon": n.icon,
+                  "title": n.title,
+                  "message": n.message,
+                  "time": n.time,
+                  "isChecked": n.isChecked,
+                })
+            .toList());
+  }
+
+  void _deleteSelected() async {
+    setState(() {
+      notifications.removeWhere((notification) => notification.isChecked);
+    });
+    await _saveNotifications();
+  }
+
+  void _toggleCheck(int id, bool value) async {
     setState(() {
       final index = notifications.indexWhere((n) => n.id == id);
-      notifications[index] = notifications[index].copyWith(isChecked: value);
+      if (index != -1) {
+        notifications[index] = notifications[index].copyWith(isChecked: value);
+      }
     });
+    await _saveNotifications();
   }
 
   @override
@@ -79,17 +99,21 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: notifications.length,
-        itemBuilder: (context, index) {
-          final notification = notifications[index];
-          return NotificationItem(
-            notification: notification,
-            onChecked: (value) => _toggleCheck(notification.id, value),
-          );
-        },
-      ),
+      body: notifications.isEmpty
+          ? const Center(
+              child: Text("Belum ada notifikasi"),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: notifications.length,
+              itemBuilder: (context, index) {
+                final notification = notifications[index];
+                return NotificationItem(
+                  notification: notification,
+                  onChecked: (value) => _toggleCheck(notification.id, value),
+                );
+              },
+            ),
     );
   }
 }
@@ -190,9 +214,7 @@ class NotificationModel {
     this.isChecked = false,
   });
 
-  NotificationModel copyWith({
-    bool? isChecked,
-  }) {
+  NotificationModel copyWith({bool? isChecked}) {
     return NotificationModel(
       id: id,
       icon: icon,

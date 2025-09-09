@@ -52,7 +52,7 @@ class MapMonitoring extends StatelessWidget {
   }
 
   Widget _buildMap() {
-    final FloodController controller = Get.find<FloodController>();
+    Get.find<FloodController>();
 
     return GetX<FloodController>(
       builder: (controller) {

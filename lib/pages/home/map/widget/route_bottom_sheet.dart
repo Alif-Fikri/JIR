@@ -76,8 +76,9 @@ class RouteBottomSheetWidget extends StatelessWidget {
                             final raw = s['distance'];
                             if (raw == null) return sum;
                             if (raw is num) return sum + raw.toDouble();
-                            if (raw is String)
+                            if (raw is String) {
                               return sum + (double.tryParse(raw) ?? 0.0);
+                            }
                             return sum;
                           });
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/pages/home/main/view/home.dart';
-import 'package:JIR/pages/notifications/notification.dart';
+import 'package:JIR/pages/notifications/view/notification.dart';
 import 'package:JIR/pages/profile/profile.dart';
 import 'package:JIR/pages/activity/activity.dart';
 import 'package:hive/hive.dart';

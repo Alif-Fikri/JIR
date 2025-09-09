@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "798096595312",
+    "project_id": "jir-smart-city",
+    "storage_bucket": "jir-smart-city.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798096595312:android:548203663f64019f1c97b5",
+        "android_client_info": {
+          "package_name": "com.example.JIR"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3FF5z1GUyDPMV5pvO64mgExKcz15wdEk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

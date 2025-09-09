@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 import 'package:JIR/pages/home/map/controller/route_controller.dart';
 
 class ReusableMap extends StatefulWidget {
-  final LatLng initialLocation;
+  final LatLng? initialLocation;
   final List<Marker> markers;
   final LatLng? userLocation;
   final LatLng? destination;
@@ -45,6 +45,8 @@ class ReusableMapState extends State<ReusableMap>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
+  static final LatLng _fallbackCenter = LatLng(-6.200000, 106.816666);
+
   @override
   bool get wantKeepAlive => true;
 
@@ -73,7 +75,10 @@ class ReusableMapState extends State<ReusableMap>
 
   void _initMapPosition() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _mapController.move(widget.initialLocation, 15.0);
+      try {
+        _mapController.move(widget.initialLocation ?? _fallbackCenter, 15.0);
+      } catch (_) {}
+      widget.onMapCreated?.call(_mapController);
     });
   }
 
@@ -137,19 +142,23 @@ class ReusableMapState extends State<ReusableMap>
     Future.delayed(const Duration(milliseconds: 100), () {
       if (!mounted) return;
 
-      _mapController.fitCamera(
-        CameraFit.bounds(
-          bounds: bounds,
-          padding: const EdgeInsets.all(100),
-          maxZoom: 17.0,
-        ),
-      );
+      try {
+        _mapController.fitCamera(
+          CameraFit.bounds(
+            bounds: bounds,
+            padding: const EdgeInsets.all(100),
+            maxZoom: 17.0,
+          ),
+        );
+      } catch (_) {}
     });
   }
 
   void _updateMapPosition() {
     if (widget.userLocation != null) {
-      _mapController.move(widget.userLocation!, _mapController.camera.zoom);
+      try {
+        _mapController.move(widget.userLocation!, _mapController.camera.zoom);
+      } catch (_) {}
     }
   }
 
@@ -197,11 +206,10 @@ class ReusableMapState extends State<ReusableMap>
               child: FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
-                  initialCenter: widget.initialLocation,
+                  initialCenter: widget.initialLocation ?? _fallbackCenter,
                   initialZoom: 15.0,
                   interactionOptions: const InteractionOptions(
-                    flags:
-                        InteractiveFlag.drag |
+                    flags: InteractiveFlag.drag |
                         InteractiveFlag.flingAnimation |
                         InteractiveFlag.pinchMove |
                         InteractiveFlag.pinchZoom,
@@ -225,10 +233,12 @@ class ReusableMapState extends State<ReusableMap>
                     backgroundColor: Colors.white.withOpacity(0.9),
                     heroTag: 'zoomIn',
                     onPressed: () {
-                      _mapController.move(
-                        _mapController.camera.center,
-                        _mapController.camera.zoom + 1,
-                      );
+                      try {
+                        _mapController.move(
+                          _mapController.camera.center,
+                          _mapController.camera.zoom + 1,
+                        );
+                      } catch (_) {}
                     },
                     child: const Icon(Icons.add, color: Colors.blue),
                   ),
@@ -238,10 +248,12 @@ class ReusableMapState extends State<ReusableMap>
                     backgroundColor: Colors.white.withOpacity(0.9),
                     heroTag: 'zoomOut',
                     onPressed: () {
-                      _mapController.move(
-                        _mapController.camera.center,
-                        _mapController.camera.zoom - 1,
-                      );
+                      try {
+                        _mapController.move(
+                          _mapController.camera.center,
+                          _mapController.camera.zoom - 1,
+                        );
+                      } catch (_) {}
                     },
                     child: const Icon(Icons.remove, color: Colors.blue),
                   ),
@@ -252,7 +264,13 @@ class ReusableMapState extends State<ReusableMap>
                     heroTag: 'myLocation',
                     onPressed: () {
                       if (widget.userLocation != null) {
-                        _mapController.move(widget.userLocation!, 15.0);
+                        try {
+                          _mapController.move(widget.userLocation!, 15.0);
+                        } catch (_) {}
+                      } else {
+                        try {
+                          _mapController.move(widget.initialLocation ?? _fallbackCenter, 15.0);
+                        } catch (_) {}
                       }
                     },
                     child: const Icon(Icons.my_location, color: Colors.blue),
@@ -309,7 +327,7 @@ class ReusableMapState extends State<ReusableMap>
           height: 60,
           child: ScaleTransition(
             scale: _pulseAnimation,
-            child: const _UserLocationMarker(),
+            child: const UserLocationMarker(),
           ),
         ),
       if (widget.destination != null)
@@ -347,7 +365,7 @@ class ReusableMapState extends State<ReusableMap>
               size: 30,
             ),
           );
-        }).toList(),
+        }),
     ];
 
     return MarkerLayer(markers: markers, rotate: false);
@@ -372,73 +390,76 @@ class ReusableMapState extends State<ReusableMap>
   }
 }
 
-class _UserLocationMarker extends StatelessWidget {
-  const _UserLocationMarker();
+class UserLocationMarker extends StatelessWidget {
+  const UserLocationMarker({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final currentHeading = Get.find<RouteController>().userHeading.value;
-      return Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
+    double currentHeading = 0.0;
+    if (Get.isRegistered<RouteController>()) {
+      try {
+        currentHeading = Get.find<RouteController>().userHeading.value;
+      } catch (_) {
+        currentHeading = 0.0;
+      }
+    }
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.2),
+            shape: BoxShape.circle,
           ),
-          Transform.rotate(
-            angle: (currentHeading * (math.pi / 180)),
-            child: CustomPaint(
-              size: const Size(48, 48),
-              painter: _DirectionLightPainter(),
-            ),
+        ),
+        Transform.rotate(
+          angle: (currentHeading * (math.pi / 180)),
+          child: CustomPaint(
+            size: const Size(48, 48),
+            painter: _DirectionLightPainter(),
           ),
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: Colors.blue.shade700,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 5,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+        ),
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: Colors.blue.shade700,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 5,
+                spreadRadius: 1,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      );
-    });
+        ),
+      ],
+    );
   }
 }
 
 class _DirectionLightPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = Colors.blue.withOpacity(0.7)
-          ..style = PaintingStyle.fill;
+    final paint = Paint()
+      ..color = Colors.blue.withOpacity(0.7)
+      ..style = PaintingStyle.fill;
 
-    final shadowPaint =
-        Paint()
-          ..color = Colors.black.withOpacity(0.2)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.2)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
 
-    final path =
-        ui.Path()
-          ..moveTo(size.width / 2, 0)
-          ..lineTo(size.width * 0.4, size.height * 0.3)
-          ..lineTo(size.width * 0.6, size.height * 0.3)
-          ..close();
+    final path = ui.Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width * 0.4, size.height * 0.3)
+      ..lineTo(size.width * 0.6, size.height * 0.3)
+      ..close();
 
     canvas.drawPath(path, shadowPaint);
 

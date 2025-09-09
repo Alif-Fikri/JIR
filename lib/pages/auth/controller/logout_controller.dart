@@ -1,8 +1,6 @@
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/helper/custom_snackbar.dart';
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class LogoutController extends GetxController {

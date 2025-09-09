@@ -1,8 +1,5 @@
 import 'package:JIR/bindings/initial_binding.dart';
-import 'package:JIR/bindings/profile_binding.dart';
 import 'package:get/get.dart';
-import 'package:JIR/bindings/auth_binding.dart';
-import 'package:JIR/bindings/home_binding.dart';
 import 'package:JIR/bindings/report_binding.dart';
 import 'package:JIR/helper/menu.dart';
 import 'package:JIR/pages/activity/activity.dart';
@@ -17,7 +14,7 @@ import 'package:JIR/pages/home/park/view/park.dart';
 import 'package:JIR/pages/home/park/view/park_detail.dart';
 import 'package:JIR/pages/home/report/view/report.dart';
 import 'package:JIR/pages/home/weather/view/weather.dart';
-import 'package:JIR/pages/notifications/notification.dart';
+import 'package:JIR/pages/notifications/view/notification.dart';
 import 'package:JIR/pages/profile/about.dart';
 import 'package:JIR/pages/profile/privacy_policy.dart';
 import 'package:JIR/pages/profile/profile.dart';
@@ -87,59 +84,85 @@ class AppRoutes {
     GetPage(
       name: home,
       page: () => const Menu(),
+      transition: Transition.fadeIn,
       binding: InitialBinding(),
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: profile,
       page: () => ProfilePage(),
+      transition: Transition.fadeIn,
       binding: InitialBinding(),
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: notification,
       page: () => const NotificationPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: notification,
       page: () => ActivityPage(),
+      transition: Transition.fadeIn,
       binding: ReportBinding(),
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: flood,
       page: () => FloodMonitoringPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: chatbot,
       page: () => const ChatbotOpeningPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: park,
       page: () => const ParkPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: parkdetail,
       page: () => const ParkDetail(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: crowd,
       page: () => CrowdMonitoringPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: cuaca,
       page: () => WeatherPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: cctv,
       page: () => CCTVPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: peta,
       page: () => MapMonitoring(),
       binding: InitialBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
       name: lapor,
       page: () => ReportPage(),
       binding: InitialBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     ),
     //     GetPage(
     //   name: report,

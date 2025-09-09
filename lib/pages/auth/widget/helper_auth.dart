@@ -54,6 +54,8 @@ Widget buildErrorMessage(String message) {
     child: Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Row(
+        crossAxisAlignment:
+            CrossAxisAlignment.start, 
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           const Icon(
@@ -62,13 +64,18 @@ Widget buildErrorMessage(String message) {
             size: 16,
           ),
           const SizedBox(width: 4),
-          Text(
-            message,
-            style: GoogleFonts.inter(
-              textStyle: const TextStyle(
-                color: Colors.red,
-                fontSize: 12,
+          Flexible(
+            child: Text(
+              message,
+              style: GoogleFonts.inter(
+                textStyle: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
+                ),
               ),
+              softWrap: true, 
+              overflow: TextOverflow.visible, 
+              textAlign: TextAlign.left,
             ),
           ),
         ],

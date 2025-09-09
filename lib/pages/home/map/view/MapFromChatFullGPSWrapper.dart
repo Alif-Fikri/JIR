@@ -2,7 +2,6 @@ import 'package:JIR/pages/home/map/controller/route_controller_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
-import 'package:latlong2/latlong.dart';
 
 class MapFromChatFullGPSNav extends StatelessWidget {
   const MapFromChatFullGPSNav({super.key});

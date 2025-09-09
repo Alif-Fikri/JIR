@@ -28,7 +28,7 @@ class _SettingsPageState extends State<SettingsPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Settings',
+          'Pengaturan',
           style: GoogleFonts.inter(
               fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
         ),
@@ -51,7 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 height: 26,
                 width: 26,
               ),
-              title: Text('Delete Account',
+              title: Text('Hapus Akun',
                   style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
@@ -65,7 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 height: 26,
                 width: 26,
               ),
-              title: Text('Change Password',
+              title: Text('Ubah Kata Sandi',
                   style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
@@ -93,8 +93,9 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context) {
         return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
+            backgroundColor: Colors.white,
             title: Text(
-              'DELETE ACCOUNT',
+              'HAPUS AKUN',
               style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -108,8 +109,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   controller: _passwordController,
                   obscureText: !isPasswordVisible,
                   decoration: InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Please insert your Password',
+                      labelText: 'Kata Sandi',
+                      hintText: 'Masukkan kata sandi Anda',
                       labelStyle: GoogleFonts.inter(
                           fontSize: 14, fontStyle: FontStyle.italic),
                       hintStyle: GoogleFonts.inter(
@@ -135,21 +136,28 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 const SizedBox(height: 10),
                 Container(
-                  height: 35.0,
-                  width: 280.0,
-                  color: const Color(0xffFFE3E3),
-                  padding: const EdgeInsets.all(5.0),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xffFFE3E3),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  padding: const EdgeInsets.all(10.0),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Icon(Icons.warning, color: Colors.red, size: 20),
-                      const SizedBox(width: 5),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          "You're about to delete your account. This action cannot be undone. All data will be lost.",
+                          "Anda akan menghapus akun secara permanen. "
+                          "Tindakan ini tidak dapat dibatalkan. "
+                          "Semua data, riwayat, dan informasi pribadi Anda akan hilang selamanya.",
                           style: GoogleFonts.inter(
-                              color: Colors.black, fontSize: 8),
+                            color: Colors.black,
+                            fontSize: 12,
+                          ),
                           softWrap: true,
-                          textAlign: TextAlign.center,
+                          textAlign: TextAlign.left,
                         ),
                       ),
                     ],
@@ -165,7 +173,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ? null
                     : () => Navigator.of(context).pop(),
                 child: Text(
-                  'Close',
+                  'Tutup',
                   style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -183,7 +191,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         if (mounted) Navigator.of(context).pop();
                       },
                 child: Text(
-                  'Delete',
+                  'Hapus',
                   style: GoogleFonts.inter(
                       color: Colors.white,
                       fontSize: 14,

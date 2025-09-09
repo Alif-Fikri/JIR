@@ -7,8 +7,8 @@ import 'package:JIR/pages/auth/service/google_api_auth.dart';
 class AuthBinding implements Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => AuthService());
-    Get.lazyPut(() => GoogleAuthService());
+    Get.put<AuthService>(AuthService(), permanent: true);
+    Get.put<GoogleAuthService>(GoogleAuthService(), permanent: true);
     Get.lazyPut(() => SignupController());
     Get.lazyPut(() => LoginController());
   }

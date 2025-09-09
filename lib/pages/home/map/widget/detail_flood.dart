@@ -163,7 +163,7 @@ class DetailRow extends StatelessWidget {
     required this.label,
     required this.value,
   });
-
+   
   @override
   Widget build(BuildContext context) {
     return Row(
