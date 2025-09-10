@@ -1,3 +1,4 @@
+import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/pages/auth/controller/logout_controller.dart';
 import 'package:JIR/pages/profile/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class ProfilePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Obx(() => Text(
-                          'Hi, ${pc.name.value} !',
+                          'Halo, ${pc.name.value} !',
                           style: GoogleFonts.inter(
                             fontSize: 22,
                             color: Colors.white,
@@ -84,57 +85,37 @@ class ProfilePage extends StatelessWidget {
                 children: [
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/settings.png', width: 24),
-                    text: "Settings",
+                    text: "Pengaturan",
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SettingsPage(),
-                        ),
-                      );
+                      Get.toNamed(AppRoutes.about);
                     },
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/about.png', width: 24),
-                    text: "About JIR",
+                    text: "Tentang JIR",
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AboutPage(),
-                        ),
-                      );
+                      Get.toNamed(AppRoutes.about);
                     },
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/privacypolicy.png',
                         width: 24),
-                    text: "Privacy Policy",
+                    text: "Kebijakan Privasi",
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const PrivacyPolicy(),
-                        ),
-                      );
+                      Get.toNamed(AppRoutes.privacyPolicy);
                     },
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/termsofservice.png',
                         width: 24),
-                    text: "Terms Of Service",
+                    text: "Syarat dan Ketentuan",
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TermsOfService(),
-                        ),
-                      );
+                      Get.toNamed(AppRoutes.termsOfService);
                     },
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/logout.png', width: 24),
-                    text: "Logout",
+                    text: "Keluar",
                     onTap: () {
                       LogoutDialog.show(
                         context,
@@ -201,7 +182,7 @@ class LogoutDialog {
             borderRadius: BorderRadius.circular(15),
           ),
           title: Text(
-            'Log Out?',
+            'Keluar?',
             style: GoogleFonts.inter(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -209,7 +190,7 @@ class LogoutDialog {
             ),
           ),
           content: Text(
-            'Are you sure want to logout?',
+            'Apakah Anda yakin ingin keluar?',
             style: GoogleFonts.inter(
               fontSize: 16,
               color: Colors.black,
@@ -233,7 +214,7 @@ class LogoutDialog {
                       ),
                       child: FittedBox(
                         child: Text(
-                          'Cancel',
+                          'Batal',
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -260,7 +241,7 @@ class LogoutDialog {
                       ),
                       child: FittedBox(
                         child: Text(
-                          'Log Out',
+                          'Keluar',
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

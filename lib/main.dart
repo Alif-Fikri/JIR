@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/bindings/initial_binding.dart';
+import 'package:JIR/config.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -19,8 +20,7 @@ void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     if (task == taskName) {
       try {
-        final res = await http
-            .get(Uri.parse("${dotenv.env['MAIN_URL']}/api/flood/data"));
+        final res = await http.get(Uri.parse("$mainUrl/api/flood/data"));
         if (res.statusCode == 200) {
           final decoded = json.decode(res.body);
           final List<dynamic> jsonData = decoded["data"];
