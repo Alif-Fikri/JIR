@@ -27,20 +27,20 @@ class DeleteAccountController extends GetxController {
         CustomSnackbar.show(
           context: Get.context!,
           message: "Akun berhasil dihapus",
-          imageAssetPath: 'assets/images/jir_logo3.png',
+          useAppIcon: true,
         );
       } else {
         CustomSnackbar.show(
           context: Get.context!,
           message: response['message'] ?? "Gagal menghapus akun",
-          imageAssetPath: 'assets/images/jir_logo3.png',
+          useAppIcon: true,
         );
       }
     } catch (e) {
       CustomSnackbar.show(
         context: Get.context!,
         message: "Terjadi kesalahan saat menghapus akun",
-        imageAssetPath: 'assets/images/jir_logo3.png',
+        useAppIcon: true,
       );
     } finally {
       isLoading(false);

@@ -16,14 +16,14 @@ class LogoutController extends GetxController {
       CustomSnackbar.show(
         context: Get.context!,
         message: "Anda berhasil logout",
-        imageAssetPath: 'assets/images/jir_logo3.png',
+        useAppIcon: true,
       );
       Get.offAllNamed(AppRoutes.login);
     } else {
       CustomSnackbar.show(
         context: Get.context!,
         message: "Logout anda gagal, coba lagi nanti!.",
-        imageAssetPath: 'assets/images/jir_logo3.png',
+        useAppIcon: true,
       );
     }
 

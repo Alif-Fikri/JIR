@@ -6,9 +6,41 @@ class CustomSnackbar {
     required BuildContext context,
     required String message,
     String? imageAssetPath,
+    bool useAppIcon = false, 
     Color backgroundColor = Colors.white,
     Color textColor = Colors.black,
   }) {
+    final appIconPath = 'assets/images/jir_logo4.png';
+    String? chosenAsset;
+    if (imageAssetPath != null && imageAssetPath.isNotEmpty) {
+      chosenAsset = imageAssetPath;
+    } else if (useAppIcon) {
+      chosenAsset = appIconPath;
+    }
+
+    Widget leading;
+    if (chosenAsset != null) {
+      leading = Image.asset(
+        chosenAsset,
+        width: 36,
+        height: 36,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return CircleAvatar(
+            radius: 18,
+            backgroundColor: Colors.grey.shade200,
+            child: Icon(Icons.notifications, color: textColor, size: 20),
+          );
+        },
+      );
+    } else {
+      leading = CircleAvatar(
+        radius: 18,
+        backgroundColor: Colors.grey.shade200,
+        child: Icon(Icons.notifications, color: textColor, size: 20),
+      );
+    }
+
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.all(12),
@@ -18,13 +50,8 @@ class CustomSnackbar {
       backgroundColor: backgroundColor,
       content: Row(
         children: [
-          if (imageAssetPath != null)
-            Image.asset(
-              imageAssetPath,
-              width: 35,
-              height: 35,
-            ),
-          if (imageAssetPath != null) const SizedBox(width: 12),
+          leading,
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               message,
@@ -33,8 +60,8 @@ class CustomSnackbar {
           ),
         ],
       ),
+      duration: const Duration(seconds: 4),
     );
-
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

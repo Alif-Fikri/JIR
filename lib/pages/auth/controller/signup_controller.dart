@@ -65,14 +65,14 @@ class SignupController extends GetxController {
       CustomSnackbar.show(
         context: Get.context!,
         message: "Pendaftaran berhasil! Silakan login.",
-        imageAssetPath: 'assets/images/jir_logo3.png',
+        useAppIcon: true,
       );
       Get.offNamed(AppRoutes.login);
     } else {
       CustomSnackbar.show(
         context: Get.context!,
         message: response['message'] ?? "Terjadi kesalahan, silakan coba lagi.",
-        imageAssetPath: 'assets/images/jir_logo3.png',
+        useAppIcon: true,
       );
       errorMessage.value =
           response['message'] ?? "Terjadi kesalahan, silakan coba lagi.";

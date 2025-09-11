@@ -4,10 +4,6 @@ import 'package:JIR/pages/profile/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:JIR/pages/profile/about.dart';
-import 'package:JIR/pages/profile/privacy_policy.dart';
-import 'package:JIR/pages/auth/view/delete_acc.dart';
-import 'package:JIR/pages/profile/terms_of_service.dart';
 
 class ProfilePage extends StatelessWidget {
   ProfilePage({super.key});
@@ -87,7 +83,7 @@ class ProfilePage extends StatelessWidget {
                     icon: Image.asset('assets/images/settings.png', width: 24),
                     text: "Pengaturan",
                     onTap: () {
-                      Get.toNamed(AppRoutes.about);
+                      Get.toNamed(AppRoutes.settings);
                     },
                   ),
                   ProfileMenuItem(

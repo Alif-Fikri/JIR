@@ -35,8 +35,6 @@ class ChangePasswordController extends GetxController {
 
   Future<void> changePassword() async {
     if (isLoading.value) return;
-
-    // validasi
     final newPwdError = validatePassword(newPasswordController.text);
     final confirmPwdError =
         validateConfirmPassword(confirmPasswordController.text);
@@ -45,7 +43,7 @@ class ChangePasswordController extends GetxController {
       CustomSnackbar.show(
         context: Get.context!,
         message: newPwdError,
-        imageAssetPath: 'assets/images/jir_logo3.png',
+        useAppIcon: true,
       );
       return;
     }
@@ -53,7 +51,7 @@ class ChangePasswordController extends GetxController {
       CustomSnackbar.show(
         context: Get.context!,
         message: confirmPwdError,
-        imageAssetPath: 'assets/images/jir_logo3.png',
+        useAppIcon: true,
       );
       return;
     }
@@ -70,20 +68,20 @@ class ChangePasswordController extends GetxController {
         CustomSnackbar.show(
           context: Get.context!,
           message: "Password berhasil diubah",
-          imageAssetPath: 'assets/images/jir_logo3.png',
+          useAppIcon: true,
         );
       } else {
         CustomSnackbar.show(
           context: Get.context!,
           message: response['message'] ?? "Gagal mengubah password",
-          imageAssetPath: 'assets/images/jir_logo3.png',
+          useAppIcon: true,
         );
       }
     } catch (e) {
       CustomSnackbar.show(
         context: Get.context!,
         message: "Terjadi kesalahan. Silakan coba lagi.",
-        imageAssetPath: 'assets/images/jir_logo3.png',
+        useAppIcon: true,
       );
     } finally {
       isLoading(false);

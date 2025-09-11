@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/bindings/initial_binding.dart';
 import 'package:JIR/config.dart';
+import 'package:JIR/pages/notifications/service/device_token.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -15,9 +18,46 @@ const taskName = "floodCheckTask";
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin bgFlutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
+  const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+  const ios = DarwinInitializationSettings();
+  await bgFlutterLocalNotificationsPlugin
+      .initialize(const InitializationSettings(android: android, iOS: ios));
+
+  final notification = message.notification;
+  final data = message.data;
+
+  const androidDetails = AndroidNotificationDetails(
+    'fcm_channel',
+    'FCM Notifications',
+    channelDescription: 'Channel for FCM',
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+  const iosDetails = DarwinNotificationDetails();
+  const details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+
+  await bgFlutterLocalNotificationsPlugin.show(
+    message.hashCode,
+    notification?.title ?? data['title'],
+    notification?.body ?? data['body'],
+    details,
+    payload: jsonEncode(data),
+  );
+}
 
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosInit = DarwinInitializationSettings();
+    await flutterLocalNotificationsPlugin.initialize(
+        const InitializationSettings(android: androidInit, iOS: iosInit));
+
     if (task == taskName) {
       try {
         final res = await http.get(Uri.parse("$mainUrl/api/flood/data"));
@@ -57,30 +97,27 @@ void callbackDispatcher() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp();
   await Hive.initFlutter();
   await Hive.openBox('authBox');
   await Hive.openBox('notifications');
-  await dotenv.load(fileName: ".env");
-  await initializeDateFormatting('id_ID', null);
   const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
   const iosInit = DarwinInitializationSettings();
   await flutterLocalNotificationsPlugin.initialize(
     const InitializationSettings(android: androidInit, iOS: iosInit),
   );
-
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await requestNotificationPermissionsAndInit();
   await Workmanager().initialize(
     callbackDispatcher,
     isInDebugMode: true,
   );
-
   await Workmanager().registerPeriodicTask(
     "floodTaskUnique",
     taskName,
-    frequency: const Duration(minutes: 15),
     initialDelay: const Duration(seconds: 10),
   );
-
   runApp(const MyApp());
 }
 
