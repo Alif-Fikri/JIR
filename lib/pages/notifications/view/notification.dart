@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -11,109 +10,89 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
-  List<NotificationModel> notifications = [];
+  late Box box;
 
   @override
   void initState() {
     super.initState();
-    _loadNotifications();
+    if (!Hive.isBoxOpen('notifications')) {
+      Hive.openBox('notifications').then((b) {
+        setState(() { box = b; });
+      });
+    } else {
+      box = Hive.box('notifications');
+    }
   }
 
-  Future<void> _loadNotifications() async {
-    final box = Hive.box('notifications');
-    final List list = box.get('list', defaultValue: []);
-    setState(() {
-      notifications = list
-          .map((item) => NotificationModel(
-                id: item['id'],
-                icon: item['icon'],
-                title: item['title'],
-                message: item['message'],
-                time: item['time'],
-                isChecked: item['isChecked'] ?? false,
-              ))
-          .toList();
-    });
+  Future<void> _saveList(List list) async {
+    await box.put('list', list);
   }
 
-  Future<void> _saveNotifications() async {
-    final box = Hive.box('notifications');
-    await box.put(
-        'list',
-        notifications
-            .map((n) => {
-                  "id": n.id,
-                  "icon": n.icon,
-                  "title": n.title,
-                  "message": n.message,
-                  "time": n.time,
-                  "isChecked": n.isChecked,
-                })
-            .toList());
+  void _deleteSelected(List<Map> currentList) async {
+    final filtered = currentList.where((m) => m['isChecked'] != true).toList();
+    await _saveList(filtered);
   }
 
-  void _deleteSelected() async {
-    setState(() {
-      notifications.removeWhere((notification) => notification.isChecked);
-    });
-    await _saveNotifications();
-  }
-
-  void _toggleCheck(int id, bool value) async {
-    setState(() {
-      final index = notifications.indexWhere((n) => n.id == id);
-      if (index != -1) {
-        notifications[index] = notifications[index].copyWith(isChecked: value);
-      }
-    });
-    await _saveNotifications();
+  void _toggleCheckItem(List<Map> currentList, int id, bool value) async {
+    final idx = currentList.indexWhere((m) => m['id'] == id);
+    if (idx != -1) {
+      currentList[idx]['isChecked'] = value;
+      await _saveList(currentList);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!Hive.isBoxOpen('notifications')) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final box = Hive.box('notifications');
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text(
-          'Notifikasi',
-          style: GoogleFonts.inter(
-            fontSize: 20,
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: Text('Notifikasi', style: GoogleFonts.inter(fontSize: 20, color: Colors.black, fontWeight: FontWeight.bold)),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.black),
-            onPressed:
-                notifications.any((n) => n.isChecked) ? _deleteSelected : null,
+          ValueListenableBuilder(
+            valueListenable: box.listenable(keys: ['list']),
+            builder: (context, _, __) {
+              final list = List<Map>.from(box.get('list', defaultValue: []));
+              final anyChecked = list.any((m) => m['isChecked'] == true);
+              return IconButton(
+                icon: const Icon(Icons.delete, color: Colors.black),
+                onPressed: anyChecked ? () => _deleteSelected(list) : null,
+              );
+            },
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(2.0),
-          child: Container(
-            color: const Color(0xff51669D),
-            height: 2.0,
-          ),
+          child: Container(color: const Color(0xff51669D), height: 2.0),
         ),
       ),
-      body: notifications.isEmpty
-          ? const Center(
-              child: Text("Belum ada notifikasi"),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                final notification = notifications[index];
-                return NotificationItem(
-                  notification: notification,
-                  onChecked: (value) => _toggleCheck(notification.id, value),
-                );
-              },
-            ),
+      body: ValueListenableBuilder(
+        valueListenable: box.listenable(keys: ['list']),
+        builder: (context, _, __) {
+          final list = List<Map>.from(box.get('list', defaultValue: []));
+          if (list.isEmpty) {
+            return const Center(child: Text("Belum ada notifikasi"));
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: list.length,
+            itemBuilder: (context, index) {
+              final m = Map<String, dynamic>.from(list[index]);
+              final notification = NotificationModel.fromMap(m);
+              return NotificationItem(
+                notification: notification,
+                onChecked: (value) => _toggleCheckItem(list, notification.id, value),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -204,6 +183,7 @@ class NotificationModel {
   final String message;
   final String time;
   final bool isChecked;
+  final Map<String, dynamic>? raw;
 
   NotificationModel({
     required this.id,
@@ -212,6 +192,7 @@ class NotificationModel {
     required this.message,
     required this.time,
     this.isChecked = false,
+    this.raw,
   });
 
   NotificationModel copyWith({bool? isChecked}) {
@@ -222,6 +203,31 @@ class NotificationModel {
       message: message,
       time: time,
       isChecked: isChecked ?? this.isChecked,
+      raw: raw,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'icon': icon,
+      'title': title,
+      'message': message,
+      'time': time,
+      'isChecked': isChecked,
+      'raw': raw ?? {},
+    };
+  }
+
+  factory NotificationModel.fromMap(Map m) {
+    return NotificationModel(
+      id: m['id'] is int ? m['id'] : int.tryParse(m['id'].toString()) ?? DateTime.now().millisecondsSinceEpoch,
+      icon: (m['icon'] as String?) ?? 'assets/images/jir_logo3.png',
+      title: (m['title'] as String?) ?? '',
+      message: (m['message'] as String?) ?? '',
+      time: (m['time'] as String?) ?? '',
+      isChecked: m['isChecked'] == true,
+      raw: m['raw'] is Map ? Map<String, dynamic>.from(m['raw']) : {},
     );
   }
 }

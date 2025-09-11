@@ -6,11 +6,11 @@ class CustomSnackbar {
     required BuildContext context,
     required String message,
     String? imageAssetPath,
-    bool useAppIcon = false, 
+    bool useAppIcon = false,
     Color backgroundColor = Colors.white,
     Color textColor = Colors.black,
   }) {
-    final appIconPath = 'assets/images/jir_logo4.png';
+    final appIconPath = 'assets/images/ic_launcher.png';
     String? chosenAsset;
     if (imageAssetPath != null && imageAssetPath.isNotEmpty) {
       chosenAsset = imageAssetPath;
