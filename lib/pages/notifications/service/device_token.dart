@@ -79,7 +79,7 @@ Future<void> requestNotificationPermissionsAndInit() async {
   RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
   if (initialMessage != null) {
     final notif = initialMessage.notification;
-    final data = initialMessage.data ?? {};
+    final data = initialMessage.data;
     final title = notif?.title ?? data['title'] ?? 'Notifikasi';
     final body = notif?.body ?? data['body'] ?? jsonEncode(data);
     final icon = data['icon'] as String?;
@@ -97,7 +97,7 @@ Future<void> requestNotificationPermissionsAndInit() async {
     }
     FirebaseMessaging.onMessage.listen((RemoteMessage msg) async {
       final notification = msg.notification;
-      final data = msg.data ?? {};
+      final data = msg.data;
       final androidDetails = AndroidNotificationDetails(
         'fcm_channel',
         'FCM Notifications',

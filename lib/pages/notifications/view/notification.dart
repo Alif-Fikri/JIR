@@ -17,7 +17,9 @@ class _NotificationPageState extends State<NotificationPage> {
     super.initState();
     if (!Hive.isBoxOpen('notifications')) {
       Hive.openBox('notifications').then((b) {
-        setState(() { box = b; });
+        setState(() {
+          box = b;
+        });
       });
     } else {
       box = Hive.box('notifications');
@@ -53,7 +55,11 @@ class _NotificationPageState extends State<NotificationPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text('Notifikasi', style: GoogleFonts.inter(fontSize: 20, color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text('Notifikasi',
+            style: GoogleFonts.inter(
+                fontSize: 20,
+                color: Colors.black,
+                fontWeight: FontWeight.bold)),
         actions: [
           ValueListenableBuilder(
             valueListenable: box.listenable(keys: ['list']),
@@ -87,7 +93,8 @@ class _NotificationPageState extends State<NotificationPage> {
               final notification = NotificationModel.fromMap(m);
               return NotificationItem(
                 notification: notification,
-                onChecked: (value) => _toggleCheckItem(list, notification.id, value),
+                onChecked: (value) =>
+                    _toggleCheckItem(list, notification.id, value),
               );
             },
           );
@@ -221,8 +228,11 @@ class NotificationModel {
 
   factory NotificationModel.fromMap(Map m) {
     return NotificationModel(
-      id: m['id'] is int ? m['id'] : int.tryParse(m['id'].toString()) ?? DateTime.now().millisecondsSinceEpoch,
-      icon: (m['icon'] as String?) ?? 'assets/images/jir_logo3.png',
+      id: m['id'] is int
+          ? m['id']
+          : int.tryParse(m['id'].toString()) ??
+              DateTime.now().millisecondsSinceEpoch,
+      icon: (m['icon'] as String?) ?? 'assets/images/ic_launcher.png',
       title: (m['title'] as String?) ?? '',
       message: (m['message'] as String?) ?? '',
       time: (m['time'] as String?) ?? '',

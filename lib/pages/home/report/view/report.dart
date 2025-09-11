@@ -60,6 +60,7 @@ class ReportPage extends StatelessWidget {
   void _showImageSourceDialog() {
     Get.dialog(
       AlertDialog(
+        backgroundColor: Colors.white,
         title: Text(
           'Pilih Sumber Gambar',
           style: GoogleFonts.inter(fontWeight: FontWeight.bold),

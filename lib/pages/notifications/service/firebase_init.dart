@@ -52,7 +52,6 @@ Future<void> initFcmAndRegister() async {
 
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage msg) {
     print('onMessageOpenedApp: ${msg.data}');
-    final data = msg.data;
     // Navigasi sesuai data
     // if (data['route'] == 'flood_detail') Get.toNamed('/flood', arguments: data);
   });

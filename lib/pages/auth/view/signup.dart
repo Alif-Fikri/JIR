@@ -33,7 +33,7 @@ class SignupPage extends GetView<SignupController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/images/jir_logo3.png',
+                'assets/images/ic_launcher.png',
                 width: 100,
                 height: 100,
               ),
