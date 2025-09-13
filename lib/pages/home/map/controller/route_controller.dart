@@ -21,7 +21,6 @@ class RouteController extends GetxController {
   final RxDouble userHeading = 0.0.obs;
   final RxList<Map<String, dynamic>> searchSuggestions =
       <Map<String, dynamic>>[].obs;
-  final Map<String, List<Map<String, dynamic>>> _searchCache = {};
   StreamSubscription<Position>? _positionStream;
   StreamSubscription<CompassEvent>? _compassSubscription;
   Timer? _debounceTimer;
@@ -293,7 +292,6 @@ class RouteController extends GetxController {
           }
         }).toList();
       }).toList();
-
       print(
         "Optimized route found: ${routePoints.length} points, ${optimizedWaypoints.length} waypoints",
       );

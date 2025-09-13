@@ -10,6 +10,9 @@ import 'package:firebase_core/firebase_core.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   try {
+    if (!Hive.isBoxOpen('notifications')) {
+      await Hive.openBox('notifications');
+    }
     await _saveRemoteMessageToHive(message);
   } catch (e) {
     print('error saving bg fcm to hive: $e');
@@ -62,8 +65,7 @@ class MessagingService {
     final iosInit = DarwinInitializationSettings();
     await _localNotif.initialize(
       InitializationSettings(android: androidInit, iOS: iosInit),
-      onDidReceiveNotificationResponse: (details) {
-      },
+      onDidReceiveNotificationResponse: (details) {},
     );
 
     NotificationSettings settings =

@@ -1,10 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:JIR/helper/menu.dart';
 import 'package:JIR/pages/home/report/widget/report_loading.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
+import 'package:JIR/config.dart';
 
 class ReportController extends GetxController {
   final imageFile = Rxn<File>();
@@ -93,7 +97,7 @@ class ReportController extends GetxController {
     dateTime.value = dt;
   }
 
-  void submitReport() async {
+  Future<void> submitReport() async {
     if (!isAnonymous.value) {
       if (contactName.value.trim().isEmpty ||
           contactPhone.value.trim().isEmpty) {
@@ -108,7 +112,6 @@ class ReportController extends GetxController {
     }
 
     Get.to(() => const ReportLoadingPage());
-
     final now = DateTime.now();
     final report = {
       'id': now.millisecondsSinceEpoch,
@@ -126,17 +129,143 @@ class ReportController extends GetxController {
       'status': 'Menunggu'
     };
 
-    await Future.delayed(const Duration(seconds: 3));
+    final imagePath =
+        (report['imagePath'] is String) ? report['imagePath'] as String : '';
+
+    bool uploaded = false;
+    if (imagePath.isNotEmpty) {
+      final file = File(imagePath);
+      uploaded = await _uploadReportToServer(report, file);
+    }
+
     reports.insert(0, Map<String, dynamic>.from(report));
     await saveReportsToHive();
-
     imageFile.value = null;
     description.value = '';
     contactName.value = '';
     contactPhone.value = '';
     isAnonymous.value = false;
-
-    Get.snackbar('Sukses', 'Laporan berhasil dikirim');
     Get.off(() => const Menu(), arguments: 1);
+
+    if (uploaded) {
+      Get.snackbar('Sukses', 'Laporan berhasil dikirim');
+    } else {
+      Get.snackbar('Tersimpan', 'Laporan tersimpan secara lokal (offline)');
+    }
+  }
+
+  Future<bool> _uploadReportToServer(
+      Map<String, dynamic> report, File image) async {
+    try {
+      final uri = Uri.parse("$mainUrl/api/reports/");
+      final request = http.MultipartRequest('POST', uri);
+
+      request.fields['type'] = (report['type'] ?? '').toString();
+      request.fields['severity'] = (report['severity'] ?? '').toString();
+      request.fields['address'] = (report['address'] ?? '').toString();
+      request.fields['latitude'] = (report['latitude'] ?? '').toString();
+      request.fields['longitude'] = (report['longitude'] ?? '').toString();
+      request.fields['description'] = (report['description'] ?? '').toString();
+      request.fields['contact_name'] = (report['contactName'] ?? '').toString();
+      request.fields['contact_phone'] =
+          (report['contactPhone'] ?? '').toString();
+      request.fields['date_time'] = (report['dateTime'] ?? '').toString();
+      request.fields['is_anonymous'] =
+          (report['isAnonymous'] == true) ? 'true' : 'false';
+      if (Hive.isBoxOpen('authBox')) {
+        final authBox = Hive.box('authBox');
+        final token = authBox.get('fcm_token');
+        if (token != null) request.fields['device_token'] = token.toString();
+      }
+
+      final fileStream = http.ByteStream(image.openRead());
+      final length = await image.length();
+      final multipartFile = http.MultipartFile(
+        'image',
+        fileStream,
+        length,
+        filename: path.basename(image.path),
+      );
+      request.files.add(multipartFile);
+
+      final streamedResponse =
+          await request.send().timeout(const Duration(seconds: 30));
+      final resp = await http.Response.fromStream(streamedResponse);
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        return true;
+      } else {
+        print('Upload failed: ${resp.statusCode} ${resp.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Upload exception: $e');
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchReportFromServer(int reportId) async {
+    try {
+      final uri = Uri.parse("$mainUrl/api/reports/$reportId");
+      final resp = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (resp.statusCode == 200) {
+        final Map<String, dynamic> json = jsonDecode(resp.body);
+        return json;
+      } else {
+        print("fetchReportFromServer failed: ${resp.statusCode} ${resp.body}");
+        return null;
+      }
+    } catch (e) {
+      print("fetchReportFromServer error: $e");
+      return null;
+    }
+  }
+
+  Future<void> refreshReportFromServer(int reportId) async {
+    final serverReport = await fetchReportFromServer(reportId);
+    if (serverReport == null) return;
+
+    if (!Hive.isBoxOpen('reports')) {
+      await Hive.openBox('reports');
+    }
+    final box = Hive.box('reports');
+    final List current = List.from(box.get('list', defaultValue: []));
+
+    final idx = current.indexWhere((r) {
+      final dynamic rid = r['id'];
+      if (rid == null) return false;
+      return rid.toString() == serverReport['id'].toString();
+    });
+
+    final mapped = <String, dynamic>{
+      'id': serverReport['id'],
+      'type': serverReport['type'],
+      'severity': serverReport['severity'],
+      'address': serverReport['address'],
+      'latitude': serverReport['latitude'],
+      'longitude': serverReport['longitude'],
+      'description': serverReport['description'],
+      'imagePath':
+          serverReport['image_path'] ?? serverReport['imagePath'] ?? '',
+      'contactName': serverReport['contact_name'] ??
+          serverReport['contactName'] ??
+          'Anonim',
+      'contactPhone':
+          serverReport['contact_phone'] ?? serverReport['contactPhone'] ?? '',
+      'dateTime': serverReport['date_time'] ?? serverReport['dateTime'],
+      'isAnonymous':
+          serverReport['is_anonymous'] ?? serverReport['isAnonymous'] ?? false,
+      'status': serverReport['status'] ?? 'Menunggu',
+      'reject_reason': serverReport['reject_reason'] ?? '',
+    };
+
+    if (idx >= 0) {
+      current[idx] = mapped;
+    } else {
+      current.insert(0, mapped);
+    }
+
+    await box.put('list', current);
+    reports.assignAll(List<Map<String, dynamic>>.from(current));
   }
 }

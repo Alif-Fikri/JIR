@@ -35,7 +35,6 @@ class ActivityPage extends StatelessWidget {
                 child: Text('Belum ada laporan',
                     style: GoogleFonts.inter(color: Colors.grey)));
           }
-
           return ListView.separated(
             itemCount: reports.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),

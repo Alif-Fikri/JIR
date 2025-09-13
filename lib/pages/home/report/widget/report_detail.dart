@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:JIR/pages/home/report/widget/url_network.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -68,7 +69,8 @@ class ReportDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = (report['imagePath'] ?? '').toString();
+    final imageUrl =
+        (report['imagePath'] ?? report['image_path'] ?? '').toString();
     final title = (report['type'] ?? 'Laporan').toString();
     final desc = (report['description'] ?? '').toString();
     final name = (report['contactName'] ?? 'Anonim').toString();
@@ -115,15 +117,8 @@ class ReportDetailPage extends StatelessWidget {
                     if (imageUrl.isNotEmpty)
                       AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: imageUrl.startsWith('http')
-                            ? Image.network(imageUrl, fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) {
-                                return Container(
-                                    color: Colors.grey[200],
-                                    child: const Center(
-                                        child: Icon(Icons.broken_image)));
-                              })
-                            : Image.file(File(imageUrl), fit: BoxFit.cover),
+                        child: buildReportImage(imageUrl,
+                            height: 200, fit: BoxFit.cover),
                       )
                     else
                       Container(
@@ -154,9 +149,9 @@ class ReportDetailPage extends StatelessWidget {
                                 style: GoogleFonts.inter(
                                     color: Colors.white, fontSize: 12)),
                             backgroundColor:
-                                status.toLowerCase().contains('selesai')
+                                status.toLowerCase().contains('diterima')
                                     ? const Color(0xFF66BB6A)
-                                    : status.toLowerCase().contains('diproses')
+                                    : status.toLowerCase().contains('ditolak')
                                         ? const Color(0xFF45557B)
                                         : const Color(0xFFFFA726),
                           ),

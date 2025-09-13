@@ -43,9 +43,9 @@ class ReportCard extends StatelessWidget {
 
   Color _statusColor(String s) {
     final lower = s.toLowerCase();
-    if (lower.contains('menunggu')) return const Color(0xFFFFA726); 
-    if (lower.contains('diproses')) return const Color(0xFF45557B);
-    if (lower.contains('selesai')) return const Color(0xFF66BB6A); 
+    if (lower.contains('Menunggu')) return const Color(0xFFFFA726); 
+    if (lower.contains('Ditolak')) return const Color(0xFF45557B);
+    if (lower.contains('Diterima')) return const Color(0xFF66BB6A); 
     return Colors.grey;
   }
 
