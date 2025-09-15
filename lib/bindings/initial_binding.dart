@@ -12,6 +12,5 @@ class InitialBinding implements Bindings {
     ReportBinding().dependencies();
     HomeBinding().dependencies();
     ProfileBinding().dependencies();
-    NotificationService.I.init();
   }
 }

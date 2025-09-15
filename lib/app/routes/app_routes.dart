@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:JIR/bindings/initial_binding.dart';
+import 'package:JIR/pages/home/report/view/report_user.dart';
+import 'package:JIR/pages/home/report/widget/report_detail.dart';
+import 'package:JIR/pages/home/report/widget/report_loading.dart';
 import 'package:get/get.dart';
 import 'package:JIR/bindings/report_binding.dart';
 import 'package:JIR/helper/menu.dart';
@@ -47,6 +51,9 @@ class AppRoutes {
   static const peta = '/peta';
   static const lapor = '/lapor';
   static const report = '/report_user';
+  static const reportdetail = '/reportdetail';
+  static const reportForm = '/report_form';
+  static const reportLoading = '/report_loading';
   //profile
   static const about = '/about';
   static const termsOfService = '/terms-of-service';
@@ -164,6 +171,41 @@ class AppRoutes {
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     ),
+    GetPage(
+      name: reportdetail,
+      page: () {
+        final args = Get.arguments;
+        final Map<String, dynamic> report = (args is Map<String, dynamic>)
+            ? args
+            : (args is String)
+                ? (() {
+                    try {
+                      final decoded = jsonDecode(args);
+                      if (decoded is Map<String, dynamic>) return decoded;
+                    } catch (_) {}
+                    return <String, dynamic>{};
+                  })()
+                : <String, dynamic>{};
+        return ReportDetailPage(report: report);
+      },
+      binding: ReportBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: reportForm,
+      page: () => ReportFormPage(),
+      binding: ReportBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: reportLoading,
+      page: () => const ReportLoadingPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 200),
+    ),
+
     //     GetPage(
     //   name: report,
     //   page: () => ReportUser(),

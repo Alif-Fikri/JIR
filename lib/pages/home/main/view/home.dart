@@ -317,7 +317,7 @@ class HomePage extends StatelessWidget {
                   bottom: 50 + bounce,
                   right: 25,
                   child: GestureDetector(
-                    onTap: () => Get.to(() => const ChatbotOpeningPage()),
+                    onTap: () => Get.toNamed(AppRoutes.chatbot),
                     child: Image.asset('assets/images/robot.png',
                         width: 70, height: 70),
                   ),

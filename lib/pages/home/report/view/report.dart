@@ -1,3 +1,4 @@
+import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -88,7 +89,7 @@ class ReportPage extends StatelessWidget {
     Get.back();
     controller.pickImage(source).then((_) {
       if (controller.imageFile.value != null) {
-        Get.to(() => ReportFormPage());
+        Get.toNamed(AppRoutes.reportForm);
       }
     });
   }

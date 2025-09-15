@@ -1,55 +1,73 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-Widget buildReportImage(String imagePath,
-    {double? height, BoxFit fit = BoxFit.cover}) {
-  if (imagePath.isEmpty) {
+Widget buildReportImage(String imageUrl, {double? height, BoxFit? fit}) {
+  final useFit = fit ?? BoxFit.cover;
+  if (imageUrl.isEmpty) {
     return Container(
-      height: height ?? 160,
-      color: Colors.grey[100],
-      child: Center(child: Text('Tidak ada foto')),
+      height: height ?? 200,
+      width: double.infinity,
+      color: Colors.grey[200],
+      child: const Center(child: Icon(Icons.broken_image)),
     );
   }
 
-  final trimmed = imagePath.trim();
-
-  if (trimmed.startsWith('http')) {
+  if (imageUrl.startsWith('http') || imageUrl.startsWith('https')) {
     return Image.network(
-      trimmed,
+      Uri.encodeFull(imageUrl),
       height: height,
       width: double.infinity,
-      fit: fit,
+      fit: useFit,
       loadingBuilder: (context, child, progress) {
         if (progress == null) return child;
+        final p = progress.expectedTotalBytes != null
+            ? progress.cumulativeBytesLoaded /
+                (progress.expectedTotalBytes ?? 1)
+            : null;
         return Container(
-          height: height ?? 160,
-          color: Colors.grey[100],
+          height: height ?? 200,
+          width: double.infinity,
+          color: Colors.grey[200],
           child: Center(
-              child: CircularProgressIndicator(
-                  value: progress.expectedTotalBytes != null
-                      ? progress.cumulativeBytesLoaded /
-                          (progress.expectedTotalBytes ?? 1)
-                      : null)),
+            child: CircularProgressIndicator(value: p),
+          ),
         );
       },
-      errorBuilder: (context, error, stackTrace) {
+      errorBuilder: (context, error, stack) {
         return Container(
-          height: height ?? 160,
+          height: height ?? 200,
+          width: double.infinity,
           color: Colors.grey[200],
-          child: Center(child: Icon(Icons.broken_image)),
+          child: const Center(child: Icon(Icons.broken_image)),
         );
       },
     );
   }
+
   try {
-    final file = File(trimmed);
-    if (file.existsSync()) {
-      return Image.file(file, height: height, width: double.infinity, fit: fit);
+    final f = File(imageUrl);
+    if (f.existsSync()) {
+      return Image.file(
+        f,
+        height: height,
+        width: double.infinity,
+        fit: useFit,
+        errorBuilder: (context, error, stack) {
+          return Container(
+            height: height ?? 200,
+            width: double.infinity,
+            color: Colors.grey[200],
+            child: const Center(child: Icon(Icons.broken_image)),
+          );
+        },
+      );
     }
   } catch (_) {}
+
   return Container(
-    height: height ?? 160,
-    color: Colors.grey[100],
-    child: Center(child: Text('Foto tidak tersedia')),
+    height: height ?? 200,
+    width: double.infinity,
+    color: Colors.grey[200],
+    child: const Center(child: Icon(Icons.broken_image)),
   );
 }

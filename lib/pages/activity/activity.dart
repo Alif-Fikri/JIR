@@ -1,3 +1,4 @@
+import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/pages/home/report/widget/report_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -66,7 +67,7 @@ class ActivityPage extends StatelessWidget {
                   imageUrl: report['imagePath'] ?? '',
                   dateTimeIso:
                       report['dateTime'] ?? DateTime.now().toIso8601String(),
-                  onTap: () => Get.to(() => ReportDetailPage(report: report)),
+                  onTap: () => Get.toNamed(AppRoutes.reportdetail, arguments: report),
                 ),
               );
             },

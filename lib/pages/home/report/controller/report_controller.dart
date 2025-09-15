@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:JIR/app/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:JIR/helper/menu.dart';
-import 'package:JIR/pages/home/report/widget/report_loading.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:JIR/config.dart';
+import 'package:JIR/utils/file_utils.dart';
 
 class ReportController extends GetxController {
   final imageFile = Rxn<File>();
@@ -32,21 +32,63 @@ class ReportController extends GetxController {
     loadReportsFromHive();
   }
 
-  Future<void> loadReportsFromHive() async {
-    if (!Hive.isBoxOpen('reports')) {
-      await Hive.openBox('reports');
+  Map<String, dynamic> _normalizeReport(dynamic raw) {
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) {
+      final Map<String, dynamic> out = {};
+      raw.forEach((k, v) {
+        out[k.toString()] = v;
+      });
+      return out;
     }
-    final box = Hive.box('reports');
-    final List stored = box.get('list', defaultValue: []);
-    reports.assignAll(List<Map<String, dynamic>>.from(stored));
+    return {};
+  }
+
+  List<Map<String, dynamic>> _normalizeReportList(dynamic rawList) {
+    final List<Map<String, dynamic>> out = [];
+    if (rawList is List) {
+      for (var it in rawList) {
+        final m = _normalizeReport(it);
+        if (m.isNotEmpty) out.add(m);
+      }
+    }
+    return out;
+  }
+
+  Future<void> loadReportsFromHive() async {
+    try {
+      if (!Hive.isBoxOpen('reports')) {
+        await Hive.openBox('reports');
+      }
+      final box = Hive.box('reports');
+      final stored = box.get('list', defaultValue: []);
+      final normalized = _normalizeReportList(stored);
+      reports.assignAll(normalized);
+    } catch (e, st) {
+      print('loadReportsFromHive error: $e\n$st');
+      reports.clear();
+    }
   }
 
   Future<void> saveReportsToHive() async {
-    if (!Hive.isBoxOpen('reports')) {
-      await Hive.openBox('reports');
+    try {
+      if (!Hive.isBoxOpen('reports')) {
+        await Hive.openBox('reports');
+      }
+      final box = Hive.box('reports');
+
+      final List<Map<String, dynamic>> toStore = reports.map((r) {
+        final Map<String, dynamic> m = {};
+        r.forEach((k, v) {
+          m[k.toString()] = v;
+        });
+        return m;
+      }).toList();
+
+      await box.put('list', toStore);
+    } catch (e, st) {
+      print('saveReportsToHive error: $e\n$st');
     }
-    final box = Hive.box('reports');
-    await box.put('list', List<Map<String, dynamic>>.from(reports));
   }
 
   Future<void> pickImage(ImageSource source) async {
@@ -54,9 +96,12 @@ class ReportController extends GetxController {
       final pickedFile =
           await _picker.pickImage(source: source, imageQuality: 80);
       if (pickedFile != null) {
-        imageFile.value = File(pickedFile.path);
+        final tmp = File(pickedFile.path);
+        final saved = await savePickedFilePermanently(tmp);
+        imageFile.value = saved;
       }
-    } catch (e) {
+    } catch (e, st) {
+      print('pickImage error: $e\n$st');
       Get.snackbar('Error', 'Gagal memilih gambar: ${e.toString()}');
     }
   }
@@ -111,7 +156,7 @@ class ReportController extends GetxController {
       return;
     }
 
-    Get.to(() => const ReportLoadingPage());
+    Get.toNamed(AppRoutes.reportLoading);
     final now = DateTime.now();
     final report = {
       'id': now.millisecondsSinceEpoch,
@@ -145,7 +190,7 @@ class ReportController extends GetxController {
     contactName.value = '';
     contactPhone.value = '';
     isAnonymous.value = false;
-    Get.off(() => const Menu(), arguments: 1);
+    Get.offNamed(AppRoutes.home, arguments: 1);
 
     if (uploaded) {
       Get.snackbar('Sukses', 'Laporan berhasil dikirim');
@@ -225,47 +270,54 @@ class ReportController extends GetxController {
     final serverReport = await fetchReportFromServer(reportId);
     if (serverReport == null) return;
 
-    if (!Hive.isBoxOpen('reports')) {
-      await Hive.openBox('reports');
+    try {
+      if (!Hive.isBoxOpen('reports')) {
+        await Hive.openBox('reports');
+      }
+      final box = Hive.box('reports');
+      final rawCurrent = box.get('list', defaultValue: []);
+      final List<Map<String, dynamic>> current =
+          _normalizeReportList(rawCurrent);
+
+      final idx = current.indexWhere((r) {
+        final dynamic rid = r['id'];
+        if (rid == null) return false;
+        return rid.toString() == serverReport['id'].toString();
+      });
+
+      final mapped = <String, dynamic>{
+        'id': serverReport['id'],
+        'type': serverReport['type'],
+        'severity': serverReport['severity'],
+        'address': serverReport['address'],
+        'latitude': serverReport['latitude'],
+        'longitude': serverReport['longitude'],
+        'description': serverReport['description'],
+        'imagePath':
+            serverReport['image_path'] ?? serverReport['imagePath'] ?? '',
+        'contactName': serverReport['contact_name'] ??
+            serverReport['contactName'] ??
+            'Anonim',
+        'contactPhone':
+            serverReport['contact_phone'] ?? serverReport['contactPhone'] ?? '',
+        'dateTime': serverReport['date_time'] ?? serverReport['dateTime'],
+        'isAnonymous': serverReport['is_anonymous'] ??
+            serverReport['isAnonymous'] ??
+            false,
+        'status': serverReport['status'] ?? 'Menunggu',
+        'reject_reason': serverReport['reject_reason'] ?? '',
+      };
+
+      if (idx >= 0) {
+        current[idx] = mapped;
+      } else {
+        current.insert(0, mapped);
+      }
+
+      await box.put('list', current);
+      reports.assignAll(List<Map<String, dynamic>>.from(current));
+    } catch (e, st) {
+      print('refreshReportFromServer error: $e\n$st');
     }
-    final box = Hive.box('reports');
-    final List current = List.from(box.get('list', defaultValue: []));
-
-    final idx = current.indexWhere((r) {
-      final dynamic rid = r['id'];
-      if (rid == null) return false;
-      return rid.toString() == serverReport['id'].toString();
-    });
-
-    final mapped = <String, dynamic>{
-      'id': serverReport['id'],
-      'type': serverReport['type'],
-      'severity': serverReport['severity'],
-      'address': serverReport['address'],
-      'latitude': serverReport['latitude'],
-      'longitude': serverReport['longitude'],
-      'description': serverReport['description'],
-      'imagePath':
-          serverReport['image_path'] ?? serverReport['imagePath'] ?? '',
-      'contactName': serverReport['contact_name'] ??
-          serverReport['contactName'] ??
-          'Anonim',
-      'contactPhone':
-          serverReport['contact_phone'] ?? serverReport['contactPhone'] ?? '',
-      'dateTime': serverReport['date_time'] ?? serverReport['dateTime'],
-      'isAnonymous':
-          serverReport['is_anonymous'] ?? serverReport['isAnonymous'] ?? false,
-      'status': serverReport['status'] ?? 'Menunggu',
-      'reject_reason': serverReport['reject_reason'] ?? '',
-    };
-
-    if (idx >= 0) {
-      current[idx] = mapped;
-    } else {
-      current.insert(0, mapped);
-    }
-
-    await box.put('list', current);
-    reports.assignAll(List<Map<String, dynamic>>.from(current));
   }
 }

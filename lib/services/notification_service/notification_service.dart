@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/home/report/controller/report_controller.dart';
@@ -86,8 +87,7 @@ class NotificationService {
         box.put('fcm_token', t);
         await _registerTokenToServer(t);
       });
-    } else {
-    }
+    } else {}
   }
 
   Future<void> _registerTokenToServer(String token) async {
@@ -219,7 +219,7 @@ class NotificationService {
       if (idx != -1) {
         final rpt = ctrl.reports[idx];
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Get.to(() => ReportDetailPage(report: rpt));
+          Get.toNamed(AppRoutes.reportdetail, arguments: rpt);
         });
       } else {
         Get.snackbar('Info', 'Laporan diperbarui tetapi tidak ditemukan lokal');

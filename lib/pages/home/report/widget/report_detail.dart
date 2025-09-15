@@ -8,6 +8,7 @@ import 'package:JIR/pages/home/report/widget/url_network.dart';
 class ReportDetailPage extends StatefulWidget {
   final Map<String, dynamic> report;
   const ReportDetailPage({super.key, required this.report});
+  get binding => null;
 
   @override
   State<ReportDetailPage> createState() => _ReportDetailPageState();
@@ -41,8 +42,40 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
         insetPadding: const EdgeInsets.all(12),
         child: InteractiveViewer(
           child: imageUrl.startsWith('http')
-              ? Image.network(imageUrl, fit: BoxFit.contain)
-              : Image.file(File(imageUrl), fit: BoxFit.contain),
+              ? Image.network(
+                  Uri.encodeFull(imageUrl),
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: Colors.black,
+                    child: const Center(
+                        child: Icon(Icons.broken_image, color: Colors.white)),
+                  ),
+                )
+              : (() {
+                  try {
+                    final f = File(imageUrl);
+                    if (f.existsSync()) {
+                      return Image.file(f, fit: BoxFit.contain);
+                    } else {
+                      return Image.network(
+                        Uri.encodeFull(imageUrl),
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: Colors.black,
+                          child: const Center(
+                              child: Icon(Icons.broken_image,
+                                  color: Colors.white)),
+                        ),
+                      );
+                    }
+                  } catch (_) {
+                    return Container(
+                      color: Colors.black,
+                      child: const Center(
+                          child: Icon(Icons.broken_image, color: Colors.white)),
+                    );
+                  }
+                }()),
         ),
       ),
     );
