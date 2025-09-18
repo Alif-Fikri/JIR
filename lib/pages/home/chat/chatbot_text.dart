@@ -1,3 +1,4 @@
+import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,7 +31,7 @@ class _ChatBotPageState extends State<ChatBotPage>
   final List<Map<String, dynamic>> _messages = [];
   late stt.SpeechToText _speech;
   String _recognizedText = '';
-  final Set<int> _previewVisible = {}; 
+  final Set<int> _previewVisible = {};
 
   @override
   void initState() {
@@ -148,9 +149,9 @@ class _ChatBotPageState extends State<ChatBotPage>
       final startName = _extractPlaceName(routeData['start']);
       final endName = _extractPlaceName(routeData['end']);
       if (startName.isNotEmpty && endName.isNotEmpty) {
-        botText = 'Rute dari $startName ke $endName berhasil dibuat. Detail';
+        botText = 'Rute dari $startName ke $endName berhasil dibuat.';
       } else {
-        botText = 'Rute berhasil dibuat. Detail';
+        botText = 'Rute berhasil dibuat.';
       }
       final messageEntry = {
         "text": botText,
@@ -202,9 +203,9 @@ class _ChatBotPageState extends State<ChatBotPage>
           String startName = _extractPlaceName(routeData['start']);
           String endName = _extractPlaceName(routeData['end']);
           if (startName.isNotEmpty && endName.isNotEmpty) {
-            return 'Rute dari $startName ke $endName berhasil dibuat. Detail';
+            return 'Rute dari $startName ke $endName berhasil dibuat.';
           }
-          return 'Rute berhasil dibuat. Detail';
+          return 'Rute berhasil dibuat.';
         }
 
         final s = resp.toString();
@@ -222,7 +223,7 @@ class _ChatBotPageState extends State<ChatBotPage>
         return singleLine;
       }
     } catch (e) {
-      return 'Balasan diterima. Detail';
+      return 'Balasan diterima.';
     }
   }
 
@@ -309,46 +310,51 @@ class _ChatBotPageState extends State<ChatBotPage>
 
   Future<void> _openRouteInMap(Map<String, dynamic> routeData) async {
     try {
-      if (Get.isRegistered<RouteController>()) {
-        final rc = Get.find<RouteController>();
-        try {
-          await (rc as dynamic).setRouteFromMap(routeData);
-        } catch (_) {
+      final RouteController rc = Get.isRegistered<RouteController>()
+          ? Get.find<RouteController>()
+          : Get.put(RouteController());
+
+      final LatLng? start = _extractCoords(routeData, 'start') ??
+          _extractFirstLastFromRouteList(routeData, isStart: true);
+      final LatLng? end = _extractCoords(routeData, 'end') ??
+          _extractFirstLastFromRouteList(routeData, isStart: false);
+
+      if (start != null && end != null) {
+        rc.userLocation(start); 
+        rc.destination(end); 
+        if (routeData['vehicle'] != null) {
           try {
-            final start = _extractCoords(routeData, 'start');
-            final end = _extractCoords(routeData, 'end');
-            if (start != null && end != null) {
-              rc.updateLocations(start, end);
-            } else if (routeData.containsKey('route') &&
-                routeData['route'] is List) {
-              final routeList = routeData['route'] as List;
-              if (routeList.isNotEmpty) {
-                final first = routeList.first;
-                final last = routeList.last;
-                final sLat = double.tryParse(first[0].toString()) ??
-                    double.tryParse(first[1].toString());
-                final sLon = double.tryParse(first[1].toString());
-                final eLat = double.tryParse(last[0].toString()) ??
-                    double.tryParse(last[1].toString());
-                final eLon = double.tryParse(last[1].toString());
-                if (sLat != null &&
-                    sLon != null &&
-                    eLat != null &&
-                    eLon != null) {
-                  rc.updateLocations(LatLng(sLat, sLon), LatLng(eLat, eLon));
-                }
+            rc.selectedVehicle.value = routeData['vehicle'].toString();
+          } catch (_) {}
+        }
+        await rc.fetchOptimizedRoute();
+      } else {
+        if (routeData.containsKey('route') && routeData['route'] is List) {
+          final List<LatLng> pts = [];
+          for (final p in List.from(routeData['route'])) {
+            if (p is List && p.length >= 2) {
+              final maybeLat = double.tryParse(p[0].toString());
+              final maybeLon = double.tryParse(p[1].toString());
+              if (maybeLat != null && (maybeLat.abs() <= 90)) {
+                pts.add(LatLng(maybeLat, maybeLon ?? 0.0));
+              } else if (maybeLon != null && (maybeLon.abs() <= 90)) {
+                pts.add(LatLng(maybeLon, maybeLat ?? 0.0));
               }
             }
-          } catch (e) {
-            print('fallback set route error: $e');
+          }
+          if (pts.isNotEmpty) {
+            rc.userLocation(pts.first);
+            rc.destination(pts.last);
+            rc.routePoints.value = pts;
           }
         }
       }
-    } catch (e) {
-      print('set route to controller failed: $e');
+    } catch (e, st) {
+      print('openRouteInMap error: $e\n$st');
     }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.to(() => MapMonitoring());
+      Get.toNamed(AppRoutes.peta);
     });
   }
 
@@ -356,15 +362,60 @@ class _ChatBotPageState extends State<ChatBotPage>
     try {
       if (!routeData.containsKey(key)) return null;
       final node = routeData[key];
-      if (node is Map && node['coords'] is List && node['coords'].length >= 2) {
-        final lat = double.tryParse(node['coords'][0].toString()) ?? 0.0;
-        final lon = double.tryParse(node['coords'][1].toString()) ?? 0.0;
-        return LatLng(lat, lon);
+
+      dynamic coords;
+      if (node is Map && (node['coords'] is List)) {
+        coords = List.from(node['coords']);
+      } else if (node is List) {
+        coords = List.from(node);
+      } else if (node is Map && (node['lat'] != null && node['lon'] != null)) {
+        final lat = double.tryParse(node['lat'].toString());
+        final lon = double.tryParse(node['lon'].toString());
+        if (lat != null && lon != null) return LatLng(lat, lon);
+      } else {
+        return null;
       }
-      return null;
-    } catch (_) {
-      return null;
+
+      if (coords is List && coords.length >= 2) {
+        final a = double.tryParse(coords[0].toString());
+        final b = double.tryParse(coords[1].toString());
+        if (a != null && b != null) {
+          if (a.abs() <= 90 && b.abs() <= 180) {
+            return LatLng(a, b); 
+          } else if (b.abs() <= 90 && a.abs() <= 180) {
+            return LatLng(b, a);
+          } else {
+            return LatLng(a, b);
+          }
+        }
+      }
+    } catch (e) {
+      print('_extractCoords error: $e');
     }
+    return null;
+  }
+
+  LatLng? _extractFirstLastFromRouteList(Map<String, dynamic> routeData,
+      {required bool isStart}) {
+    try {
+      if (!routeData.containsKey('route') || routeData['route'] is! List) {
+        return null;
+      }
+      final List routeList = List.from(routeData['route']);
+      if (routeList.isEmpty) return null;
+      final candidate = isStart ? routeList.first : routeList.last;
+      if (candidate is List && candidate.length >= 2) {
+        final a = double.tryParse(candidate[0].toString());
+        final b = double.tryParse(candidate[1].toString());
+        if (a != null && b != null) {
+          if (a.abs() <= 90 && b.abs() <= 180) return LatLng(a, b);
+          return LatLng(b, a);
+        }
+      }
+    } catch (e) {
+      print('_extractFirstLastFromRouteList error: $e');
+    }
+    return null;
   }
 
   @override
@@ -489,7 +540,6 @@ class _ChatBotPageState extends State<ChatBotPage>
   }
 
   ScrollController _scroll_controller() => _scrollController;
-
   Widget _chatBubble(
       {required Map<String, dynamic> message, required int index}) {
     final String rawText = (message['text'] ?? '').toString();
@@ -500,49 +550,13 @@ class _ChatBotPageState extends State<ChatBotPage>
 
     final textColor = Colors.white;
 
-    Widget buildTextWithDetail() {
-      if (route == null) {
-        return Text(
-          rawText,
-          style: GoogleFonts.inter(
-            color: textColor,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        );
-      }
-      final displayText = rawText.replaceAll('Detail', '').trim();
-      return RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: displayText + (displayText.isNotEmpty ? ' ' : ''),
-              style: GoogleFonts.inter(
-                color: textColor,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            TextSpan(
-              text: 'Detail',
-              style: GoogleFonts.inter(
-                color: Colors.orangeAccent,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                decoration: TextDecoration.underline,
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  setState(() {
-                    if (_previewVisible.contains(index)) {
-                      _previewVisible.remove(index);
-                    } else {
-                      _previewVisible.add(index);
-                    }
-                  });
-                },
-            ),
-          ],
+    Widget buildMainText() {
+      return Text(
+        rawText,
+        style: GoogleFonts.inter(
+          color: textColor,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
         ),
       );
     }
@@ -560,7 +574,59 @@ class _ChatBotPageState extends State<ChatBotPage>
           crossAxisAlignment:
               isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            buildTextWithDetail(),
+            buildMainText(),
+            if (route != null) const SizedBox(height: 10),
+            if (route != null)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.white24,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 8.0),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => _openRouteInMap(route),
+                    child: Text(
+                      'Lihat Rute',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.white12,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 8.0),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        if (_previewVisible.contains(index)) {
+                          _previewVisible.remove(index);
+                        } else {
+                          _previewVisible.add(index);
+                        }
+                      });
+                    },
+                    child: Text(
+                      _previewVisible.contains(index)
+                          ? 'Sembunyikan'
+                          : 'Preview',
+                      style: GoogleFonts.inter(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             if (route != null && _previewVisible.contains(index))
               const SizedBox(height: 10),
             if (route != null && _previewVisible.contains(index))
@@ -598,11 +664,11 @@ class _ChatBotPageState extends State<ChatBotPage>
       final b = toNum(list[1]);
       if (a == null || b == null) return;
       if (a.abs() <= 90 && b.abs() <= 180) {
-        points.add(LatLng(a.toDouble(), b.toDouble())); 
+        points.add(LatLng(a.toDouble(), b.toDouble()));
       } else if (b.abs() <= 90 && a.abs() <= 180) {
         points.add(LatLng(b.toDouble(), a.toDouble()));
       } else {
-        points.add(LatLng(a.toDouble(), b.toDouble())); 
+        points.add(LatLng(a.toDouble(), b.toDouble()));
       }
     }
 

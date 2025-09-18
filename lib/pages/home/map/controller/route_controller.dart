@@ -109,7 +109,7 @@ class RouteController extends GetxController {
   Future<void> _fetchNewRoute(LatLng start, LatLng end) async {
     try {
       final response = await _dio.post(
-        '$baseUrl/routing/optimized-route',
+        '$baseUrl/api/routing/optimized-route',
         data: {
           'start_lat': start.latitude,
           'start_lon': start.longitude,
@@ -117,17 +117,31 @@ class RouteController extends GetxController {
           'end_lon': end.longitude,
           'vehicle': selectedVehicle.value,
         },
+        options: Options(validateStatus: (_) => true),
       );
 
-      _parseOptimizedRouteData(response.data);
+      if (response.statusCode == null ||
+          response.statusCode! < 200 ||
+          response.statusCode! >= 300) {
+        print(
+            '_fetchNewRoute bad status ${response.statusCode}: ${response.data}');
+        Get.snackbar('Gagal memperbarui rute',
+            'Rute tidak tersedia atau server tidak merespon.');
+        return;
+      }
+
+      _parseOptimizedRouteData(response.data as Map<String, dynamic>);
+      Get.snackbar("Info", "Rute diperbarui",
+          duration: const Duration(seconds: 2),
+          snackPosition: SnackPosition.TOP);
+    } on DioException catch (e) {
+      print('_fetchNewRoute DioException: ${e.toString()}');
+      print('Response: ${e.response?.statusCode} ${e.response?.data}');
       Get.snackbar(
-        "Info",
-        "Rute diperbarui",
-        duration: const Duration(seconds: 2),
-        snackPosition: SnackPosition.TOP,
-      );
+          'Gagal memperbarui rute', 'Tidak dapat terhubung ke server.');
     } catch (e) {
-      Get.snackbar("Error", "Gagal memperbarui rute: ${e.toString()}");
+      print('_fetchNewRoute error: $e');
+      Get.snackbar('Gagal memperbarui rute', 'Terjadi kesalahan. Coba lagi.');
     }
   }
 
@@ -177,7 +191,7 @@ class RouteController extends GetxController {
     optimizedWaypoints.clear();
     isLoading(true);
 
-    try {
+    try {       
       final response = await _dio.post(
         '$baseUrl/api/routing/optimized-route',
         data: {
@@ -190,22 +204,44 @@ class RouteController extends GetxController {
         options: Options(
           contentType: Headers.jsonContentType,
           sendTimeout: const Duration(seconds: 30),
+          validateStatus: (_) => true,
         ),
       );
 
-      _parseOptimizedRouteData(response.data);
+      if (response.statusCode == null ||
+          response.statusCode! < 200 ||
+          response.statusCode! >= 300) {
+        print(
+            'fetchOptimizedRoute: bad status ${response.statusCode} - ${response.data}');
+        Get.snackbar(
+          'Gagal memuat rute',
+          response.statusCode == 404
+              ? 'Rute tidak ditemukan. Periksa tujuan Anda.'
+              : 'Terjadi kesalahan saat memuat rute (kode ${response.statusCode}). Coba lagi.',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+        );
+        return;
+      }
+
+      _parseOptimizedRouteData(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      final errorMsg = e.response?.data?['detail'] ?? e.message;
+      print('fetchOptimizedRoute DioException: ${e.toString()}');
+      print('Response: ${e.response?.statusCode} ${e.response?.data}');
+
       Get.snackbar(
-        "Error",
-        "Gagal memuat rute: $errorMsg",
-        backgroundColor: Colors.red,
+        'Gagal memuat rute',
+        'Tidak dapat terhubung ke server. Periksa koneksi atau coba lagi.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
       );
-    } catch (e) {
+    } catch (e, st) {
+      print('fetchOptimizedRoute unknown error: $e\n$st');
       Get.snackbar(
-        "Error",
-        "Gagal memuat rute: ${e.toString()}",
-        backgroundColor: Colors.red,
+        'Terjadi Kesalahan',
+        'Terjadi kesalahan tak terduga saat memuat rute.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 4),
       );
     } finally {
       isLoading(false);
