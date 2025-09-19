@@ -1,51 +1,44 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:path_provider/path_provider.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  WidgetsFlutterBinding.ensureInitialized();
+  final appDocDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocDir.path);
+  await Hive.openBox('notifications');
+  await saveRemoteMessageToHive(message);
+}
+
+Future<void> saveRemoteMessageToHive(RemoteMessage message) async {
   try {
     if (!Hive.isBoxOpen('notifications')) {
       await Hive.openBox('notifications');
     }
-    await _saveRemoteMessageToHive(message);
-  } catch (e) {
-    print('error saving bg fcm to hive: $e');
+    final box = Hive.box('notifications');
+    final now = DateTime.now();
+    final item = {
+      'id': now.millisecondsSinceEpoch,
+      'icon': message.data['icon'] ?? 'assets/images/ic_launcher.png',
+      'title':
+          message.notification?.title ?? message.data['title'] ?? 'Notifikasi',
+      'message': message.notification?.body ?? message.data['body'] ?? '',
+      'time': now.toIso8601String(),
+      'type': message.data['type'] ?? message.data['category'] ?? 'general',
+      'raw': message.data,
+      'isChecked': false,
+    };
+    final List current = List.from(box.get('list', defaultValue: []));
+    current.insert(0, item);
+    await box.put('list', current);
+  } catch (e, st) {
+    debugPrint('saveRemoteMessageToHive error: $e\n$st');
   }
-  print('Background message handled: ${message.messageId}');
-}
-
-Future<void> _saveRemoteMessageToHive(RemoteMessage message) async {
-  final box = Hive.box('notifications');
-  final now = DateTime.now();
-  final id = now.millisecondsSinceEpoch ~/ 1000;
-  final timeStr = DateFormat('dd MMM yyyy HH:mm').format(now);
-  final title =
-      message.notification?.title ?? message.data['title'] ?? 'Notifikasi';
-  final body = message.notification?.body ?? message.data['body'] ?? '';
-  final type = message.data['type'] ?? 'general';
-  final icon = (type == 'flood')
-      ? 'assets/images/peringatan.png'
-      : (type == 'weather')
-          ? 'assets/images/suhu.png'
-          : 'assets/images/info.png';
-
-  final item = {
-    'id': id,
-    'icon': icon,
-    'title': title,
-    'message': body,
-    'time': timeStr,
-    'isChecked': false,
-    'raw': message.data,
-  };
-
-  await box.put(id.toString(), item);
 }
 
 class MessagingService {
@@ -117,7 +110,7 @@ class MessagingService {
 
   Future<void> _saveMessageToHive(RemoteMessage message) async {
     try {
-      await _saveRemoteMessageToHive(message);
+      await saveRemoteMessageToHive(message);
     } catch (e) {
       print('gagal simpan message ke hive: $e');
     }

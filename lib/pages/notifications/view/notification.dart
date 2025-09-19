@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -11,45 +12,56 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
   late Box box;
+  bool _ready = false;
 
   @override
   void initState() {
     super.initState();
+    _openBox();
+  }
+
+  Future<void> _openBox() async {
     if (!Hive.isBoxOpen('notifications')) {
-      Hive.openBox('notifications').then((b) {
-        setState(() {
-          box = b;
-        });
-      });
-    } else {
-      box = Hive.box('notifications');
+      await Hive.openBox('notifications');
     }
+    box = Hive.box('notifications');
+    setState(() {
+      _ready = true;
+    });
   }
 
   Future<void> _saveList(List list) async {
     await box.put('list', list);
   }
 
-  void _deleteSelected(List<Map> currentList) async {
-    final filtered = currentList.where((m) => m['isChecked'] != true).toList();
-    await _saveList(filtered);
-  }
-
-  void _toggleCheckItem(List<Map> currentList, int id, bool value) async {
+  Future<void> _deleteItem(List<Map> currentList, int id) async {
     final idx = currentList.indexWhere((m) => m['id'] == id);
-    if (idx != -1) {
-      currentList[idx]['isChecked'] = value;
-      await _saveList(currentList);
-    }
+    if (idx == -1) return;
+    final removed = currentList.removeAt(idx);
+    await _saveList(currentList);
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Notifikasi dihapus'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () async {
+            currentList.insert(idx, removed);
+            await _saveList(currentList);
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!Hive.isBoxOpen('notifications')) {
-      return const Center(child: CircularProgressIndicator());
+    if (!_ready) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
     final box = Hive.box('notifications');
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -60,19 +72,6 @@ class _NotificationPageState extends State<NotificationPage> {
                 fontSize: 20,
                 color: Colors.black,
                 fontWeight: FontWeight.bold)),
-        actions: [
-          ValueListenableBuilder(
-            valueListenable: box.listenable(keys: ['list']),
-            builder: (context, _, __) {
-              final list = List<Map>.from(box.get('list', defaultValue: []));
-              final anyChecked = list.any((m) => m['isChecked'] == true);
-              return IconButton(
-                icon: const Icon(Icons.delete, color: Colors.black),
-                onPressed: anyChecked ? () => _deleteSelected(list) : null,
-              );
-            },
-          ),
-        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(2.0),
           child: Container(color: const Color(0xff51669D), height: 2.0),
@@ -81,20 +80,33 @@ class _NotificationPageState extends State<NotificationPage> {
       body: ValueListenableBuilder(
         valueListenable: box.listenable(keys: ['list']),
         builder: (context, _, __) {
-          final list = List<Map>.from(box.get('list', defaultValue: []));
-          if (list.isEmpty) {
+          final rawList = List<Map>.from(box.get('list', defaultValue: []));
+          if (rawList.isEmpty) {
             return const Center(child: Text("Belum ada notifikasi"));
           }
-          return ListView.builder(
+          return ListView.separated(
             padding: const EdgeInsets.all(16),
-            itemCount: list.length,
+            itemCount: rawList.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              final m = Map<String, dynamic>.from(list[index]);
+              final m = Map<String, dynamic>.from(rawList[index]);
               final notification = NotificationModel.fromMap(m);
-              return NotificationItem(
-                notification: notification,
-                onChecked: (value) =>
-                    _toggleCheckItem(list, notification.id, value),
+              return Dismissible(
+                key: ValueKey(notification.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                onDismissed: (_) => _deleteItem(rawList, notification.id),
+                child: NotificationItem(
+                  notification: notification,
+                ),
               );
             },
           );
@@ -106,43 +118,75 @@ class _NotificationPageState extends State<NotificationPage> {
 
 class NotificationItem extends StatelessWidget {
   final NotificationModel notification;
-  final ValueChanged<bool> onChecked;
 
   const NotificationItem({
     super.key,
     required this.notification,
-    required this.onChecked,
   });
+
+  String _friendlyTime(String raw) {
+    if (raw.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(raw);
+      return DateFormat('dd MMM yyyy, HH:mm').format(dt);
+    } catch (_) {}
+    try {
+      final ms = int.parse(raw);
+      final dt = DateTime.fromMillisecondsSinceEpoch(ms);
+      return DateFormat('dd MMM yyyy, HH:mm').format(dt);
+    } catch (_) {}
+    return raw;
+  }
+
+  String _resolveIconAsset() {
+    final provided = (notification.icon).trim();
+    if (provided.isNotEmpty) return provided;
+    final Map<String, dynamic>? raw = notification.raw;
+    final typ = (raw != null && raw['type'] != null)
+        ? raw['type'].toString().toLowerCase()
+        : '';
+    if (typ.contains('flood') ||
+        typ.contains('banjir') ||
+        typ.contains('peringatan')) {
+      return 'assets/images/peringatan.png';
+    }
+    if (typ.contains('weather') ||
+        typ.contains('cuaca') ||
+        typ.contains('suhu')) {
+      return 'assets/images/suhu.png';
+    }
+    if (typ.contains('report') || typ.contains('laporan')) {
+      return 'assets/images/laporan.png';
+    }
+    return 'assets/images/ic_launcher.png';
+  }
 
   @override
   Widget build(BuildContext context) {
+    final timeStr = _friendlyTime(notification.time);
+    final iconAsset = _resolveIconAsset();
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff435482).withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              Image.asset(
-                notification.icon,
-                width: 24,
-                height: 24,
-              ),
-              const SizedBox(height: 40.0),
-              Checkbox(
-                value: notification.isChecked,
-                activeColor: const Color(0xff435482),
-                onChanged: (value) => onChecked(value ?? false),
-              ),
-            ],
+        border: Border.all(color: Colors.grey.shade100, width: 0.6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
-          const SizedBox(width: 16),
-          Expanded(
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 72, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -154,32 +198,60 @@ class NotificationItem extends StatelessWidget {
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   notification.message,
                   style: GoogleFonts.inter(
                     fontSize: 14,
+                    color: Colors.black87,
                     fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text(
-                    notification.time,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black,
-                    ),
                   ),
                 ),
               ],
             ),
           ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(8),
+              child: _buildIconWidget(iconAsset),
+            ),
+          ),
+          Positioned(
+            right: 12,
+            bottom: 8,
+            child: Text(
+              timeStr,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                color: Colors.grey,
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildIconWidget(String asset) {
+    if (asset.startsWith('http')) {
+      return Image.network(asset, width: 40, height: 40, fit: BoxFit.contain);
+    }
+    return Image.asset(asset, width: 40, height: 40, fit: BoxFit.contain);
   }
 }
 
@@ -202,18 +274,6 @@ class NotificationModel {
     this.raw,
   });
 
-  NotificationModel copyWith({bool? isChecked}) {
-    return NotificationModel(
-      id: id,
-      icon: icon,
-      title: title,
-      message: message,
-      time: time,
-      isChecked: isChecked ?? this.isChecked,
-      raw: raw,
-    );
-  }
-
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -227,17 +287,20 @@ class NotificationModel {
   }
 
   factory NotificationModel.fromMap(Map m) {
+    final idVal = m['id'];
+    final idComputed = idVal is int
+        ? idVal
+        : (int.tryParse(idVal.toString()) ??
+            DateTime.now().millisecondsSinceEpoch);
+    final timeVal = (m['time'] as String?) ?? '';
     return NotificationModel(
-      id: m['id'] is int
-          ? m['id']
-          : int.tryParse(m['id'].toString()) ??
-              DateTime.now().millisecondsSinceEpoch,
-      icon: (m['icon'] as String?) ?? 'assets/images/ic_launcher.png',
+      id: idComputed,
+      icon: (m['icon'] as String?) ?? '',
       title: (m['title'] as String?) ?? '',
       message: (m['message'] as String?) ?? '',
-      time: (m['time'] as String?) ?? '',
+      time: timeVal,
       isChecked: m['isChecked'] == true,
-      raw: m['raw'] is Map ? Map<String, dynamic>.from(m['raw']) : {},
+      raw: m['raw'] is Map ? Map<String, dynamic>.from(m['raw']) : null,
     );
   }
 }

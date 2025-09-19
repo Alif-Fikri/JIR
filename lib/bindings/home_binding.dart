@@ -7,7 +7,7 @@ class HomeBinding implements Bindings {
   @override
   void dependencies() {
     // Get.put(GlobalMapController());
-    Get.lazyPut<HomeController>(() => HomeController());
+    Get.put<HomeController>(HomeController(), permanent: true);
     Get.put<FloodController>(FloodController(), permanent: true);
     Get.put(RouteController(), permanent: true);
   }

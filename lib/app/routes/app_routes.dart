@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:JIR/bindings/initial_binding.dart';
+import 'package:JIR/pages/home/chat/chatbot_text.dart';
 import 'package:JIR/pages/home/report/view/report_user.dart';
 import 'package:JIR/pages/home/report/widget/report_detail.dart';
 import 'package:JIR/pages/home/report/widget/report_loading.dart';
@@ -43,6 +44,7 @@ class AppRoutes {
   //home
   static const flood = '/flood';
   static const chatbot = '/chatbot';
+  static const chatbottext = '/chatbot_text';
   static const cctv = '/cctv';
   static const park = '/park';
   static const parkdetail = '/parkdetail';
@@ -124,6 +126,12 @@ class AppRoutes {
     GetPage(
       name: chatbot,
       page: () => const ChatbotOpeningPage(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+        GetPage(
+      name: chatbottext,
+      page: () => const ChatBotPage(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     ),

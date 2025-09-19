@@ -1,6 +1,7 @@
+import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:JIR/pages/home/chat/chatbot_text.dart';
 
 class ChatbotOpeningPage extends StatelessWidget {
   const ChatbotOpeningPage({super.key});
@@ -79,10 +80,7 @@ class ChatbotOpeningPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ChatBotPage()));
+                      Get.toNamed(AppRoutes.chatbottext);
                     },
                     style: ButtonStyle(
                       backgroundColor:

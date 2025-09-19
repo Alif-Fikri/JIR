@@ -4,7 +4,6 @@ import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/home/report/controller/report_controller.dart';
-import 'package:JIR/pages/home/report/widget/report_detail.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -132,18 +131,47 @@ class NotificationService {
     final data = msg.data;
     final box = Hive.box('notifications');
     final now = DateTime.now();
+
+    String type =
+        (data['type'] ?? data['category'] ?? '').toString().toLowerCase();
+    String icon = (data['icon'] ?? '').toString().trim();
+
+    if (icon.isEmpty) {
+      if (type.contains('flood') ||
+          type.contains('banjir') ||
+          type.contains('peringatan') ||
+          (n?.title?.toLowerCase().contains('banjir') ?? false)) {
+        icon = 'assets/images/peringatan.png';
+      } else if (type.contains('weather') ||
+          type.contains('cuaca') ||
+          type.contains('suhu')) {
+        icon = 'assets/images/suhu.png';
+      } else if (type.contains('report') || type.contains('laporan')) {
+        icon = 'assets/images/laporan.png';
+      } else {
+        icon = 'assets/images/ic_launcher.png';
+      }
+    }
+
+    final id = now.millisecondsSinceEpoch;
+    final timeStr = now.toIso8601String();
+    final title = n?.title ?? data['title'] ?? 'Notifikasi';
+    final body = n?.body ?? data['body'] ?? '';
+
     final item = {
-      'id': now.millisecondsSinceEpoch,
-      'icon': data['icon'] ?? 'assets/images/ic_launcher.png',
-      'title': n?.title ?? data['title'] ?? 'Notifikasi',
-      'message': n?.body ?? data['body'] ?? jsonEncode(data),
-      'time': now.toIso8601String(),
+      'id': id,
+      'icon': icon,
+      'title': title,
+      'message': body,
+      'time': timeStr,
+      'type': type,
       'isChecked': false,
       'raw': data,
     };
-    final list = List.from(box.get('list', defaultValue: []));
-    list.insert(0, item);
-    await box.put('list', list);
+
+    final List current = List.from(box.get('list', defaultValue: []));
+    current.insert(0, item);
+    await box.put('list', current);
   }
 
   Future<void> _storePendingNotification(Map<String, dynamic> data) async {

@@ -1,5 +1,4 @@
 import 'package:JIR/app/routes/app_routes.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -9,7 +8,7 @@ import 'package:JIR/services/chat_service/chat_api_service.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/home/map/controller/route_controller.dart';
-import 'package:JIR/pages/home/map/view/map_monitoring.dart';
+import 'package:JIR/pages/home/map/controller/flood_controller.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -24,6 +23,7 @@ class _ChatBotPageState extends State<ChatBotPage>
     with TickerProviderStateMixin {
   bool _isMicTapped = false;
   bool _isChatVisible = true;
+  bool _loadingVisible = false;
   late AnimationController _controllerA;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _controller = TextEditingController();
@@ -32,6 +32,8 @@ class _ChatBotPageState extends State<ChatBotPage>
   late stt.SpeechToText _speech;
   String _recognizedText = '';
   final Set<int> _previewVisible = {};
+  Timer? _typingTimer;
+  int? _typingMessageIndex;
 
   @override
   void initState() {
@@ -48,6 +50,7 @@ class _ChatBotPageState extends State<ChatBotPage>
   void dispose() {
     _controllerA.dispose();
     _flutterTts.stop();
+    _typingTimer?.cancel();
     try {
       _speech.stop();
     } catch (_) {}
@@ -70,6 +73,64 @@ class _ChatBotPageState extends State<ChatBotPage>
         _messages.add(message);
       });
     }
+    scrollToBottom();
+  }
+
+  void _showLoading({String? message}) {
+    if (_loadingVisible) return;
+    _loadingVisible = true;
+    Get.dialog(
+      PopScope(
+        canPop: false,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 40.0),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF45557B),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    strokeWidth: 3,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Flexible(
+                  child: Text(
+                    message ?? 'Mempersiapkan peta...',
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void _hideLoading() {
+    if (!_loadingVisible) return;
+    _loadingVisible = false;
+    try {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      } else {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    } catch (_) {}
   }
 
   void _startListening() async {
@@ -120,11 +181,17 @@ class _ChatBotPageState extends State<ChatBotPage>
   Future<void> _sendMessages(String message) async {
     if (message.isEmpty) return;
 
-    setState(() {
-      _messages.add(
-          {"text": "sedang mengetik...", "isSender": false, "isTyping": true});
+    _typingTimer?.cancel();
+    _typingMessageIndex = null;
+
+    _typingTimer = Timer(const Duration(milliseconds: 600), () {
+      if (!mounted) return;
+      setState(() {
+        _messages.add({"text": "", "isSender": false, "isTyping": true});
+        _typingMessageIndex = _messages.length - 1;
+      });
+      scrollToBottom();
     });
-    scrollToBottom();
 
     dynamic resp;
     try {
@@ -133,18 +200,21 @@ class _ChatBotPageState extends State<ChatBotPage>
       resp = null;
     }
 
-    print('DEBUG chat response: $resp');
-
-    final typingIdx = _messages.indexWhere((m) => m['isTyping'] == true);
-    if (typingIdx != -1) {
+    _typingTimer?.cancel();
+    if (_typingMessageIndex != null) {
       setState(() {
-        _messages.removeAt(typingIdx);
+        if (_typingMessageIndex! >= 0 &&
+            _typingMessageIndex! < _messages.length &&
+            (_messages[_typingMessageIndex!]['isTyping'] == true)) {
+          _messages.removeAt(_typingMessageIndex!);
+        }
+        _typingMessageIndex = null;
       });
     }
 
+    String botText;
     final Map<String, dynamic>? routeData = _extractRouteData(resp);
 
-    String botText;
     if (routeData != null) {
       final startName = _extractPlaceName(routeData['start']);
       final endName = _extractPlaceName(routeData['end']);
@@ -180,7 +250,6 @@ class _ChatBotPageState extends State<ChatBotPage>
   String _formatBotTextFromResponse(
       dynamic resp, Map<String, dynamic>? routeData) {
     if (resp == null) return 'Maaf, server tidak merespon.';
-
     try {
       if (resp is Map<String, dynamic>) {
         if (resp.containsKey('data') && resp['data'] is Map) {
@@ -211,14 +280,14 @@ class _ChatBotPageState extends State<ChatBotPage>
         final s = resp.toString();
         final singleLine = s.replaceAll(RegExp(r'\s+'), ' ');
         if (singleLine.length > 200) {
-          return singleLine.substring(0, 180) + '...';
+          return '${singleLine.substring(0, 180)}...';
         }
         return singleLine;
       } else {
         final s = resp.toString();
         final singleLine = s.replaceAll(RegExp(r'\s+'), ' ');
         if (singleLine.length > 200) {
-          return singleLine.substring(0, 180) + '...';
+          return '${singleLine.substring(0, 180)}...';
         }
         return singleLine;
       }
@@ -249,12 +318,10 @@ class _ChatBotPageState extends State<ChatBotPage>
       if (resp is Map<String, dynamic>) {
         if (resp.containsKey('start') && resp.containsKey('end')) return resp;
         if (resp.containsKey('route')) return resp;
-
         final candidates = <dynamic>[];
         if (resp.containsKey('data')) candidates.add(resp['data']);
         if (resp.containsKey('respons')) candidates.add(resp['respons']);
         if (resp.containsKey('response')) candidates.add(resp['response']);
-
         for (final c in candidates) {
           if (c is Map<String, dynamic>) {
             if (c.containsKey('start') && c.containsKey('end')) {
@@ -320,8 +387,8 @@ class _ChatBotPageState extends State<ChatBotPage>
           _extractFirstLastFromRouteList(routeData, isStart: false);
 
       if (start != null && end != null) {
-        rc.userLocation(start); 
-        rc.destination(end); 
+        rc.userLocation(start);
+        rc.destination(end);
         if (routeData['vehicle'] != null) {
           try {
             rc.selectedVehicle.value = routeData['vehicle'].toString();
@@ -352,17 +419,12 @@ class _ChatBotPageState extends State<ChatBotPage>
     } catch (e, st) {
       print('openRouteInMap error: $e\n$st');
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.toNamed(AppRoutes.peta);
-    });
   }
 
   LatLng? _extractCoords(Map<String, dynamic> routeData, String key) {
     try {
       if (!routeData.containsKey(key)) return null;
       final node = routeData[key];
-
       dynamic coords;
       if (node is Map && (node['coords'] is List)) {
         coords = List.from(node['coords']);
@@ -375,13 +437,12 @@ class _ChatBotPageState extends State<ChatBotPage>
       } else {
         return null;
       }
-
       if (coords is List && coords.length >= 2) {
         final a = double.tryParse(coords[0].toString());
         final b = double.tryParse(coords[1].toString());
         if (a != null && b != null) {
           if (a.abs() <= 90 && b.abs() <= 180) {
-            return LatLng(a, b); 
+            return LatLng(a, b);
           } else if (b.abs() <= 90 && a.abs() <= 180) {
             return LatLng(b, a);
           } else {
@@ -416,6 +477,28 @@ class _ChatBotPageState extends State<ChatBotPage>
       print('_extractFirstLastFromRouteList error: $e');
     }
     return null;
+  }
+
+  Future<void> _onTapOpenRoute(Map<String, dynamic> route) async {
+    try {
+      _showLoading(message: 'Menyiapkan rute...');
+      await _openRouteInMap(route);
+      if (!Get.isRegistered<FloodController>()) {
+        try {
+          Get.put(FloodController());
+        } catch (_) {}
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      _hideLoading();
+      Get.toNamed(AppRoutes.peta);
+    } catch (e) {
+      _hideLoading();
+      Get.snackbar('Gagal', 'Tidak dapat membuka peta. Silakan coba lagi.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.transparent,
+          colorText: Colors.black);
+      print('openRoute error: $e');
+    }
   }
 
   @override
@@ -544,6 +627,7 @@ class _ChatBotPageState extends State<ChatBotPage>
       {required Map<String, dynamic> message, required int index}) {
     final String rawText = (message['text'] ?? '').toString();
     final bool isSender = (message['isSender'] == true);
+    final bool isTyping = message['isTyping'] == true;
     final Map<String, dynamic>? route = message['route'] is Map<String, dynamic>
         ? message['route'] as Map<String, dynamic>
         : null;
@@ -551,6 +635,23 @@ class _ChatBotPageState extends State<ChatBotPage>
     final textColor = Colors.white;
 
     Widget buildMainText() {
+      if (isTyping) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'sedang mengetik',
+              style: GoogleFonts.inter(
+                color: textColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const AnimatedDots(),
+          ],
+        );
+      }
       return Text(
         rawText,
         style: GoogleFonts.inter(
@@ -588,7 +689,7 @@ class _ChatBotPageState extends State<ChatBotPage>
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: () => _openRouteInMap(route),
+                    onPressed: () => _onTapOpenRoute(route),
                     child: Text(
                       'Lihat Rute',
                       style: GoogleFonts.inter(
@@ -631,7 +732,7 @@ class _ChatBotPageState extends State<ChatBotPage>
               const SizedBox(height: 10),
             if (route != null && _previewVisible.contains(index))
               GestureDetector(
-                onTap: () => _openRouteInMap(route),
+                onTap: () => _onTapOpenRoute(route),
                 child: Container(
                   height: 120,
                   width: MediaQuery.of(context).size.width * 0.65,
@@ -684,8 +785,9 @@ class _ChatBotPageState extends State<ChatBotPage>
         for (final wp in List.from(route['waypoints'])) {
           if (wp is List) {
             addFromList(wp);
-          } else if (wp is Map && wp['coords'] is List)
+          } else if (wp is Map && wp['coords'] is List) {
             addFromList(List.from(wp['coords']));
+          }
         }
       }
 
@@ -848,6 +950,47 @@ class _ChatBotPageState extends State<ChatBotPage>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AnimatedDots extends StatefulWidget {
+  const AnimatedDots({super.key});
+
+  @override
+  State<AnimatedDots> createState() => _AnimatedDotsState();
+}
+
+class _AnimatedDotsState extends State<AnimatedDots> {
+  int _count = 1;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(milliseconds: 400), (_) {
+      setState(() {
+        _count = (_count % 3) + 1;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dots = '.' * _count;
+    return Text(
+      dots,
+      style: GoogleFonts.inter(
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
       ),
     );
   }

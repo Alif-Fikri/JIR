@@ -1,17 +1,17 @@
+import 'package:JIR/pages/notifications/controller/notification_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/helper/loading.dart';
 import 'package:JIR/pages/home/main/controller/home_controller.dart';
-import 'package:JIR/pages/home/chat/chatbot.dart';
 import 'package:get/get.dart';
 import 'dart:math' as math;
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
 
-  final HomeController controller = Get.put(HomeController());
-
+  final HomeController controller = Get.find<HomeController>();
+  final NotificationController nc = Get.find<NotificationController>();
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -276,21 +276,31 @@ class HomePage extends StatelessWidget {
                       offset: const Offset(0, -60),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              "WARNING",
-                              style: GoogleFonts.inter(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                        child: Obx(() {
+                          final warns = nc.warnings;
+                          if (warns.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          final toShow = warns.take(2).toList();
+                          return Column(
+                            children: [
+                              Text(
+                                "WARNING",
+                                style: GoogleFonts.inter(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 20.0),
-                            warningBox("Curah Hujan Tinggi Berpotensi Banjir"),
-                            warningBox("Aksi Demo Para Demonstran"),
-                          ],
-                        ),
+                              const SizedBox(height: 20.0),
+                              ...toShow.map((n) {
+                                final title = (n['title'] ?? n['message'] ?? '')
+                                    .toString();
+                                return warningBox(title);
+                              }).toList(),
+                            ],
+                          );
+                        }),
                       ),
                     ),
                     const SizedBox(height: 16),

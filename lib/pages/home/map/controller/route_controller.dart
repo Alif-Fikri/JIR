@@ -41,39 +41,48 @@ class RouteController extends GetxController {
   }
 
   void _startLocationUpdates() {
-    _positionStream = Geolocator.getPositionStream().listen((position) async {
-      final currentLocation = LatLng(position.latitude, position.longitude);
-      userLocation(currentLocation);
+    try {
+      _positionStream = Geolocator.getPositionStream().listen((position) async {
+        final currentLocation = LatLng(position.latitude, position.longitude);
+        userLocation(currentLocation);
 
-      final now = DateTime.now();
-      if (now.difference(_lastCheck).inSeconds.abs() > 10) {
-        _checkRouteDeviation(currentLocation);
-        _lastCheck = now;
-      }
-    });
+        final now = DateTime.now();
+        if (now.difference(_lastCheck).inSeconds.abs() > 10) {
+          _checkRouteDeviation(currentLocation);
+          _lastCheck = now;
+        }
+      });
+    } catch (e, st) {
+      _logError(e, st);
+    }
   }
 
   void _checkRouteDeviation(LatLng currentLocation) async {
-    if (routePoints.isEmpty || destination.value == null) return;
+    try {
+      if (routePoints.isEmpty || destination.value == null) return;
 
-    startPoint ??= userLocation.value;
+      startPoint ??= userLocation.value;
 
-    final nearestPointOnRoute = _findNearestPoint(currentLocation, routePoints);
-    final distanceToRoute = calculateDistance(
-      currentLocation,
-      nearestPointOnRoute,
-    );
+      final nearestPointOnRoute =
+          _findNearestPoint(currentLocation, routePoints);
+      final distanceToRoute = calculateDistance(
+        currentLocation,
+        nearestPointOnRoute,
+      );
 
-    final totalDistance = calculateDistance(startPoint!, destination.value!);
-    final remainingDistance = calculateDistance(
-      currentLocation,
-      destination.value!,
-    );
+      final totalDistance = calculateDistance(startPoint!, destination.value!);
+      final remainingDistance = calculateDistance(
+        currentLocation,
+        destination.value!,
+      );
 
-    if (remainingDistance < totalDistance * 0.2) return;
+      if (remainingDistance < totalDistance * 0.2) return;
 
-    if (distanceToRoute > 50) {
-      await _fetchNewRoute(currentLocation, destination.value!);
+      if (distanceToRoute > 50) {
+        await _fetchNewRoute(currentLocation, destination.value!);
+      }
+    } catch (e, st) {
+      _logError(e, st);
     }
   }
 
@@ -123,57 +132,77 @@ class RouteController extends GetxController {
       if (response.statusCode == null ||
           response.statusCode! < 200 ||
           response.statusCode! >= 300) {
-        print(
-            '_fetchNewRoute bad status ${response.statusCode}: ${response.data}');
-        Get.snackbar('Gagal memperbarui rute',
-            'Rute tidak tersedia atau server tidak merespon.');
+        _logError('Bad status', StackTrace.current);
+        _showUserMessage(
+          'Tidak dapat memperbarui rute',
+          'Rute tidak tersedia saat ini. Silakan coba lagi nanti.',
+        );
         return;
       }
 
-      _parseOptimizedRouteData(response.data as Map<String, dynamic>);
-      Get.snackbar("Info", "Rute diperbarui",
-          duration: const Duration(seconds: 2),
-          snackPosition: SnackPosition.TOP);
+      final data = response.data;
+      _parseOptimizedRouteDataSafely(data);
+      _showUserMessage('Rute diperbarui', 'Rute telah diperbarui.');
     } on DioException catch (e) {
-      print('_fetchNewRoute DioException: ${e.toString()}');
-      print('Response: ${e.response?.statusCode} ${e.response?.data}');
-      Get.snackbar(
-          'Gagal memperbarui rute', 'Tidak dapat terhubung ke server.');
-    } catch (e) {
-      print('_fetchNewRoute error: $e');
-      Get.snackbar('Gagal memperbarui rute', 'Terjadi kesalahan. Coba lagi.');
+      _logError(e, e.stackTrace);
+      _showUserMessage(
+        'Gagal memperbarui rute',
+        'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
+      );
+    } catch (e, st) {
+      _logError(e, st);
+      _showUserMessage(
+        'Gagal memperbarui rute',
+        'Terjadi kesalahan saat memperbarui rute. Silakan coba lagi.',
+      );
     }
   }
 
   void _startCompassUpdates() {
-    _compassSubscription = FlutterCompass.events?.listen((event) {
-      if (event.heading != null) {
-        double heading = event.heading!;
-        userHeading(heading);
-      }
-    });
+    try {
+      _compassSubscription = FlutterCompass.events?.listen((event) {
+        if (event.heading != null) {
+          double heading = event.heading!;
+          userHeading(heading);
+        }
+      });
+    } catch (e, st) {
+      _logError(e, st);
+    }
   }
 
   Future<void> _getUserLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) throw Exception('Layanan lokasi tidak aktif');
+      if (!serviceEnabled) {
+        _showUserMessage('Lokasi tidak aktif',
+            'Layanan lokasi perangkat Anda tidak aktif. Aktifkan lokasi lalu coba lagi.');
+        return;
+      }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission != LocationPermission.whileInUse) {
-          throw Exception('Izin lokasi ditolak');
+        if (permission == LocationPermission.denied) {
+          _showUserMessage('Izin Lokasi Ditolak',
+              'Aplikasi membutuhkan izin lokasi untuk menampilkan peta di posisi Anda.');
+          return;
         }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _showUserMessage('Izin Lokasi Permanen Ditolak',
+            'Mohon aktifkan izin lokasi di pengaturan perangkat.');
+        return;
       }
 
       Position position = await Geolocator.getCurrentPosition();
       userLocation(LatLng(position.latitude, position.longitude));
-    } catch (e) {
-      Get.snackbar(
-        "Peringatan",
-        "Gagal mendapatkan lokasi",
-        backgroundColor: Colors.orange,
+    } catch (e, st) {
+      _logError(e, st);
+      _showUserMessage(
+        'Tidak dapat mengambil lokasi',
+        'Gagal mendapatkan lokasi. Periksa pengaturan lokasi dan coba lagi.',
       );
     }
   }
@@ -184,14 +213,18 @@ class RouteController extends GetxController {
   }
 
   Future<void> fetchOptimizedRoute() async {
-    if (userLocation.value == null || destination.value == null) return;
+    if (userLocation.value == null || destination.value == null) {
+      _showUserMessage(
+          'Belum ada lokasi', 'Pastikan lokasi Anda dan tujuan telah dipilih.');
+      return;
+    }
 
     routePoints.clear();
     routeSteps.clear();
     optimizedWaypoints.clear();
     isLoading(true);
 
-    try {       
+    try {
       final response = await _dio.post(
         '$baseUrl/api/routing/optimized-route',
         data: {
@@ -211,129 +244,124 @@ class RouteController extends GetxController {
       if (response.statusCode == null ||
           response.statusCode! < 200 ||
           response.statusCode! >= 300) {
-        print(
-            'fetchOptimizedRoute: bad status ${response.statusCode} - ${response.data}');
-        Get.snackbar(
-          'Gagal memuat rute',
-          response.statusCode == 404
-              ? 'Rute tidak ditemukan. Periksa tujuan Anda.'
-              : 'Terjadi kesalahan saat memuat rute (kode ${response.statusCode}). Coba lagi.',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 4),
-        );
+        _logError('fetchOptimizedRoute bad status ${response.statusCode}',
+            StackTrace.current);
+        final userMsg = response.statusCode == 404
+            ? 'Rute tidak ditemukan. Coba cek lokasi tujuan Anda.'
+            : 'Gagal memuat rute. Silakan coba lagi.';
+        _showUserMessage('Gagal memuat rute', userMsg);
         return;
       }
 
-      _parseOptimizedRouteData(response.data as Map<String, dynamic>);
+      final data = response.data;
+      _parseOptimizedRouteDataSafely(data);
     } on DioException catch (e) {
-      print('fetchOptimizedRoute DioException: ${e.toString()}');
-      print('Response: ${e.response?.statusCode} ${e.response?.data}');
-
-      Get.snackbar(
+      _logError(e, e.stackTrace);
+      _showUserMessage(
         'Gagal memuat rute',
-        'Tidak dapat terhubung ke server. Periksa koneksi atau coba lagi.',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 4),
+        'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
       );
     } catch (e, st) {
-      print('fetchOptimizedRoute unknown error: $e\n$st');
-      Get.snackbar(
+      _logError(e, st);
+      _showUserMessage(
         'Terjadi Kesalahan',
-        'Terjadi kesalahan tak terduga saat memuat rute.',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 4),
+        'Terjadi kesalahan saat memuat rute. Silakan coba lagi.',
       );
     } finally {
       isLoading(false);
     }
   }
 
-  void _parseOptimizedRouteData(Map<String, dynamic> data) {
+  void _parseOptimizedRouteDataSafely(dynamic data) {
     try {
-      final waypoints = data['waypoints'] as List? ?? [];
-      optimizedWaypoints.value = waypoints.map<LatLng>((wp) {
-        if (wp is List && wp.length >= 2) {
-          return LatLng(
-            (wp[0] as num).toDouble(),
-            (wp[1] as num).toDouble(),
-          );
-        } else {
-          throw Exception('Invalid waypoint format: $wp');
-        }
+      _parseOptimizedRouteDataInternal(data);
+    } catch (e, st) {
+      _logError(e, st);
+      _showUserMessage(
+        'Data rute tidak valid',
+        'Server mengirim data rute yang tidak dapat diproses. Silakan coba lagi nanti.',
+      );
+    }
+  }
+
+  void _parseOptimizedRouteDataInternal(dynamic data) {
+    final Map<String, dynamic> map = data as Map<String, dynamic>;
+    final waypoints = map['waypoints'] as List? ?? [];
+    optimizedWaypoints.value = waypoints.map<LatLng>((wp) {
+      if (wp is List && wp.length >= 2) {
+        return LatLng(
+          (wp[0] as num).toDouble(),
+          (wp[1] as num).toDouble(),
+        );
+      } else {
+        throw Exception('Invalid waypoint format: $wp');
+      }
+    }).toList();
+
+    final routeData = map['route'] as Map<String, dynamic>?;
+    if (routeData == null) {
+      throw Exception('Route data is null');
+    }
+
+    final routes = routeData['routes'] as List?;
+    if (routes == null || routes.isEmpty) {
+      throw Exception('No routes found in response');
+    }
+
+    final mainRoute = routes[0] as Map<String, dynamic>;
+    final geometry = mainRoute['geometry'] as Map<String, dynamic>?;
+    if (geometry == null) {
+      throw Exception('Geometry data is null');
+    }
+
+    final coordinates = geometry['coordinates'] as List? ?? [];
+    routePoints.value = coordinates.map<LatLng>((coord) {
+      if (coord is List && coord.length >= 2) {
+        return LatLng(
+          (coord[1] as num).toDouble(),
+          (coord[0] as num).toDouble(),
+        );
+      } else {
+        throw Exception('Invalid coordinate format: $coord');
+      }
+    }).toList();
+
+    final legs = mainRoute['legs'] as List?;
+    if (legs != null && legs.isNotEmpty) {
+      final leg = legs[0] as Map<String, dynamic>;
+      final steps = leg['steps'] as List? ?? [];
+
+      routeSteps.value = steps.map<Map<String, dynamic>>((step) {
+        final stepMap = step as Map<String, dynamic>;
+        final maneuver = stepMap['maneuver'] as Map<String, dynamic>?;
+
+        return {
+          'instruction': parseManeuver(maneuver),
+          'name': stepMap['name'] as String? ?? 'Jalan tanpa nama',
+          'distance': (stepMap['distance'] as num?)?.toDouble() ?? 0.0,
+          'type': maneuver?['type'] as String?,
+          'modifier': maneuver?['modifier'] as String?,
+        };
       }).toList();
+    }
 
-      final routeData = data['route'] as Map<String, dynamic>?;
-      if (routeData == null) {
-        throw Exception('Route data is null');
-      }
+    final alternatives = routeData['alternatives'] as List? ?? [];
+    _alternativeRoutes.value = alternatives.map<List<LatLng>>((alt) {
+      final altMap = alt as Map<String, dynamic>;
+      final altGeometry = altMap['geometry'] as Map<String, dynamic>?;
+      final altCoordinates = altGeometry?['coordinates'] as List? ?? [];
 
-      final routes = routeData['routes'] as List?;
-      if (routes == null || routes.isEmpty) {
-        throw Exception('No routes found in response');
-      }
-
-      final mainRoute = routes[0] as Map<String, dynamic>;
-      final geometry = mainRoute['geometry'] as Map<String, dynamic>?;
-      if (geometry == null) {
-        throw Exception('Geometry data is null');
-      }
-
-      final coordinates = geometry['coordinates'] as List? ?? [];
-      routePoints.value = coordinates.map<LatLng>((coord) {
+      return altCoordinates.map<LatLng>((coord) {
         if (coord is List && coord.length >= 2) {
           return LatLng(
             (coord[1] as num).toDouble(),
             (coord[0] as num).toDouble(),
           );
         } else {
-          throw Exception('Invalid coordinate format: $coord');
+          throw Exception('Invalid alternative coordinate format: $coord');
         }
       }).toList();
-
-      final legs = mainRoute['legs'] as List?;
-      if (legs != null && legs.isNotEmpty) {
-        final leg = legs[0] as Map<String, dynamic>;
-        final steps = leg['steps'] as List? ?? [];
-
-        routeSteps.value = steps.map<Map<String, dynamic>>((step) {
-          final stepMap = step as Map<String, dynamic>;
-          final maneuver = stepMap['maneuver'] as Map<String, dynamic>?;
-
-          return {
-            'instruction': parseManeuver(maneuver),
-            'name': stepMap['name'] as String? ?? 'Jalan tanpa nama',
-            'distance': (stepMap['distance'] as num?)?.toDouble() ?? 0.0,
-            'type': maneuver?['type'] as String?,
-            'modifier': maneuver?['modifier'] as String?,
-          };
-        }).toList();
-      }
-
-      final alternatives = routeData['alternatives'] as List? ?? [];
-      _alternativeRoutes.value = alternatives.map<List<LatLng>>((alt) {
-        final altMap = alt as Map<String, dynamic>;
-        final altGeometry = altMap['geometry'] as Map<String, dynamic>?;
-        final altCoordinates = altGeometry?['coordinates'] as List? ?? [];
-
-        return altCoordinates.map<LatLng>((coord) {
-          if (coord is List && coord.length >= 2) {
-            return LatLng(
-              (coord[1] as num).toDouble(),
-              (coord[0] as num).toDouble(),
-            );
-          } else {
-            throw Exception(
-              'Invalid alternative coordinate format: $coord',
-            );
-          }
-        }).toList();
-      }).toList();
-      print(
-        "Optimized route found: ${routePoints.length} points, ${optimizedWaypoints.length} waypoints",
-      );
-    } catch (e) {
-      throw Exception('Format data tidak valid: ${e.toString()}');
-    }
+    }).toList();
   }
 
   void useAlternativeRoute(int index) {
@@ -377,10 +405,13 @@ class RouteController extends GetxController {
           };
         }).toList();
       } on DioException catch (e) {
-        final errorMsg = e.response?.data?['detail'] ?? e.message;
-        Get.snackbar("Error", "Pencarian gagal: $errorMsg");
-      } catch (e) {
-        Get.snackbar("Error", "Pencarian gagal: ${e.toString()}");
+        _logError(e, e.stackTrace);
+        _showUserMessage('Pencarian gagal',
+            'Tidak dapat melakukan pencarian. Periksa koneksi Anda.');
+      } catch (e, st) {
+        _logError(e, st);
+        _showUserMessage('Pencarian gagal',
+            'Terjadi kesalahan saat mencari. Silakan coba lagi.');
       }
     });
   }
@@ -393,10 +424,10 @@ class RouteController extends GetxController {
   static String parseManeuver(Map<String, dynamic>? maneuver) {
     if (maneuver == null) return 'Lanjutkan perjalanan';
 
-    final type = maneuver['type'];
-    final modifier = maneuver['modifier'];
+    final type = (maneuver['type'] ?? '').toString();
+    final modifier = (maneuver['modifier'] ?? '').toString();
     final exit = maneuver['keluar'];
-    final roadName = maneuver['name'] ?? '';
+    final roadName = (maneuver['name'] ?? '').toString();
 
     String exitIndonesian(int? exitNum) {
       if (exitNum == null) return '';
@@ -411,6 +442,31 @@ class RouteController extends GetxController {
           return 'keempat';
         default:
           return 'ke-$exitNum';
+      }
+    }
+
+    String modText(String? m) {
+      switch (m) {
+        case 'left':
+          return 'kiri';
+        case 'right':
+          return 'kanan';
+        case 'sharp left':
+          return 'tajam ke kiri';
+        case 'sharp right':
+          return 'tajam ke kanan';
+        case 'slight left':
+          return 'sedikit ke kiri';
+        case 'slight right':
+          return 'sedikit ke kanan';
+        case 'straight':
+          return 'lurus';
+        case 'uturn':
+        case 'uturn-left':
+        case 'uturn-right':
+          return 'balik arah';
+        default:
+          return '';
       }
     }
 
@@ -430,26 +486,48 @@ class RouteController extends GetxController {
           case 'sharp right':
             return 'Belok tajam ke kanan';
           case 'slight left':
-            return 'Belok pelan ke kiri';
+            return 'Belok sedikit ke kiri';
           case 'slight right':
-            return 'Belok pelan ke kanan';
+            return 'Belok sedikit ke kanan';
+          case 'straight':
+            return 'Lurus';
+          case 'uturn':
+          case 'uturn-left':
+          case 'uturn-right':
+            return 'Balik arah';
           default:
             return 'Belok';
         }
       case 'new name':
-        return 'Teruskan lurus menuju $roadName';
+        if (roadName.isNotEmpty) return 'Teruskan menuju $roadName';
+        return 'Teruskan mengikuti jalan';
+      case 'continue':
+        return 'Lanjutkan mengikuti jalan';
       case 'roundabout':
         return 'Masuk bundaran dan ambil keluar ${exitIndonesian(exit)}';
       case 'rotary':
-        return 'Masuk lingkaran lalu keluar di keluar ${exitIndonesian(exit)}';
+        return 'Masuk bundaran besar lalu keluar ${exitIndonesian(exit)}';
       case 'fork':
-        return 'Ambil percabangan ${_translateModifier(modifier)}';
+        final t = _translateModifier(modifier);
+        return t.isNotEmpty ? 'Ambil percabangan $t' : 'Ambil percabangan';
       case 'merge':
-        return 'Bergabung ke jalur ${_translateModifier(modifier)}';
+        final t = _translateModifier(modifier);
+        return t.isNotEmpty ? 'Bergabung ke jalur $t' : 'Bergabung ke jalur';
       case 'on ramp':
-        return 'Masuk jalan tol ${_translateModifier(modifier)}';
+        final t = _translateModifier(modifier);
+        return t.isNotEmpty ? 'Masuk jalur (ramp) $t' : 'Masuk jalur (ramp)';
       case 'off ramp':
-        return 'Keluar melalui jalan tol ${_translateModifier(modifier)}';
+        final t = _translateModifier(modifier);
+        return t.isNotEmpty
+            ? 'Keluar dari jalur (ramp) $t'
+            : 'Keluar dari jalur (ramp)';
+      case 'end of road':
+        final t = modText(modifier);
+        return t.isNotEmpty ? 'Ujung jalan, kemudian belok $t' : 'Ujung jalan';
+      case 'use lane':
+        return 'Pilih jalur yang sesuai';
+      case 'turn slight':
+        return 'Belok sedikit';
       default:
         return 'Teruskan mengikuti jalan';
     }
@@ -473,35 +551,63 @@ class RouteController extends GetxController {
   }
 
   static Widget getManeuverIcon(String? type, String? modifier) {
-    const defaultIcon = Icon(Icons.directions, color: Colors.blue);
+    const baseColor = Color(0xff45557B);
+    const departColor = Colors.green;
+    const arriveColor = Colors.red;
+    const roundColor = Colors.orange;
+    final mod = modifier ?? '';
 
     switch (type) {
-      case 'turn':
-        switch (modifier) {
-          case 'left':
-            return const Icon(Icons.turn_left, color: Colors.blue);
-          case 'right':
-            return const Icon(Icons.turn_right, color: Colors.blue);
-          case 'sharp left':
-            return const Icon(Icons.u_turn_left, color: Colors.blue);
-          case 'sharp right':
-            return const Icon(Icons.u_turn_right, color: Colors.blue);
-          default:
-            return defaultIcon;
-        }
-      case 'roundabout':
-        return const Icon(Icons.alt_route, color: Colors.orange);
       case 'depart':
-        return const Icon(Icons.location_on, color: Colors.green);
+        return const Icon(Icons.my_location, color: departColor);
       case 'arrive':
-        return const Icon(Icons.flag, color: Colors.red);
+        return const Icon(Icons.flag, color: arriveColor);
+      case 'turn':
+        switch (mod) {
+          case 'left':
+            return const Icon(Icons.turn_left, color: baseColor);
+          case 'right':
+            return const Icon(Icons.turn_right, color: baseColor);
+          case 'sharp left':
+            return const Icon(Icons.u_turn_left, color: baseColor);
+          case 'sharp right':
+            return const Icon(Icons.u_turn_right, color: baseColor);
+          case 'slight left':
+            return const Icon(Icons.turn_left, color: baseColor);
+          case 'slight right':
+            return const Icon(Icons.turn_right, color: baseColor);
+          case 'straight':
+            return const Icon(Icons.arrow_forward, color: baseColor);
+          case 'uturn':
+          case 'uturn-left':
+            return const Icon(Icons.u_turn_left, color: baseColor);
+          case 'uturn-right':
+            return const Icon(Icons.u_turn_right, color: baseColor);
+          default:
+            return const Icon(Icons.directions, color: baseColor);
+        }
+      case 'new name':
+        return const Icon(Icons.straight, color: baseColor);
+      case 'continue':
+        return const Icon(Icons.straight, color: baseColor);
+      case 'roundabout':
+        return const Icon(Icons.alt_route, color: roundColor);
+      case 'rotary':
+        return const Icon(Icons.loop, color: roundColor);
       case 'fork':
-        return Transform.rotate(
-          angle: modifier == 'left' ? 0.3 : -0.3,
-          child: const Icon(Icons.fork_left, color: Colors.blue),
-        );
+        return const Icon(Icons.call_split, color: baseColor);
+      case 'merge':
+        return const Icon(Icons.merge_type, color: baseColor);
+      case 'on ramp':
+        return const Icon(Icons.login, color: baseColor);
+      case 'off ramp':
+        return const Icon(Icons.exit_to_app, color: baseColor);
+      case 'end of road':
+        return const Icon(Icons.stop_circle, color: baseColor);
+      case 'use lane':
+        return const Icon(Icons.view_agenda, color: baseColor);
       default:
-        return defaultIcon;
+        return const Icon(Icons.directions, color: baseColor);
     }
   }
 
@@ -557,5 +663,22 @@ class RouteController extends GetxController {
     _compassSubscription?.cancel();
     _alternativeRoutes.close();
     super.onClose();
+  }
+
+  void _showUserMessage(String title, String message) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.white,
+      colorText: Colors.black,
+      margin: const EdgeInsets.all(12),
+      duration: const Duration(seconds: 4),
+    );
+  }
+
+  void _logError(Object e, StackTrace? st) {
+    print('RouteController error: $e');
+    if (st != null) print(st);
   }
 }
