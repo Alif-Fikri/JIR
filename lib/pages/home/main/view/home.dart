@@ -30,6 +30,8 @@ class HomePage extends StatelessWidget {
         body: Stack(
           children: [
             RefreshIndicator(
+              color: Colors.white,
+              backgroundColor: Color(0xff45557B),
               onRefresh: controller.refreshData,
               child: SingleChildScrollView(
                 child: Column(

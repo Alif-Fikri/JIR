@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -13,11 +16,24 @@ class NotificationPage extends StatefulWidget {
 class _NotificationPageState extends State<NotificationPage> {
   late Box box;
   bool _ready = false;
+  bool _showShimmer = true;
 
   @override
   void initState() {
     super.initState();
-    _openBox();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await Future.wait([
+      _openBox(),
+      Future.delayed(const Duration(milliseconds: 700)),
+    ]);
+    if (mounted) {
+      setState(() {
+        _showShimmer = false;
+      });
+    }
   }
 
   Future<void> _openBox() async {
@@ -25,9 +41,11 @@ class _NotificationPageState extends State<NotificationPage> {
       await Hive.openBox('notifications');
     }
     box = Hive.box('notifications');
-    setState(() {
-      _ready = true;
-    });
+    if (mounted) {
+      setState(() {
+        _ready = true;
+      });
+    }
   }
 
   Future<void> _saveList(List list) async {
@@ -39,16 +57,103 @@ class _NotificationPageState extends State<NotificationPage> {
     if (idx == -1) return;
     final removed = currentList.removeAt(idx);
     await _saveList(currentList);
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Notifikasi dihapus'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () async {
-            currentList.insert(idx, removed);
-            await _saveList(currentList);
-          },
+    Get.closeAllSnackbars();
+    Get.snackbar(
+      'Notifikasi dihapus',
+      '',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: const Color(0xff45557B),
+      margin: const EdgeInsets.all(16),
+      borderRadius: 12,
+      duration: const Duration(seconds: 4),
+      titleText: Text('Notifikasi dihapus',
+          style: const TextStyle(color: Colors.white)),
+      messageText: const SizedBox.shrink(),
+      mainButton: TextButton(
+        onPressed: () async {
+          currentList.insert(idx, removed);
+          await _saveList(currentList);
+          Get.closeAllSnackbars();
+        },
+        child: const Text('Kembalikan',
+            style: TextStyle(color: Colors.blueAccent)),
+      ),
+    );
+  }
+
+  Future<void> _onRefresh() async {
+    setState(() {
+      _showShimmer = true;
+    });
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!Hive.isBoxOpen('notifications')) {
+      await Hive.openBox('notifications');
+    }
+    box = Hive.box('notifications');
+    if (mounted) {
+      setState(() {
+        _ready = true;
+        _showShimmer = false;
+      });
+      Get.closeAllSnackbars();
+      Get.snackbar(
+        'Daftar notifikasi diperbarui',
+        '',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xff45557B),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 20,
+        duration: const Duration(seconds: 2),
+        titleText: Text('Daftar notifikasi diperbarui',
+            style: const TextStyle(color: Colors.white)),
+        messageText: const SizedBox.shrink(),
+      );
+    }
+  }
+
+  Widget _buildShimmerItem() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      constraints: const BoxConstraints(minHeight: 112),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                          height: 18,
+                          width: double.infinity,
+                          color: Colors.white),
+                      const SizedBox(height: 8),
+                      Container(
+                          height: 14,
+                          width: double.infinity,
+                          color: Colors.white),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(width: 44, height: 44, color: Colors.white),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Align(
+                alignment: Alignment.centerRight,
+                child: Container(height: 12, width: 120, color: Colors.white)),
+          ],
         ),
       ),
     );
@@ -56,59 +161,95 @@ class _NotificationPageState extends State<NotificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_ready) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+    if (!_ready && _showShimmer == false) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    final box = Hive.box('notifications');
+    final boxRef = Hive.box('notifications');
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        shadowColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.white,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Text('Notifikasi',
             style: GoogleFonts.inter(
                 fontSize: 20,
                 color: Colors.black,
                 fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.black87),
+            onPressed: _onRefresh,
+          ),
+        ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2.0),
-          child: Container(color: const Color(0xff51669D), height: 2.0),
-        ),
+            preferredSize: const Size.fromHeight(2.0),
+            child: Container(color: const Color(0xff51669D), height: 2.0)),
       ),
       body: ValueListenableBuilder(
-        valueListenable: box.listenable(keys: ['list']),
+        valueListenable: boxRef.listenable(keys: ['list']),
         builder: (context, _, __) {
-          final rawList = List<Map>.from(box.get('list', defaultValue: []));
-          if (rawList.isEmpty) {
-            return const Center(child: Text("Belum ada notifikasi"));
+          final rawList = List<Map>.from(boxRef.get('list', defaultValue: []));
+          if (_showShimmer) {
+            return Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+              child: RefreshIndicator(
+                onRefresh: _onRefresh,
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  itemCount: 6,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, __) => _buildShimmerItem(),
+                ),
+              ),
+            );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: rawList.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final m = Map<String, dynamic>.from(rawList[index]);
-              final notification = NotificationModel.fromMap(m);
-              return Dismissible(
-                key: ValueKey(notification.id),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.redAccent,
-                    borderRadius: BorderRadius.circular(12),
+          if (rawList.isEmpty) {
+            return RefreshIndicator(
+              color: const Color(0xff45557B),
+              onRefresh: _onRefresh,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 200),
+                  Center(child: Text("Belum ada notifikasi")),
+                ],
+              ),
+            );
+          }
+          return RefreshIndicator(
+            color: Colors.white,
+            backgroundColor: const Color(0xff45557B),
+            onRefresh: _onRefresh,
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: rawList.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final m = Map<String, dynamic>.from(rawList[index]);
+                final notification = NotificationModel.fromMap(m);
+                return Dismissible(
+                  key: ValueKey(notification.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.delete, color: Colors.white),
                   ),
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                onDismissed: (_) => _deleteItem(rawList, notification.id),
-                child: NotificationItem(
-                  notification: notification,
-                ),
-              );
-            },
+                  onDismissed: (_) => _deleteItem(rawList, notification.id),
+                  child: NotificationItem(notification: notification),
+                );
+              },
+            ),
           );
         },
       ),
@@ -165,84 +306,82 @@ class NotificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeStr = _friendlyTime(notification.time);
     final iconAsset = _resolveIconAsset();
+    const double cardMinHeight = 112;
     return Container(
+      constraints: const BoxConstraints(minHeight: cardMinHeight),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade100, width: 0.6),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 6)),
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2)),
         ],
       ),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 72, 12),
-            child: Column(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  notification.title,
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(notification.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black)),
+                      const SizedBox(height: 8),
+                      Text(notification.message,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w400)),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  notification.message,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w400,
+                const SizedBox(width: 12),
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3))
+                    ],
                   ),
+                  padding: const EdgeInsets.all(8),
+                  child: _buildIconWidget(iconAsset),
                 ),
               ],
             ),
-          ),
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(8),
-              child: _buildIconWidget(iconAsset),
-            ),
-          ),
-          Positioned(
-            right: 12,
-            bottom: 8,
-            child: Text(
-              timeStr,
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Align(
+                alignment: Alignment.centerRight,
+                child: Text(timeStr,
+                    style:
+                        GoogleFonts.inter(fontSize: 11, color: Colors.grey))),
+          ],
+        ),
       ),
     );
   }
