@@ -20,11 +20,11 @@ void main() async {
   await Hive.openBox('notifications');
   FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
   await NotificationService.I.init();
-  await Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+  await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
   await Workmanager().registerPeriodicTask(
     "floodTaskUnique",
     floodTaskName,
-    frequency: const Duration(minutes: 15),
+    frequency: const Duration(minutes: 15), 
     initialDelay: const Duration(seconds: 10),
   );
   runApp(const MyApp());

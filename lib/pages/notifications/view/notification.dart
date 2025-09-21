@@ -52,35 +52,6 @@ class _NotificationPageState extends State<NotificationPage> {
     await box.put('list', list);
   }
 
-  Future<void> _deleteItem(List<Map> currentList, int id) async {
-    final idx = currentList.indexWhere((m) => m['id'] == id);
-    if (idx == -1) return;
-    final removed = currentList.removeAt(idx);
-    await _saveList(currentList);
-    Get.closeAllSnackbars();
-    Get.snackbar(
-      'Notifikasi dihapus',
-      '',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xff45557B),
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-      duration: const Duration(seconds: 4),
-      titleText: Text('Notifikasi dihapus',
-          style: const TextStyle(color: Colors.white)),
-      messageText: const SizedBox.shrink(),
-      mainButton: TextButton(
-        onPressed: () async {
-          currentList.insert(idx, removed);
-          await _saveList(currentList);
-          Get.closeAllSnackbars();
-        },
-        child: const Text('Kembalikan',
-            style: TextStyle(color: Colors.blueAccent)),
-      ),
-    );
-  }
-
   Future<void> _onRefresh() async {
     setState(() {
       _showShimmer = true;
@@ -97,16 +68,9 @@ class _NotificationPageState extends State<NotificationPage> {
       });
       Get.closeAllSnackbars();
       Get.snackbar(
+        'Sukses',
         'Daftar notifikasi diperbarui',
-        '',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xff45557B),
-        margin: const EdgeInsets.all(16),
-        borderRadius: 20,
-        duration: const Duration(seconds: 2),
-        titleText: Text('Daftar notifikasi diperbarui',
-            style: const TextStyle(color: Colors.white)),
-        messageText: const SizedBox.shrink(),
       );
     }
   }
@@ -233,19 +197,32 @@ class _NotificationPageState extends State<NotificationPage> {
               itemBuilder: (context, index) {
                 final m = Map<String, dynamic>.from(rawList[index]);
                 final notification = NotificationModel.fromMap(m);
+
                 return Dismissible(
                   key: ValueKey(notification.id),
                   direction: DismissDirection.endToStart,
+                  confirmDismiss: (dir) async {
+                    final id = notification.id;
+                    final newList =
+                        List<Map>.from(boxRef.get('list', defaultValue: []));
+                    final idx = newList.indexWhere(
+                        (e) => (e['id']?.toString() ?? '') == id.toString());
+                    if (idx == -1) return false;
+                    newList.removeAt(idx);
+                    await _saveList(newList);
+                    Get.closeAllSnackbars();
+                    Get.snackbar('Sukses', 'Notifikasi dihapus',
+                        snackPosition: SnackPosition.BOTTOM);
+                    return true;
+                  },
                   background: Container(
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
-                  onDismissed: (_) => _deleteItem(rawList, notification.id),
                   child: NotificationItem(notification: notification),
                 );
               },
@@ -260,10 +237,7 @@ class _NotificationPageState extends State<NotificationPage> {
 class NotificationItem extends StatelessWidget {
   final NotificationModel notification;
 
-  const NotificationItem({
-    super.key,
-    required this.notification,
-  });
+  const NotificationItem({super.key, required this.notification});
 
   String _friendlyTime(String raw) {
     if (raw.isEmpty) return '';
@@ -327,61 +301,55 @@ class NotificationItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(notification.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black)),
-                      const SizedBox(height: 8),
-                      Text(notification.message,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w400)),
-                    ],
-                  ),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(notification.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black)),
+                        const SizedBox(height: 8),
+                        Text(notification.message,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w400)),
+                      ]),
                 ),
                 const SizedBox(width: 12),
                 Container(
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3))
-                    ],
-                  ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3))
+                      ]),
                   padding: const EdgeInsets.all(8),
                   child: _buildIconWidget(iconAsset),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Align(
-                alignment: Alignment.centerRight,
-                child: Text(timeStr,
-                    style:
-                        GoogleFonts.inter(fontSize: 11, color: Colors.grey))),
-          ],
-        ),
+              ]),
+              const SizedBox(height: 8),
+              Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(timeStr,
+                      style:
+                          GoogleFonts.inter(fontSize: 11, color: Colors.grey))),
+            ]),
       ),
     );
   }
@@ -403,15 +371,14 @@ class NotificationModel {
   final bool isChecked;
   final Map<String, dynamic>? raw;
 
-  NotificationModel({
-    required this.id,
-    required this.icon,
-    required this.title,
-    required this.message,
-    required this.time,
-    this.isChecked = false,
-    this.raw,
-  });
+  NotificationModel(
+      {required this.id,
+      required this.icon,
+      required this.title,
+      required this.message,
+      required this.time,
+      this.isChecked = false,
+      this.raw});
 
   Map<String, dynamic> toMap() {
     return {
@@ -421,7 +388,7 @@ class NotificationModel {
       'message': message,
       'time': time,
       'isChecked': isChecked,
-      'raw': raw ?? {},
+      'raw': raw ?? {}
     };
   }
 
@@ -433,13 +400,12 @@ class NotificationModel {
             DateTime.now().millisecondsSinceEpoch);
     final timeVal = (m['time'] as String?) ?? '';
     return NotificationModel(
-      id: idComputed,
-      icon: (m['icon'] as String?) ?? '',
-      title: (m['title'] as String?) ?? '',
-      message: (m['message'] as String?) ?? '',
-      time: timeVal,
-      isChecked: m['isChecked'] == true,
-      raw: m['raw'] is Map ? Map<String, dynamic>.from(m['raw']) : null,
-    );
+        id: idComputed,
+        icon: (m['icon'] as String?) ?? '',
+        title: (m['title'] as String?) ?? '',
+        message: (m['message'] as String?) ?? '',
+        time: timeVal,
+        isChecked: m['isChecked'] == true,
+        raw: m['raw'] is Map ? Map<String, dynamic>.from(m['raw']) : null);
   }
 }

@@ -160,12 +160,17 @@ class RouteController extends GetxController {
 
   void _startCompassUpdates() {
     try {
+      if (_compassSubscription != null) {
+        return;
+      }
+
       _compassSubscription = FlutterCompass.events?.listen((event) {
-        if (event.heading != null) {
-          double heading = event.heading!;
-          userHeading(heading);
+        if (event.heading == null) {
+          return;
         }
-      });
+        final double heading = event.heading!;
+        userHeading(heading);
+      }, onError: (error) {});
     } catch (e, st) {
       _logError(e, st);
     }

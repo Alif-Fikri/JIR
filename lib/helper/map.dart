@@ -269,7 +269,8 @@ class ReusableMapState extends State<ReusableMap>
                         } catch (_) {}
                       } else {
                         try {
-                          _mapController.move(widget.initialLocation ?? _fallbackCenter, 15.0);
+                          _mapController.move(
+                              widget.initialLocation ?? _fallbackCenter, 15.0);
                         } catch (_) {}
                       }
                     },
@@ -395,52 +396,48 @@ class UserLocationMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double currentHeading = 0.0;
-    if (Get.isRegistered<RouteController>()) {
-      try {
-        currentHeading = Get.find<RouteController>().userHeading.value;
-      } catch (_) {
-        currentHeading = 0.0;
-      }
-    }
+    final RouteController rc = Get.find<RouteController>();
 
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.2),
-            shape: BoxShape.circle,
+    return Obx(() {
+      final double currentHeading = rc.userHeading.value;
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
           ),
-        ),
-        Transform.rotate(
-          angle: (currentHeading * (math.pi / 180)),
-          child: CustomPaint(
-            size: const Size(48, 48),
-            painter: _DirectionLightPainter(),
+          Transform.rotate(
+            angle: (currentHeading * (math.pi / 180)),
+            child: CustomPaint(
+              size: const Size(48, 48),
+              painter: _DirectionLightPainter(),
+            ),
           ),
-        ),
-        Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            color: Colors.blue.shade700,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 5,
-                spreadRadius: 1,
-                offset: const Offset(0, 2),
-              ),
-            ],
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: Colors.blue.shade700,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 5,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:JIR/bindings/initial_binding.dart';
-import 'package:JIR/pages/home/chat/chatbot_text.dart';
+import 'package:JIR/pages/home/chat/view/chat_view.dart';
+import 'package:JIR/pages/home/map/controller/route_controller_chat.dart';
 import 'package:JIR/pages/home/report/view/report_user.dart';
 import 'package:JIR/pages/home/report/widget/report_detail.dart';
 import 'package:JIR/pages/home/report/widget/report_loading.dart';
@@ -131,7 +132,7 @@ class AppRoutes {
     ),
         GetPage(
       name: chatbottext,
-      page: () => const ChatBotPage(),
+      page: () => const ChatView(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     ),
