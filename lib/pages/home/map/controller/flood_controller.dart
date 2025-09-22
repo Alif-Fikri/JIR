@@ -23,19 +23,17 @@ class FloodController extends GetxController {
     try {
       final data = await _floodService.fetchFloodData();
       final cleanedData = data.map((item) {
+        final rawStatus = item["STATUS_SIAGA"];
+        final normalized = _formatStatus(rawStatus);
         return {
           ...item,
-          "STATUS_SIAGA": item["STATUS_SIAGA"]
-              .toString()
-              .replaceAll(RegExp(r"Status\s*:\s*"), ""),
+          "STATUS_SIAGA": normalized,
         };
       }).toList();
 
-      print("Data API setelah dibersihkan: $cleanedData");
       floodData.value = cleanedData;
       _hasInitialLoad = true;
 
-      print("Data banjir di-load sekali saja");
 
       // if (floodData.isNotEmpty) {
       //   _showFloodMonitoringBottomSheet(Get.context!);
@@ -103,6 +101,47 @@ class FloodController extends GetxController {
   void showFloodMonitoringSheet() {
     if (floodData.isNotEmpty) {
       _showFloodMonitoringBottomSheet(Get.context!);
+    }
+  }
+
+  String _formatStatus(dynamic statusRaw) {
+    if (statusRaw == null) return 'Normal';
+    if (statusRaw is int) return _mapIntToStatus(statusRaw);
+    final s = statusRaw.toString().trim();
+    final digits = RegExp(r'\d+').firstMatch(s)?.group(0);
+    if (digits != null) {
+      final n = int.tryParse(digits);
+      if (n != null) return _mapIntToStatus(n);
+    }
+    final cleaned = s
+        .replaceAll(RegExp(r'status\s*:?\s*', caseSensitive: false), '')
+        .trim();
+    if (cleaned.isEmpty || cleaned.toLowerCase() == 'n/a') return 'Normal';
+
+    final lower = cleaned.toLowerCase();
+    if (lower.contains('siaga 3') || lower == '3') return 'Siaga 3';
+    if (lower.contains('siaga 2') || lower == '2') return 'Siaga 2';
+    if (lower.contains('siaga 1') || lower == '1') return 'Siaga 1';
+    if (lower.contains('sedang')) return 'Sedang';
+    if (lower.contains('normal')) return 'Normal';
+
+    return cleaned
+        .split(RegExp(r'\s+'))
+        .map((w) =>
+            w.isEmpty ? w : (w[0].toUpperCase() + w.substring(1).toLowerCase()))
+        .join(' ');
+  }
+
+  String _mapIntToStatus(int v) {
+    switch (v) {
+      case 3:
+        return 'Siaga 3';
+      case 2:
+        return 'Siaga 2';
+      case 1:
+        return 'Siaga 1';
+      default:
+        return 'Normal';
     }
   }
 }

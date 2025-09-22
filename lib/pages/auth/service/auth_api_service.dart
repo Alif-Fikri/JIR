@@ -205,7 +205,6 @@ class AuthService {
   Future<void> _saveToken(String token) async {
     var box = await Hive.openBox('authBox');
     await box.put('token', token);
-    print('Token saved: $token');
   }
 
   Future<String?> _getToken() async {
@@ -217,6 +216,5 @@ class AuthService {
     var box = await Hive.openBox('authBox');
     await box.delete('token');
     await box.close();
-    print('Token cleared');
   }
 }

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:JIR/pages/home/report/controller/report_controller.dart';
-import 'package:JIR/pages/home/report/view/report_user.dart';
 
 class ReportPage extends StatelessWidget {
   final ReportController controller = Get.find<ReportController>();

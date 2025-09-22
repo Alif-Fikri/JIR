@@ -70,7 +70,7 @@ class MapMonitoring extends StatelessWidget {
             point: LatLng(lat, lng),
             child: GestureDetector(
               onTap: () => _showDisasterDetails(item),
-              child: RadarMarker(color: Colors.red),
+              child: RadarMarker(status: item['STATUS_SIAGA']?.toString()),
             ),
           );
         }).toList();
@@ -372,8 +372,10 @@ class MapMonitoring extends StatelessWidget {
       DisasterBottomSheet(
         location: item['NAMA_PINTU_AIR'] ?? 'Lokasi Tidak Diketahui',
         status: item['STATUS_SIAGA']?.toString() ?? 'N/A',
-        onViewLocation: () => Get.to(
-            () => FloodMonitoringPage(initialLocation: LatLng(lat, lng))),
+        onViewLocation: () {
+          Get.back();
+          Get.to(() => FloodMonitoringPage(initialLocation: LatLng(lat, lng)));
+        },
       ),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

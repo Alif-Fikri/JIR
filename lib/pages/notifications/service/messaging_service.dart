@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:JIR/services/notification_service/tts_service.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,23 +62,22 @@ class MessagingService {
       onDidReceiveNotificationResponse: (details) {},
     );
 
-    NotificationSettings settings =
-        await _fm.requestPermission(alert: true, badge: true, sound: true);
-    print('User permission: ${settings.authorizationStatus}');
+    await TtsService.I.init();
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      print('onMessage: ${message.notification?.title}');
       await _showLocalNotification(message);
       await _saveMessageToHive(message);
+
+      final title = message.notification?.title ?? message.data['title'] ?? '';
+      final body = message.notification?.body ?? message.data['body'] ?? '';
+      await TtsService.I.speak('$title. $body');
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
-      print('onMessageOpenedApp: ${message.data}');
       await _saveMessageToHive(message);
     });
 
     String? token = await _fm.getToken();
-    print('FCM token: $token');
     if (token != null) await saveTokenToFirestore(token);
 
     _fm.onTokenRefresh.listen((newToken) async {
@@ -112,7 +112,6 @@ class MessagingService {
     try {
       await saveRemoteMessageToHive(message);
     } catch (e) {
-      print('gagal simpan message ke hive: $e');
     }
   }
 
@@ -141,7 +140,6 @@ class MessagingService {
       }
       await deviceDoc.set(data, SetOptions(merge: true));
     } catch (e) {
-      print('saveTokenToFirestore error: $e');
     }
   }
 

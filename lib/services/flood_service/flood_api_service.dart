@@ -29,7 +29,6 @@ class FloodService {
         throw Exception("Gagal memuat data dari backend");
       }
     } catch (e) {
-      print("Error saat ambil data banjir: $e");
       return [];
     }
   }

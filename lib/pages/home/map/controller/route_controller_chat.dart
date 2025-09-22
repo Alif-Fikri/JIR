@@ -160,7 +160,6 @@ class _ChatBotPageState extends State<ChatBotPage>
     try {
       await _flutterTts.speak(botText);
     } catch (e) {
-      print('TTS speak error: $e');
     }
   }
 
@@ -200,12 +199,12 @@ class _ChatBotPageState extends State<ChatBotPage>
 
         final s = resp.toString();
         final singleLine = s.replaceAll(RegExp(r'\s+'), ' ');
-        if (singleLine.length > 200) return singleLine.substring(0, 180) + '...';
+        if (singleLine.length > 200) return '${singleLine.substring(0, 180)}...';
         return singleLine;
       } else {
         final s = resp.toString();
         final singleLine = s.replaceAll(RegExp(r'\s+'), ' ');
-        if (singleLine.length > 200) return singleLine.substring(0, 180) + '...';
+        if (singleLine.length > 200) return '${singleLine.substring(0, 180)}...';
         return singleLine;
       }
     } catch (e) {
@@ -289,7 +288,6 @@ class _ChatBotPageState extends State<ChatBotPage>
         }
       }
     } catch (e) {
-      print('set route to controller failed: $e');
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Get.to(() => MapMonitoring());
@@ -514,7 +512,6 @@ class _ChatBotPageState extends State<ChatBotPage>
         }
       }
     } catch (e) {
-      print('preview parse error: $e');
     }
 
     if (points.isEmpty) {

@@ -163,7 +163,7 @@ class DetailRow extends StatelessWidget {
     required this.label,
     required this.value,
   });
-   
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -267,6 +267,7 @@ class _FloodMonitoringBottomSheetState
                     final longitude =
                         double.tryParse(item['LONGITUDE'].toString()) ?? 0.0;
 
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -302,27 +303,39 @@ class _FloodMonitoringBottomSheetState
   }
 
   Widget _statusIndicator(String status) {
-    String cleanedStatus = status.replaceAll("Status: ", "");
+    final raw = status;
+    final cleaned = raw
+        .replaceAll(RegExp(r'status\s*:?\s*', caseSensitive: false), '')
+        .trim();
+    final lower = cleaned.toLowerCase();
 
     Color statusColor;
-    switch (cleanedStatus) {
-      case "Siaga 3":
-        statusColor = Colors.red;
-        break;
-      case "Siaga 2":
-        statusColor = Colors.orange;
-        break;
-      case "Siaga 1":
-        statusColor = Colors.orange;
-        break;
-      case "Sedang":
-        statusColor = Colors.orange;
-        break;
-      case "Normal":
-        statusColor = Colors.green;
-        break;
-      default:
-        statusColor = Colors.grey;
+    String displayText;
+
+    if (lower.contains('siaga 3') || lower == '3') {
+      statusColor = Colors.red;
+      displayText = 'Siaga 3';
+    } else if (lower.contains('siaga 2') || lower == '2') {
+      statusColor = Colors.orange;
+      displayText = 'Siaga 2';
+    } else if (lower.contains('siaga 1') || lower == '1') {
+      statusColor = Colors.orange;
+      displayText = 'Siaga 1';
+    } else if (lower.contains('sedang')) {
+      statusColor = Colors.orange;
+      displayText = 'Sedang';
+    } else if (lower.contains('normal') || cleaned.isEmpty || lower == 'n/a') {
+      statusColor = Colors.green;
+      displayText = 'Normal';
+    } else {
+      statusColor = Colors.grey;
+      displayText = cleaned
+          .split(RegExp(r'\s+'))
+          .map((w) => w.isEmpty
+              ? w
+              : (w[0].toUpperCase() + w.substring(1).toLowerCase()))
+          .join(' ');
+      if (displayText.isEmpty) displayText = 'Tidak Diketahui';
     }
 
     return Row(
@@ -330,8 +343,7 @@ class _FloodMonitoringBottomSheetState
       children: [
         Icon(Icons.circle, color: statusColor, size: 11),
         const SizedBox(width: 5),
-        Text(cleanedStatus,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(displayText, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
     );
   }

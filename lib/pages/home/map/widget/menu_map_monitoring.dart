@@ -21,16 +21,16 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
       'label': 'Status Banjir',
       'onPressed': () => Get.find<FloodController>().showFloodMonitoringSheet(),
     },
-    {
-      'icon': Icons.history,
-      'label': 'testing',
-      'onPressed': () => print('Riwayat diklik'),
-    },
-    {
-      'icon': Icons.history,
-      'label': 'testing',
-      'onPressed': () => print('Pengaturan diklik'),
-    },
+    // {
+    //   'icon': Icons.history,
+    //   'label': 'testing',
+    //   'onPressed': () => print('Riwayat diklik'),
+    // },
+    // {
+    //   'icon': Icons.history,
+    //   'label': 'testing',
+    //   'onPressed': () => print('Pengaturan diklik'),
+    // },
   ];
 
   @override

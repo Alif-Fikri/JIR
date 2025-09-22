@@ -683,7 +683,6 @@ class RouteController extends GetxController {
   }
 
   void _logError(Object e, StackTrace? st) {
-    print('RouteController error: $e');
-    if (st != null) print(st);
+    if (st != null) {}
   }
 }

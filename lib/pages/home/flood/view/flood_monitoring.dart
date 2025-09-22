@@ -15,8 +15,12 @@ class FloodMonitoringPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (initialLocation != null) {
-      controller.currentLocation.value = initialLocation!;
+    final arg = initialLocation ??
+        (Get.arguments is LatLng ? Get.arguments as LatLng : null);
+    if (arg != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.gotoLocation(arg);
+      });
     }
 
     return Scaffold(

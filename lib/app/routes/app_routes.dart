@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:JIR/bindings/initial_binding.dart';
 import 'package:JIR/pages/home/chat/view/chat_view.dart';
-import 'package:JIR/pages/home/map/controller/route_controller_chat.dart';
 import 'package:JIR/pages/home/report/view/report_user.dart';
 import 'package:JIR/pages/home/report/widget/report_detail.dart';
 import 'package:JIR/pages/home/report/widget/report_loading.dart';
@@ -12,7 +11,7 @@ import 'package:JIR/pages/activity/activity.dart';
 import 'package:JIR/pages/auth/view/login.dart';
 import 'package:JIR/pages/auth/view/signup.dart';
 import 'package:JIR/pages/home/cctv/cctv_monitoring.dart';
-import 'package:JIR/pages/home/chat/chatbot.dart';
+import 'package:JIR/pages/home/chat/view/chatbot.dart';
 import 'package:JIR/pages/home/crowd/crowd_monitoring.dart';
 import 'package:JIR/pages/home/flood/view/flood_monitoring.dart';
 import 'package:JIR/pages/home/map/view/map_monitoring.dart';

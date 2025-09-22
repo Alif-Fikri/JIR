@@ -22,7 +22,6 @@ class LocationService {
       Position position = await Geolocator.getCurrentPosition();
       return LatLng(position.latitude, position.longitude);
     } catch (e) {
-      print("Error getting location: $e");
       return null;
     }
   }

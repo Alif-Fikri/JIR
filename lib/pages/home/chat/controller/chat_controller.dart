@@ -224,9 +224,12 @@ class ChatController extends GetxController with StateMixin<void> {
         (low.contains('tidak') ||
             low.contains('mengerti') ||
             low.contains('memahami') ||
-            low.contains('paham'))) return true;
-    if (low.contains('tidak mengerti') || low.contains('tidak paham'))
+            low.contains('paham'))) {
       return true;
+    }
+    if (low.contains('tidak mengerti') || low.contains('tidak paham')) {
+      return true;
+    }
     if (low.contains('sorry')) return true;
     return false;
   }
@@ -469,23 +472,6 @@ class ChatController extends GetxController with StateMixin<void> {
       }
     } catch (_) {
       return 'Balasan diterima.';
-    }
-  }
-
-  String _extractPlaceName(dynamic node) {
-    try {
-      if (node == null) return '';
-      if (node is Map) {
-        if (node['place'] != null) return node['place'].toString();
-        if (node['name'] != null) return node['name'].toString();
-        if (node['display_name'] != null) {
-          return node['display_name'].toString();
-        }
-        if (node['label'] != null) return node['label'].toString();
-      }
-      return '';
-    } catch (_) {
-      return '';
     }
   }
 

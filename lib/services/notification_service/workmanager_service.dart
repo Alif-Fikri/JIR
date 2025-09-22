@@ -54,7 +54,6 @@ Future<bool> callbackHandler(
         }
       }
     } catch (e) {
-      print('Workmanager flood task error: $e');
     }
   }
 

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,12 +6,11 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:JIR/pages/home/report/controller/report_controller.dart';
 import 'package:JIR/pages/home/report/widget/report_card.dart';
 
 class ActivityPage extends StatefulWidget {
-  ActivityPage({super.key});
+  const ActivityPage({super.key});
 
   @override
   State<ActivityPage> createState() => _ActivityPageState();

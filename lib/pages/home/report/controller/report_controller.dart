@@ -64,8 +64,7 @@ class ReportController extends GetxController {
       final stored = box.get('list', defaultValue: []);
       final normalized = _normalizeReportList(stored);
       reports.assignAll(normalized);
-    } catch (e, st) {
-      print('loadReportsFromHive error: $e\n$st');
+    } catch (e) {
       reports.clear();
     }
   }
@@ -86,8 +85,7 @@ class ReportController extends GetxController {
       }).toList();
 
       await box.put('list', toStore);
-    } catch (e, st) {
-      print('saveReportsToHive error: $e\n$st');
+    } catch (e) {
     }
   }
 
@@ -100,8 +98,7 @@ class ReportController extends GetxController {
         final saved = await savePickedFilePermanently(tmp);
         imageFile.value = saved;
       }
-    } catch (e, st) {
-      print('pickImage error: $e\n$st');
+    } catch (e) {
       Get.snackbar('Error', 'Gagal memilih gambar: ${e.toString()}');
     }
   }
@@ -240,11 +237,9 @@ class ReportController extends GetxController {
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
         return true;
       } else {
-        print('Upload failed: ${resp.statusCode} ${resp.body}');
         return false;
       }
     } catch (e) {
-      print('Upload exception: $e');
       return false;
     }
   }
@@ -257,11 +252,9 @@ class ReportController extends GetxController {
         final Map<String, dynamic> json = jsonDecode(resp.body);
         return json;
       } else {
-        print("fetchReportFromServer failed: ${resp.statusCode} ${resp.body}");
         return null;
       }
     } catch (e) {
-      print("fetchReportFromServer error: $e");
       return null;
     }
   }
@@ -316,8 +309,7 @@ class ReportController extends GetxController {
 
       await box.put('list', current);
       reports.assignAll(List<Map<String, dynamic>>.from(current));
-    } catch (e, st) {
-      print('refreshReportFromServer error: $e\n$st');
+    } catch (e) {
     }
   }
 }

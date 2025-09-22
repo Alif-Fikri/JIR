@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -67,10 +66,12 @@ class ChatBubble extends StatelessWidget {
         final a = _toNum(node[0]);
         final b = _toNum(node[1]);
         if (a != null && b != null) {
-          if (a.abs() <= 90 && b.abs() <= 180)
+          if (a.abs() <= 90 && b.abs() <= 180) {
             return LatLng(a.toDouble(), b.toDouble());
-          if (b.abs() <= 90 && a.abs() <= 180)
+          }
+          if (b.abs() <= 90 && a.abs() <= 180) {
             return LatLng(b.toDouble(), a.toDouble());
+          }
           return LatLng(a.toDouble(), b.toDouble());
         }
       } else if (node is Map) {
@@ -80,10 +81,12 @@ class ChatBubble extends StatelessWidget {
             final a = _toNum(c[0]);
             final b = _toNum(c[1]);
             if (a != null && b != null) {
-              if (a.abs() <= 90 && b.abs() <= 180)
+              if (a.abs() <= 90 && b.abs() <= 180) {
                 return LatLng(a.toDouble(), b.toDouble());
-              if (b.abs() <= 90 && a.abs() <= 180)
+              }
+              if (b.abs() <= 90 && a.abs() <= 180) {
                 return LatLng(b.toDouble(), a.toDouble());
+              }
               return LatLng(a.toDouble(), b.toDouble());
             }
           }
@@ -106,9 +109,12 @@ class ChatBubble extends StatelessWidget {
         (low.contains('tidak') ||
             low.contains('mengerti') ||
             low.contains('memahami') ||
-            low.contains('paham'))) return true;
-    if (low.contains('tidak mengerti') || low.contains('tidak paham'))
+            low.contains('paham'))) {
       return true;
+    }
+    if (low.contains('tidak mengerti') || low.contains('tidak paham')) {
+      return true;
+    }
     if (low.contains('sorry')) return true;
     return false;
   }
@@ -173,8 +179,9 @@ class ChatBubble extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8)),
                     ),
                     onPressed: () {
-                      if (onOpenRoute != null && route != null)
+                      if (onOpenRoute != null && route != null) {
                         onOpenRoute!(route);
+                      }
                     },
                     child: Text(
                       'Lihat Rute',
@@ -206,7 +213,7 @@ class ChatBubble extends StatelessWidget {
             if (showButtons && previewVisible)
               GestureDetector(
                 onTap: () {
-                  if (onOpenRoute != null && route != null) onOpenRoute!(route);
+                  if (onOpenRoute != null) onOpenRoute!(route);
                 },
                 child: Container(
                   height: 120,
@@ -256,35 +263,41 @@ class SmallMapPreview extends StatelessWidget {
     try {
       if (route.containsKey('start') && route['start'] != null) {
         final s = route['start'];
-        if (s is Map && s['coords'] is List)
+        if (s is Map && s['coords'] is List) {
           _addFromList(List.from(s['coords']), points);
-        else if (s is List) _addFromList(List.from(s), points);
+        } else if (s is List) {
+          _addFromList(List.from(s), points);
+        }
       }
 
       if (route.containsKey('waypoints') && route['waypoints'] is List) {
         for (final wp in List.from(route['waypoints'])) {
-          if (wp is List)
+          if (wp is List) {
             _addFromList(wp, points);
-          else if (wp is Map && wp['coords'] is List)
+          } else if (wp is Map && wp['coords'] is List) {
             _addFromList(List.from(wp['coords']), points);
+          }
         }
       }
 
       if (route.containsKey('end') && route['end'] != null) {
         final e = route['end'];
-        if (e is Map && e['coords'] is List)
+        if (e is Map && e['coords'] is List) {
           _addFromList(List.from(e['coords']), points);
-        else if (e is List) _addFromList(List.from(e), points);
+        } else if (e is List) {
+          _addFromList(List.from(e), points);
+        }
       }
 
       if (points.isEmpty &&
           route.containsKey('route') &&
           route['route'] is List) {
         for (final r in List.from(route['route'])) {
-          if (r is List)
+          if (r is List) {
             _addFromList(r, points);
-          else if (r is Map && r['coords'] is List)
+          } else if (r is Map && r['coords'] is List) {
             _addFromList(List.from(r['coords']), points);
+          }
         }
       }
     } catch (_) {}

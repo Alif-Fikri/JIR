@@ -9,6 +9,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:JIR/config.dart';
+import 'package:JIR/services/notification_service/tts_service.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -22,6 +23,7 @@ class NotificationService {
   Future<void> init() async {
     await _ensureHiveBoxes();
     await _initLocalNotifications();
+    await TtsService.I.init(); 
     await _initFcmHandlers();
     await _processPendingWhenControllerReady();
   }
@@ -48,7 +50,6 @@ class NotificationService {
             final Map<String, dynamic> data = jsonDecode(payload);
             await _handleNotificationClick(data);
           } catch (e) {
-            print('parse payload error: $e');
           }
         }
       },
@@ -96,7 +97,6 @@ class NotificationService {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'fcm_token': token, 'platform': 'android'}));
     } catch (e) {
-      print('register token error: $e');
     }
   }
 
@@ -115,13 +115,18 @@ class NotificationService {
     final details =
         NotificationDetails(android: androidDetails, iOS: iosDetails);
 
+    final title = n?.title ?? data['title'] ?? 'Notifikasi';
+    final body = n?.body ?? data['body'] ?? '';
+
     await flutterLocalNotificationsPlugin.show(
       msg.hashCode,
-      n?.title ?? data['title'] ?? 'Notifikasi',
-      n?.body ?? data['body'] ?? '',
+      title,
+      body,
       details,
       payload: data.isNotEmpty ? jsonEncode(data) : null,
     );
+
+    await TtsService.I.speak('$title. $body');
 
     await _saveToHiveFromRemoteMessage(msg);
   }
@@ -252,8 +257,7 @@ class NotificationService {
       } else {
         Get.snackbar('Info', 'Laporan diperbarui tetapi tidak ditemukan lokal');
       }
-    } catch (e, st) {
-      print('handleNotificationClick error: $e\n$st');
+    } catch (e) {
     }
   }
 }

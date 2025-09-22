@@ -10,6 +10,7 @@ import 'package:JIR/pages/home/flood/widgets/radar_map.dart';
 
 class FloodMonitoringController extends GetxController {
   var currentLocation = Rxn<LatLng>();
+  LatLng? _pendingCenter;
   var floodMarkers = <Marker>[].obs;
   var floodData = <Map<String, dynamic>>[].obs;
   var suggestions = <Map<String, dynamic>>[].obs;
@@ -41,9 +42,18 @@ class FloodMonitoringController extends GetxController {
 
   void setMapController(MapController mc) {
     mapController = mc;
-    final loc = currentLocation.value;
     try {
+      if (_pendingCenter != null) {
+        debugPrint('[FloodController] Applying pendingCenter: $_pendingCenter');
+        mapController!.move(_pendingCenter!, 15.0);
+        _didInitialCameraMove = true;
+        _pendingCenter = null;
+        return;
+      }
+
+      final loc = currentLocation.value;
       if (!_didInitialCameraMove && loc != null) {
+        debugPrint('[FloodController] Moving to user location: $loc');
         mapController!.move(loc, 15.0);
         _didInitialCameraMove = true;
       }
@@ -85,13 +95,12 @@ class FloodMonitoringController extends GetxController {
           height: 36,
           child: GestureDetector(
             onTap: () => _openFloodInfo(item),
-            child: const RadarMarker(color: Colors.red),
+            child: RadarMarker(status: item['STATUS_SIAGA']?.toString()),
           ),
         );
       }).toList();
       floodMarkers.assignAll(markers);
     } catch (e) {
-      print("Error fetching flood data: $e");
     }
   }
 
@@ -145,27 +154,17 @@ class FloodMonitoringController extends GetxController {
 
   Future<void> getCurrentLocation() async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        Get.snackbar('Lokasi dinonaktifkan', 'Silakan aktifkan layanan lokasi');
-        return;
+      final pos = await Geolocator.getCurrentPosition();
+      final latlng = LatLng(pos.latitude, pos.longitude);
+      currentLocation.value = latlng;
+      if (mapController != null &&
+          !_didInitialCameraMove &&
+          _pendingCenter == null) {
+        mapController!.move(latlng, 15.0);
+        _didInitialCameraMove = true;
       }
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.deniedForever) {
-          Get.snackbar('Izin ditolak', 'Izin lokasi diperlukan');
-          return;
-        }
-      }
-      Position position = await Geolocator.getCurrentPosition();
-      LatLng current = LatLng(position.latitude, position.longitude);
-      currentLocation.value = current;
-      try {
-        mapController?.move(current, 15.0);
-      } catch (_) {}
     } catch (e) {
-      print("Failed to get current location: $e");
+      debugPrint('[FloodController] getCurrentLocation error: $e');
     }
   }
 
@@ -206,7 +205,6 @@ class FloodMonitoringController extends GetxController {
         return;
       }
     } catch (e) {
-      print("Geocoding error: $e");
     }
     Get.snackbar('Tidak Ditemukan', 'Lokasi atau data banjir tidak ditemukan');
   }
@@ -219,11 +217,23 @@ class FloodMonitoringController extends GetxController {
     super.onClose();
   }
 
+  void gotoLocation(LatLng loc, {double zoom = 15.0}) {
+    try {
+      debugPrint(
+          '[FloodController] gotoLocation requested: $loc (mapController ready=${mapController != null})');
+      if (mapController != null) {
+        mapController!.move(loc, zoom);
+        _didInitialCameraMove = true;
+      } else {
+        _pendingCenter = loc;
+      }
+    } catch (_) {}
+  }
+
   String _formatStatus(dynamic statusRaw) {
-    if (statusRaw == null) return 'Status : Normal';
+    if (statusRaw == null) return 'Normal';
     if (statusRaw is String) {
-      final s = statusRaw.trim();
-      if (s.toLowerCase().startsWith('status')) return s;
+      var s = statusRaw.trim();
       final digits = RegExp(r'\d+').firstMatch(s)?.group(0);
       if (digits != null) {
         final n = int.tryParse(digits);
@@ -231,7 +241,9 @@ class FloodMonitoringController extends GetxController {
       }
       final maybeNum = int.tryParse(s);
       if (maybeNum != null) return _mapIntToStatus(maybeNum);
-      return 'Status : $s';
+      s = s.replaceAll(RegExp(r'status\s*:?\s*', caseSensitive: false), '');
+      if (s.isEmpty) return 'Normal';
+      return s;
     }
     if (statusRaw is int) return _mapIntToStatus(statusRaw);
     final str = statusRaw.toString();
@@ -240,19 +252,21 @@ class FloodMonitoringController extends GetxController {
       final n = int.tryParse(digits);
       if (n != null) return _mapIntToStatus(n);
     }
-    return 'Status : $str';
+    final cleaned =
+        str.replaceAll(RegExp(r'status\s*:?\s*', caseSensitive: false), '');
+    return cleaned.isEmpty ? 'Normal' : cleaned;
   }
 
   String _mapIntToStatus(int v) {
     switch (v) {
       case 3:
-        return 'Status : Siaga 3';
+        return 'Siaga 3';
       case 2:
-        return 'Status : Siaga 2';
+        return 'Siaga 2';
       case 1:
-        return 'Status : Siaga 1';
+        return 'Siaga 1';
       default:
-        return 'Status : Normal';
+        return 'Normal';
     }
   }
 }

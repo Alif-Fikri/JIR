@@ -32,7 +32,6 @@ class GoogleAuthService {
         throw Exception("Failed to authenticate with Google");
       }
     } catch (e) {
-      print("Error signing in with Google: $e");
       return null;
     }
   }

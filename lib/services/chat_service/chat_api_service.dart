@@ -30,14 +30,12 @@ class ChatService {
           'data': {'response': decoded.toString()}
         };
       } else {
-        print('ChatService non-200 ${response.statusCode}: ${response.body}');
         return {
           'ok': false,
           'message': 'Terjadi kesalahan pada server. Silakan coba lagi nanti.'
         };
       }
-    } catch (e, st) {
-      print('ChatService exception: $e\n$st');
+    } catch (e) {
       return {
         'ok': false,
         'message':

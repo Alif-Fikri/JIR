@@ -37,7 +37,6 @@ class CrowdController extends GetxController {
       isLoading(true);
       final response =
           await http.get(Uri.parse('$mainUrl/api/get_predictions'));
-      print(response.body);
 
       if (response.statusCode == 200) {
         liveData.value = json.decode(response.body);
