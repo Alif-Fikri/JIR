@@ -143,7 +143,7 @@ class AppRoutes {
     ),
     GetPage(
       name: parkdetail,
-      page: () => const ParkDetail(),
+      page: () => ParkDetail(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     ),

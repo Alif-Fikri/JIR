@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:JIR/pages/home/park/widget/airquality_chart.dart';
 import 'package:JIR/pages/home/park/widget/pm_table.dart';
-import 'package:JIR/pages/home/park/widget/temperature_chart.dart';
 
 class ParkDetail extends StatelessWidget {
-  const ParkDetail({super.key});
+  ParkDetail({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final args = Get.arguments as Map<String, dynamic>? ?? {};
+    final title = args['name']?.toString() ?? 'Taman Cattleya';
+    final imageUrl = args['imageUrl']?.toString();
+
     String formattedDate = DateFormat("dd MMMM yyyy").format(DateTime.now());
 
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text('Taman Cattleya'),
+          title: Text(title),
           titleTextStyle: GoogleFonts.inter(
               fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
           backgroundColor: const Color(0xff45557B),
@@ -30,21 +34,52 @@ class ParkDetail extends StatelessWidget {
             padding: const EdgeInsets.all(30),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ]),
-              ),
+              if (imageUrl != null && imageUrl.isNotEmpty)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.network(
+                    imageUrl,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        height: 200,
+                        width: double.infinity,
+                        color: Colors.grey[200],
+                        child: const Center(child: CircularProgressIndicator()),
+                      );
+                    },
+                    errorBuilder: (context, err, stack) {
+                      return Container(
+                        height: 200,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: const Icon(Icons.broken_image, size: 48),
+                      );
+                    },
+                  ),
+                )
+              else
+                Container(
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 2,
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]),
+                ),
               const SizedBox(height: 20),
               Text(
                 formattedDate,
@@ -144,7 +179,7 @@ class ParkDetail extends StatelessWidget {
                                 ),
                                 border: Border.all(
                                   color: const Color(0xff45557B),
-                                  width: 1.0, 
+                                  width: 1.0,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -167,66 +202,66 @@ class ParkDetail extends StatelessWidget {
               const SizedBox(height: 30),
               const PMTableWidget(),
               const SizedBox(height: 30),
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xff45557B),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 15,
-                        ),
-                        child: Text(
-                          'Grafik suhu',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 200,
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: const BorderRadius.only(
-                                    bottomLeft: Radius.circular(20),
-                                    bottomRight: Radius.circular(20),
-                                  ),
-                                  border: const Border(
-                                      top: BorderSide(
-                                          color: Color(0xff45557B), width: 1.0),
-                                      left: BorderSide(
-                                          color: Color(0xff45557B), width: 1.0),
-                                      right: BorderSide(
-                                          color: Color(0xff45557B), width: 1.0),
-                                      bottom: BorderSide.none),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      spreadRadius: 2,
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: const TemperatureChart(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ]),
-              )
+              // Container(
+              //   decoration: BoxDecoration(
+              //     color: const Color(0xff45557B),
+              //     borderRadius: BorderRadius.circular(20),
+              //   ),
+              //   child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.center,
+              //       children: [
+              //         Padding(
+              //           padding: const EdgeInsets.only(
+              //             top: 15,
+              //           ),
+              //           child: Text(
+              //             'Grafik suhu',
+              //             style: GoogleFonts.inter(
+              //               fontSize: 11,
+              //               fontWeight: FontWeight.bold,
+              //               color: Colors.white,
+              //             ),
+              //           ),
+              //         ),
+              //         const SizedBox(height: 10),
+              //         SizedBox(
+              //           height: 200,
+              //           child: Stack(
+              //             children: [
+              //               Positioned.fill(
+              //                 child: Container(
+              //                   padding: const EdgeInsets.all(16),
+              //                   decoration: BoxDecoration(
+              //                     color: Colors.white,
+              //                     borderRadius: const BorderRadius.only(
+              //                       bottomLeft: Radius.circular(20),
+              //                       bottomRight: Radius.circular(20),
+              //                     ),
+              //                     border: const Border(
+              //                         top: BorderSide(
+              //                             color: Color(0xff45557B), width: 1.0),
+              //                         left: BorderSide(
+              //                             color: Color(0xff45557B), width: 1.0),
+              //                         right: BorderSide(
+              //                             color: Color(0xff45557B), width: 1.0),
+              //                         bottom: BorderSide.none),
+              //                     boxShadow: [
+              //                       BoxShadow(
+              //                         color: Colors.black.withOpacity(0.2),
+              //                         spreadRadius: 2,
+              //                         blurRadius: 6,
+              //                         offset: const Offset(0, 3),
+              //                       ),
+              //                     ],
+              //                   ),
+              //                   child: const TemperatureChart(),
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //         )
+              //       ]),o
+              // )
             ])));
   }
 

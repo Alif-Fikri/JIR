@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,10 +26,21 @@ class _ParkPageState extends State<ParkPage> {
     super.initState();
     _controller.getUserLocation();
     _startAutoPlay();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        final count = min(_controller.nearbyParks.length, 6);
+        for (var i = 0; i < count; i++) {
+          final url = _parkImageUrl(i);
+          precacheImage(NetworkImage(url), context).catchError((_) {});
+        }
+      } catch (_) {}
+    });
   }
 
   void _startAutoPlay() {
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_controller.nearbyParks.isEmpty) return;
+
       if (_isScrollingForward) {
         if (_currentPage < _controller.nearbyParks.length - 1) {
           _currentPage++;
@@ -59,8 +70,15 @@ class _ParkPageState extends State<ParkPage> {
   @override
   void dispose() {
     _pageController.dispose();
-    _timer.cancel();
+    try {
+      _timer.cancel();
+    } catch (_) {}
+    _searchController.dispose();
     super.dispose();
+  }
+
+  String _parkImageUrl(int index, {int w = 600, int h = 400}) {
+    return 'https://picsum.photos/seed/park$index/600/400';
   }
 
   @override
@@ -197,7 +215,7 @@ class _ParkPageState extends State<ParkPage> {
                                   ),
                                   border: Border.all(
                                     color: const Color(0xff45557B),
-                                    width: 1.0, 
+                                    width: 1.0,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
@@ -215,11 +233,28 @@ class _ParkPageState extends State<ParkPage> {
                                   left: 20, bottom: 30, top: 20),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
-                                child: Image.asset(
-                                  'assets/images/park.png',
+                                child: Image.network(
+                                  _parkImageUrl(0, w: 320, h: 120),
                                   width: 163,
                                   height: 53,
                                   fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, progress) {
+                                    if (progress == null) return child;
+                                    return Container(
+                                      color: Colors.grey[200],
+                                      child: const Center(
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2)),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stack) {
+                                    return Container(
+                                      color: Colors.grey[300],
+                                      width: 163,
+                                      height: 53,
+                                      child: const Icon(Icons.broken_image),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
@@ -340,6 +375,7 @@ class _ParkPageState extends State<ParkPage> {
                       park.street ?? 'Alamat tidak tersedia',
                       park.latitude,
                       park.longitude,
+                      index,
                     ),
                   );
                 },
@@ -348,8 +384,8 @@ class _ParkPageState extends State<ParkPage> {
     );
   }
 
-  Widget _buildParkItem(
-      String name, String distance, String address, double lat, double lon) {
+  Widget _buildParkItem(String name, String distance, String address,
+      double lat, double lon, int index) {
     return GestureDetector(
       onTap: () => Get.toNamed(AppRoutes.parkdetail, arguments: {
         'name': name,
@@ -357,6 +393,7 @@ class _ParkPageState extends State<ParkPage> {
         'address': address,
         'lat': lat,
         'lon': lon,
+        'imageUrl': _parkImageUrl(index),
       }),
       child: Container(
         width: 100,
@@ -383,11 +420,25 @@ class _ParkPageState extends State<ParkPage> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: Image.asset(
-                  'assets/images/park.png',
+                child: Image.network(
+                  _parkImageUrl(index, w: 400, h: 240),
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return Container(
+                      color: Colors.grey[200],
+                      child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2)),
+                    );
+                  },
+                  errorBuilder: (context, error, stack) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.broken_image),
+                    );
+                  },
                 ),
               ),
             ),
@@ -432,79 +483,100 @@ class _ParkPageState extends State<ParkPage> {
 
   Widget _buildOtherParks() {
     return Obx(
-      () => ListView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: _controller.otherParks.take(20).length,
-        padding: const EdgeInsets.only(top: 8, bottom: 20),
-        itemBuilder: (context, index) {
-          final park = _controller.otherParks[index];
-          final distance = _controller.calculateDistanceInMeters(
-              park.latitude, park.longitude);
+      () {
+        final count = min(_controller.otherParks.length, 20);
+        if (count == 0) {
+          return const SizedBox.shrink();
+        }
+        return ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: count,
+          padding: const EdgeInsets.only(top: 8, bottom: 20),
+          itemBuilder: (context, index) {
+            final park = _controller.otherParks[index];
+            final distance = _controller.calculateDistanceInMeters(
+                park.latitude, park.longitude);
+            final seedIndex = _controller.nearbyParks.length + index;
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: const Color(0xff45557B)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    spreadRadius: 2,
-                    offset: const Offset(2, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[500],
-                      borderRadius: BorderRadius.circular(10),
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 8),
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: const Color(0xff45557B)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                      offset: const Offset(2, 4),
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.asset(
-                        'assets/images/park.png',
-                        fit: BoxFit.cover,
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[500],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          _parkImageUrl(seedIndex, w: 200, h: 140),
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2)));
+                          },
+                          errorBuilder: (context, err, stack) =>
+                              Container(color: Colors.grey[300]),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(park.name,
-                            style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xff45557B))),
-                        const SizedBox(height: 4),
-                        Text(_controller.formatDistance(distance),
-                            style: GoogleFonts.inter(
-                                fontSize: 10, color: const Color(0xff45557B))),
-                        const SizedBox(height: 2),
-                        Text(park.street ?? 'Alamat tidak tersedia',
-                            style: GoogleFonts.inter(
-                                fontSize: 10, color: Colors.black)),
-                      ],
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(park.name,
+                              style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xff45557B))),
+                          const SizedBox(height: 4),
+                          Text(_controller.formatDistance(distance),
+                              style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  color: const Color(0xff45557B))),
+                          const SizedBox(height: 2),
+                          Text(park.street ?? 'Alamat tidak tersedia',
+                              style: GoogleFonts.inter(
+                                  fontSize: 10, color: Colors.black)),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
-  void _filterParks(String query) {}
+  void _filterParks(String query) {
+    // implement search/filter logic in ParksController or here as needed
+    // example: _controller.filter(query);
+  }
 }
