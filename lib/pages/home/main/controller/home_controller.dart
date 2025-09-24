@@ -1,3 +1,4 @@
+import 'package:JIR/services/news_service/news_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
@@ -17,6 +18,10 @@ class HomeController extends GetxController
   var backgroundImage = ''.obs;
   var isLoading = true.obs;
 
+  var newsList = <NewsItem>[].obs;
+  var isNewsLoading = false.obs;
+  var newsIndex = 0.obs;
+
   late WeatherFactory wf;
 
   @override
@@ -25,7 +30,10 @@ class HomeController extends GetxController
     wf = WeatherFactory(dotenv.env['WEATHER_API_KEY']!);
     _initAnimation();
     fetchData();
+    fetchNews();
   }
+
+  void setNewsIndex(int i) => newsIndex.value = i;
 
   @override
   void onClose() {
@@ -127,5 +135,15 @@ class HomeController extends GetxController
     weatherIcon.value = 'assets/images/Cuaca Smart City Icon-01.png';
     final currentHour = DateTime.now().hour;
     backgroundImage.value = WeatherHelper.getBackgroundImage(currentHour);
+  }
+
+  Future<void> fetchNews() async {
+    try {
+      isNewsLoading.value = true;
+      final items = await NewsService.fetchNews();
+      newsList.assignAll(items);
+    } finally {
+      isNewsLoading.value = false;
+    }
   }
 }
