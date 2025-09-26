@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -23,7 +24,7 @@ class NotificationService {
   Future<void> init() async {
     await _ensureHiveBoxes();
     await _initLocalNotifications();
-    await TtsService.I.init(); 
+    await TtsService.I.init();
     await _initFcmHandlers();
     await _processPendingWhenControllerReady();
   }
@@ -49,8 +50,7 @@ class NotificationService {
           try {
             final Map<String, dynamic> data = jsonDecode(payload);
             await _handleNotificationClick(data);
-          } catch (e) {
-          }
+          } catch (e) {}
         }
       },
     );
@@ -59,35 +59,66 @@ class NotificationService {
   Future<void> _initFcmHandlers() async {
     final messaging = FirebaseMessaging.instance;
     final settings = await messaging.requestPermission(
-        alert: true, badge: true, sound: true);
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-        settings.authorizationStatus == AuthorizationStatus.provisional) {
-      final token = await messaging.getToken();
-      final box = Hive.box('authBox');
-      final saved = box.get('fcm_token');
-      if (token != null && saved != token) {
-        box.put('fcm_token', token);
-        await _registerTokenToServer(token);
-      }
+    if (!(settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional)) {
+      debugPrint('FCM permission not granted: ${settings.authorizationStatus}');
+      return;
+    }
 
-      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage msg) async {
-        if (msg.data.isNotEmpty) {
-          await _handleNotificationClick(msg.data);
+    if (Platform.isIOS || Platform.isMacOS) {
+      try {
+        final apns = await messaging.getAPNSToken();
+        debugPrint('APNs token: $apns');
+        if (apns == null) {
+
+          debugPrint('APNs token not ready; skipping getToken for now.');
+        } else {
+          final token = await messaging.getToken();
+          await _handleFetchedFcmToken(token);
         }
-      });
-
-      final initial = await messaging.getInitialMessage();
-      if (initial != null && initial.data.isNotEmpty) {
-        await _handleNotificationClick(initial.data);
+      } catch (e, st) {
+        debugPrint('Error while getting APNs/FCM token: $e\n$st');
       }
+    } else {
+      try {
+        final token = await messaging.getToken();
+        await _handleFetchedFcmToken(token);
+      } catch (e, st) {
+        debugPrint('Error getting FCM token on non-iOS: $e\n$st');
+      }
+    }
 
-      messaging.onTokenRefresh.listen((t) async {
-        box.put('fcm_token', t);
-        await _registerTokenToServer(t);
-      });
-    } else {}
+    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage msg) async {
+      if (msg.data.isNotEmpty) await _handleNotificationClick(msg.data);
+    });
+
+    final initial = await messaging.getInitialMessage();
+    if (initial != null && initial.data.isNotEmpty) {
+      await _handleNotificationClick(initial.data);
+    }
+
+    messaging.onTokenRefresh.listen((t) async {
+      await _handleFetchedFcmToken(t);
+    });
+  }
+
+  Future<void> _handleFetchedFcmToken(String? token) async {
+    if (token == null || token.isEmpty) {
+      debugPrint('FCM token is null/empty');
+      return;
+    }
+    final box = Hive.box('authBox');
+    final saved = box.get('fcm_token');
+    if (saved != token) {
+      box.put('fcm_token', token);
+      await _registerTokenToServer(token);
+    }
   }
 
   Future<void> _registerTokenToServer(String token) async {
@@ -96,8 +127,7 @@ class NotificationService {
       await http.post(uri,
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'fcm_token': token, 'platform': 'android'}));
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage msg) async {
@@ -257,7 +287,6 @@ class NotificationService {
       } else {
         Get.snackbar('Info', 'Laporan diperbarui tetapi tidak ditemukan lokal');
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 }

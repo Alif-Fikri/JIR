@@ -1,5 +1,5 @@
 {
     "git.ignoreLimitWarning": true,
     "cmake.ignoreCMakeListsMissing": true,
-    "dart.flutterSdkPath": "C:\\flutter"
+    "dart.flutterSdkPath": "/Users/aliffikri/Documents/development/flutter"
 }

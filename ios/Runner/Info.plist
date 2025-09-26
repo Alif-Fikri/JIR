@@ -4,8 +4,14 @@
 	<dict>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>We need your location to show the weather data.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>We need your location even when the app is in the background to provide location-based alerts and background updates.</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>We need your location to provide continuous location-based services.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Need photo library access to upload images</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Need permission to save photos to your photo library</string>
 		<key>NSCameraUsageDescription</key>
 		<string>Need camera access to take photos</string>
 		<key>NSMicrophoneUsageDescription</key>
@@ -57,5 +63,12 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<!-- Background modes: note you must enable Background Modes > Location updates / Background fetch / Remote notifications in Xcode -->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>location</string>
+			<string>fetch</string>
+			<string>remote-notification</string>
+		</array>
 	</dict>
 </plist>

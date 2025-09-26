@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:798096595312:android:548203663f64019f1c97b5",
+        "mobilesdk_app_id": "1:798096595312:android:c2c877b5b2bf68f81c97b5",
         "android_client_info": {
           "package_name": "com.example.JIR"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "798096595312-9uo24pjmqon3pb68f7t64i1ne0o7c633.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA3FF5z1GUyDPMV5pvO64mgExKcz15wdEk"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "798096595312-9uo24pjmqon3pb68f7t64i1ne0o7c633.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "798096595312-6i18pisj8e4lcidcmg2lpvt4tiqrf61e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.JIR"
+              }
+            }
+          ]
         }
       }
     }
