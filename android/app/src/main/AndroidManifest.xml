@@ -30,15 +30,27 @@
         <provider android:name="androidx.startup.InitializationProvider" android:authorities="${applicationId}.workmanager-init" android:exported="false" tools:replace="android:authorities" />
 
     </application>
-    <!-- Required to query activities that can process text, see:
-         https://developer.android.com/training/package-visibility and
-         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
-
-         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <!-- Package visibility queries required on Android 11+ so the app can
+         discover other apps that handle mailto/https intents. This helps
+         url_launcher find installed mail clients and browsers.
+         See: https://developer.android.com/training/package-visibility -->
     <queries>
+        <!-- Allow resolving apps that handle PROCESS_TEXT (used by Flutter plugin) -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <package android:name="com.google.android.gm" />
+        <package android:name="com.android.email" />
+        <package android:name="com.google.android.apps.chrome" />
+        <package android:name="com.android.chrome" />
     </queries>
 </manifest>

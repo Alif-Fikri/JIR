@@ -3,19 +3,29 @@
 <plist version="1.0">
 	<dict>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>We need your location to show the weather data.</string>
+		<string>We need your location to show the weather data and location-based features while the app is in use.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-		<string>We need your location even when the app is in the background to provide location-based alerts and background updates.</string>
+		<string>We need your location even when the app is in background to provide location-based alerts and background updates (e.g. hazard warnings).</string>
 		<key>NSLocationAlwaysUsageDescription</key>
 		<string>We need your location to provide continuous location-based services.</string>
-		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Need photo library access to upload images</string>
-		<key>NSPhotoLibraryAddUsageDescription</key>
-		<string>Need permission to save photos to your photo library</string>
+		<key>NSBluetoothAlwaysUsageDescription</key>
+		<string>The app uses Bluetooth to connect to nearby devices and provide real-time data.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>Need camera access to take photos</string>
+		<string>Need camera access to take photos for reports and uploads.</string>
 		<key>NSMicrophoneUsageDescription</key>
-		<string>Need microphone access for video recording</string>
+		<string>Need microphone access for voice recording and audio reports.</string>
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>Need speech recognition to convert spoken audio to text for reports and voice features.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Need photo library access to upload images and attach pictures to reports.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Need permission to save exported images and reports to your photo library.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Need camera access to take photos for reports and uploads.</string>
+		<key>NSAppleMusicUsageDescription</key>
+		<string>Need access to media library for attaching audio files to reports (if applicable).</string>
+		<key>NSUserTrackingUsageDescription</key>
+		<string>Allow tracking to provide personalized content and improve app features. We will not sell your data.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
@@ -63,12 +73,34 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
-		<!-- Background modes: note you must enable Background Modes > Location updates / Background fetch / Remote notifications in Xcode -->
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>location</string>
 			<string>fetch</string>
 			<string>remote-notification</string>
+			<string>audio</string>
 		</array>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>location</string>
+			<string>fetch</string>
+			<string>remote-notification</string>
+			<string>audio</string>
+		</array>
+		<key>NSAppTransportSecurity</key>
+		<dict>
+			<key>NSAllowsArbitraryLoads</key>
+			<false/>
+			<key>NSExceptionDomains</key>
+			<dict>
+				<key>localhost</key>
+				<dict>
+					<key>NSExceptionAllowsInsecureHTTPLoads</key>
+					<true/>
+					<key>NSIncludesSubdomains</key>
+					<true/>
+				</dict>
+			</dict>
+		</dict>
 	</dict>
 </plist>

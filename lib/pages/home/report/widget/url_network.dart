@@ -1,4 +1,6 @@
 import 'dart:io';
+
+import 'package:JIR/utils/file_utils.dart';
 import 'package:flutter/material.dart';
 
 Widget buildReportImage(String imageUrl, {double? height, BoxFit? fit}) {
@@ -45,7 +47,8 @@ Widget buildReportImage(String imageUrl, {double? height, BoxFit? fit}) {
   }
 
   try {
-    final f = File(imageUrl);
+    final localPath = normalizeLocalPath(imageUrl);
+    final f = File(localPath);
     if (f.existsSync()) {
       return Image.file(
         f,

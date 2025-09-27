@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:JIR/config.dart';
 
 class ChatService {
-  static const String chatUrl = mainUrl;
+  static String chatUrl = mainUrl;
   static const Map<String, String> defaultHeaders = {
     'Accept': 'application/json'
   };

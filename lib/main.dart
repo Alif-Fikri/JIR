@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'firebase_options.dart'; 
+import 'firebase_options.dart';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/bindings/initial_binding.dart';
 import 'package:JIR/services/notification_service/background_handler.dart';
@@ -69,10 +69,54 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
+    const primaryColor = Color(0xFF45557B);
+    const secondaryColor = Color(0xFFE45835);
+    final borderRadius = BorderRadius.circular(8);
+    final enabledBorder = OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: const BorderSide(color: Color(0xFFDADADA)),
+    );
+    final focusedBorder = OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: const BorderSide(color: primaryColor, width: 2),
+    );
+
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'JIR App',
-      theme: ThemeData(),
+      theme: ThemeData(
+        useMaterial3: false,
+        colorScheme: const ColorScheme.light(
+          primary: primaryColor,
+          onPrimary: Colors.white,
+          secondary: secondaryColor,
+          onSecondary: Colors.white,
+          surface: Colors.white,
+          onSurface: Colors.black,
+        ),
+        primaryColor: primaryColor,
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+        ),
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: primaryColor,
+          selectionColor: Color(0x3345557B),
+          selectionHandleColor: primaryColor,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFF6F6F6),
+          border: enabledBorder,
+          enabledBorder: enabledBorder,
+          focusedBorder: focusedBorder,
+          floatingLabelStyle: const TextStyle(
+            color: primaryColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
       initialRoute: AppRoutes.initial,
       initialBinding: InitialBinding(),
       getPages: AppRoutes.getPages,

@@ -16,6 +16,7 @@ Widget buildTextField({
     child: TextField(
       controller: controller,
       obscureText: isObscure,
+      cursorColor: const Color(0xFF45557B),
       style: GoogleFonts.inter(
         fontSize: 12,
         fontWeight: FontWeight.w400,
@@ -41,6 +42,15 @@ Widget buildTextField({
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFDADADA)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFDADADA)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF45557B), width: 2),
         ),
       ),
     ),
@@ -54,8 +64,7 @@ Widget buildErrorMessage(String message) {
     child: Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start, 
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           const Icon(
@@ -73,8 +82,8 @@ Widget buildErrorMessage(String message) {
                   fontSize: 12,
                 ),
               ),
-              softWrap: true, 
-              overflow: TextOverflow.visible, 
+              softWrap: true,
+              overflow: TextOverflow.visible,
               textAlign: TextAlign.left,
             ),
           ),

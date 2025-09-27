@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:JIR/services/news_service/news_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -49,15 +50,22 @@ class HomeController extends GetxController
   }
 
   Future<void> refreshData() async {
-    isLoading.value = true;
     await fetchData();
-    isLoading.value = false;
   }
 
   Future<void> fetchData() async {
-    isLoading(true);
-    await _getLocationAndWeather();
-    isLoading(false);
+    isLoading.value = true;
+    try {
+      await _getLocationAndWeather().timeout(const Duration(seconds: 12));
+    } on TimeoutException catch (e) {
+      debugPrint('HomeController.fetchData timeout: $e');
+      _setError('Gagal memuat data cuaca (timeout)');
+    } catch (e) {
+      debugPrint('HomeController.fetchData error: $e');
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> _getLocationAndWeather() async {

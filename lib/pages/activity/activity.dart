@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:JIR/app/routes/app_routes.dart';
+import 'package:JIR/utils/file_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -256,24 +256,33 @@ class _ActivityPageState extends State<ActivityPage> {
                         Get.toNamed(AppRoutes.reportdetail, arguments: report),
                     onShowImage: () {
                       final imageUrl = report['imagePath'] ?? '';
-                      if (imageUrl.isNotEmpty) {
-                        showDialog(
-                          context: context,
-                          builder: (_) => Dialog(
-                            backgroundColor: Colors.transparent,
-                            insetPadding: const EdgeInsets.all(16),
-                            child: InteractiveViewer(
-                              child: imageUrl.startsWith('http')
-                                  ? Image.network(imageUrl,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (_, __, ___) =>
-                                          const SizedBox.shrink())
-                                  : Image.file(File(imageUrl),
-                                      fit: BoxFit.contain),
-                            ),
-                          ),
+                      if (imageUrl.isEmpty) return;
+                      final isNetworkImage = imageUrl.startsWith('http');
+                      final localFile =
+                          isNetworkImage ? null : resolveLocalFile(imageUrl);
+                      if (!isNetworkImage && localFile == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text(
+                                  'Gambar tidak ditemukan atau telah dipindahkan.')),
                         );
+                        return;
                       }
+                      showDialog(
+                        context: context,
+                        builder: (_) => Dialog(
+                          backgroundColor: Colors.transparent,
+                          insetPadding: const EdgeInsets.all(16),
+                          child: InteractiveViewer(
+                            child: isNetworkImage
+                                ? Image.network(imageUrl,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) =>
+                                        const SizedBox.shrink())
+                                : Image.file(localFile!, fit: BoxFit.contain),
+                          ),
+                        ),
+                      );
                     },
                   ),
                 );

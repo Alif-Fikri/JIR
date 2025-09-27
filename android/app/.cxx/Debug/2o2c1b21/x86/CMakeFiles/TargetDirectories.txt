@@ -1,0 +1,2 @@
+/Users/aliffikri/Documents/JIR/android/app/.cxx/Debug/2o2c1b21/x86/CMakeFiles/edit_cache.dir
+/Users/aliffikri/Documents/JIR/android/app/.cxx/Debug/2o2c1b21/x86/CMakeFiles/rebuild_cache.dir

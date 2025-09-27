@@ -26,6 +26,7 @@ class NotificationService {
     await _initLocalNotifications();
     await TtsService.I.init();
     await _initFcmHandlers();
+    await _retryPendingRegistration();
     await _processPendingWhenControllerReady();
   }
 
@@ -58,6 +59,7 @@ class NotificationService {
 
   Future<void> _initFcmHandlers() async {
     final messaging = FirebaseMessaging.instance;
+
     final settings = await messaging.requestPermission(
       alert: true,
       badge: true,
@@ -70,28 +72,20 @@ class NotificationService {
       return;
     }
 
-    if (Platform.isIOS || Platform.isMacOS) {
+    try {
       try {
         final apns = await messaging.getAPNSToken();
         debugPrint('APNs token: $apns');
-        if (apns == null) {
+      } catch (_) {}
 
-          debugPrint('APNs token not ready; skipping getToken for now.');
-        } else {
-          final token = await messaging.getToken();
-          await _handleFetchedFcmToken(token);
-        }
-      } catch (e, st) {
-        debugPrint('Error while getting APNs/FCM token: $e\n$st');
-      }
-    } else {
-      try {
-        final token = await messaging.getToken();
-        await _handleFetchedFcmToken(token);
-      } catch (e, st) {
-        debugPrint('Error getting FCM token on non-iOS: $e\n$st');
-      }
+      await _attemptGetAndRegisterFcmToken(messaging);
+    } catch (e, st) {
+      debugPrint('Error while getting FCM token: $e\n$st');
     }
+
+    messaging.onTokenRefresh.listen((t) async {
+      await _handleFetchedFcmToken(t);
+    });
 
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage msg) async {
@@ -102,10 +96,28 @@ class NotificationService {
     if (initial != null && initial.data.isNotEmpty) {
       await _handleNotificationClick(initial.data);
     }
+  }
 
-    messaging.onTokenRefresh.listen((t) async {
-      await _handleFetchedFcmToken(t);
-    });
+  Future<void> _attemptGetAndRegisterFcmToken(
+    FirebaseMessaging messaging, {
+    int retries = 6,
+    int delayMs = 2000,
+  }) async {
+    String? token;
+    for (var i = 0; i < retries; i++) {
+      try {
+        token = await messaging.getToken();
+      } catch (_) {
+        token = null;
+      }
+      debugPrint('[NotificationService] getToken attempt ${i + 1}: $token');
+      if (token != null && token.isNotEmpty) {
+        await _handleFetchedFcmToken(token);
+        return;
+      }
+      await Future.delayed(Duration(milliseconds: delayMs));
+    }
+    debugPrint('[NotificationService] FCM token not available after retries');
   }
 
   Future<void> _handleFetchedFcmToken(String? token) async {
@@ -123,11 +135,53 @@ class NotificationService {
 
   Future<void> _registerTokenToServer(String token) async {
     try {
+      final platformStr = Platform.isIOS
+          ? 'ios'
+          : Platform.isAndroid
+              ? 'android'
+              : 'other';
       final uri = Uri.parse("$mainUrl/api/notification/device/register");
-      await http.post(uri,
+      debugPrint('[NotificationService] registering token to server: $uri');
+      final res = await http.post(uri,
           headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'fcm_token': token, 'platform': 'android'}));
-    } catch (e) {}
+          body: jsonEncode({'fcm_token': token, 'platform': platformStr}));
+
+      debugPrint(
+          '[NotificationService] register token response: ${res.statusCode} ${res.body}');
+
+      final box = Hive.box('authBox');
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        box.put('fcm_registered', true);
+        if (box.get('pending_fcm_token') != null) {
+          box.delete('pending_fcm_token');
+        }
+      } else {
+        box.put('pending_fcm_token', token);
+        debugPrint(
+            '[NotificationService] token registration failed (non-2xx), saved as pending');
+      }
+    } catch (e, st) {
+      debugPrint('[NotificationService] register token error: $e\n$st');
+      try {
+        final box = Hive.box('authBox');
+        box.put('pending_fcm_token', token);
+      } catch (_) {}
+    }
+  }
+
+  Future<void> _retryPendingRegistration() async {
+    try {
+      final box = Hive.box('authBox');
+      final pending = box.get('pending_fcm_token');
+      if (pending != null && pending is String && pending.isNotEmpty) {
+        debugPrint(
+            '[NotificationService] retrying pending FCM token registration');
+        await _registerTokenToServer(pending);
+      }
+    } catch (e, st) {
+      debugPrint(
+          '[NotificationService] retry pending registration error: $e\n$st');
+    }
   }
 
   Future<void> _handleForegroundMessage(RemoteMessage msg) async {

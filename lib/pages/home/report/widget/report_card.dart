@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:JIR/utils/file_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -228,24 +227,33 @@ class _ReportListPageState extends State<ReportListPage> {
                   imageUrl: imageUrl,
                   dateTimeIso: dateTimeIso,
                   onShowImage: () {
-                    if (imageUrl.isNotEmpty) {
-                      showDialog(
-                        context: context,
-                        builder: (_) => Dialog(
-                          backgroundColor: Colors.transparent,
-                          insetPadding: const EdgeInsets.all(16),
-                          child: InteractiveViewer(
-                            child: imageUrl.startsWith('http')
-                                ? Image.network(imageUrl,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (_, __, ___) =>
-                                        const SizedBox.shrink())
-                                : Image.file(File(imageUrl),
-                                    fit: BoxFit.contain),
-                          ),
-                        ),
+                    if (imageUrl.isEmpty) return;
+                    final isNetworkImage = imageUrl.startsWith('http');
+                    final localFile =
+                        isNetworkImage ? null : resolveLocalFile(imageUrl);
+                    if (!isNetworkImage && localFile == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                'Gambar tidak ditemukan atau telah dipindahkan.')),
                       );
+                      return;
                     }
+                    showDialog(
+                      context: context,
+                      builder: (_) => Dialog(
+                        backgroundColor: Colors.transparent,
+                        insetPadding: const EdgeInsets.all(16),
+                        child: InteractiveViewer(
+                          child: isNetworkImage
+                              ? Image.network(imageUrl,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) =>
+                                      const SizedBox.shrink())
+                              : Image.file(localFile!, fit: BoxFit.contain),
+                        ),
+                      ),
+                    );
                   },
                 );
               },
@@ -288,11 +296,9 @@ class ReportCard extends StatelessWidget {
     if (avatarUrl.startsWith('http')) {
       return CircleAvatar(radius: 20, backgroundImage: NetworkImage(avatarUrl));
     }
-    if (avatarUrl.startsWith('/')) {
-      final file = File(avatarUrl);
-      if (file.existsSync()) {
-        return CircleAvatar(backgroundImage: FileImage(file), radius: 20);
-      }
+    final file = resolveLocalFile(avatarUrl);
+    if (file != null) {
+      return CircleAvatar(backgroundImage: FileImage(file), radius: 20);
     }
     return const CircleAvatar(
         radius: 20,
@@ -317,17 +323,26 @@ class ReportCard extends StatelessWidget {
   }
 
   void _showFullImage(BuildContext context) {
+    final isNetworkImage = imageUrl.startsWith('http');
+    final localFile = isNetworkImage ? null : resolveLocalFile(imageUrl);
+    if (!isNetworkImage && localFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Gambar tidak ditemukan atau telah dipindahkan.')),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.all(16),
         child: InteractiveViewer(
-          child: imageUrl.startsWith('http')
+          child: isNetworkImage
               ? Image.network(imageUrl,
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => const SizedBox.shrink())
-              : Image.file(File(imageUrl), fit: BoxFit.contain),
+              : Image.file(localFile!, fit: BoxFit.contain),
         ),
       ),
     );
@@ -335,6 +350,8 @@ class ReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNetworkImage = imageUrl.startsWith('http');
+    final localImageFile = isNetworkImage ? null : resolveLocalFile(imageUrl);
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -377,17 +394,25 @@ class ReportCard extends StatelessWidget {
               Stack(children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: imageUrl.startsWith('http')
+                  child: isNetworkImage
                       ? Image.network(imageUrl,
                           height: 200,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) =>
                               Container(height: 200, color: Colors.grey[200]))
-                      : Image.file(File(imageUrl),
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover),
+                      : (localImageFile != null
+                          ? Image.file(localImageFile,
+                              height: 200,
+                              width: double.infinity,
+                              fit: BoxFit.cover)
+                          : Container(
+                              height: 200,
+                              width: double.infinity,
+                              color: Colors.grey[200],
+                              child:
+                                  const Center(child: Icon(Icons.broken_image)),
+                            )),
                 ),
                 Positioned(
                   top: 8,

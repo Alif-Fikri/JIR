@@ -69,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
             opacity: firstLogoOpacity,
             child: Center(
               child: Image.asset(
-                'assets/images/jir_logo.png',
+                'assets/images/jir_logo7.png',
                 width: 200,
                 height: 200,
               ),
