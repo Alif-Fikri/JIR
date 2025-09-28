@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
-
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart' show MethodChannel, PlatformException;
-
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/pages/home/main/controller/home_controller.dart';
 import 'package:JIR/pages/home/main/widget/home_feature_grid.dart';
@@ -89,7 +86,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _openSupportEmail() async {
-    const supportEmail = 'support@jir.app';
+    const supportEmail = 'jirsup.dev@gmail.com';
     final subject =
         'Permintaan Bantuan dari ${_username.isNotEmpty ? _username : 'Pengguna'}';
     final body =
@@ -175,6 +172,7 @@ class _HomePageState extends State<HomePage> {
     const headerHeight = 308.0;
     const weatherCardHeight = WeatherCard.cardHeight;
     final overlap = math.min(180.0, screenHeight * 0.22);
+    const appBarHeight = 90.0;
 
     return PopScope(
       canPop: false,
@@ -200,15 +198,123 @@ class _HomePageState extends State<HomePage> {
                             height: headerHeight,
                             decoration:
                                 const BoxDecoration(color: Color(0xFF45557B)),
-                            child: Padding(
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          child: SafeArea(
+                            bottom: false,
+                            child: Container(
+                              height: appBarHeight,
                               padding: const EdgeInsets.only(
-                                  top: 65, left: 30, right: 8),
-                              child: Align(
-                                alignment: Alignment.topCenter,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Container(
+                                  left: 16, right: 16, bottom: 50),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF45557B),
+                                borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(87),
+                                    bottomRight: Radius.circular(87)),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      borderRadius: BorderRadius.circular(50),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Color.fromRGBO(0, 0, 0, 0.25),
+                                          blurRadius: 2,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Image.asset(
+                                      'assets/images/jir_logo8.png',
+                                      width: 45,
+                                      height: 45,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          _greetingForNow(),
+                                          style: GoogleFonts.lexend(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                            shadows: [
+                                              Shadow(
+                                                  blurRadius: 5.0,
+                                                  color: Colors.black
+                                                      .withOpacity(0.4),
+                                                  offset: Offset(1, 1))
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 1),
+                                        _profileLoading
+                                            ? SizedBox(
+                                                height: 18,
+                                                child: Row(
+                                                  children: const [
+                                                    SizedBox(
+                                                      width: 14,
+                                                      height: 14,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation<
+                                                                    Color>(
+                                                                Colors.white),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 8),
+                                                    Text(
+                                                      'Memuat...',
+                                                      style: TextStyle(
+                                                        color: Colors.white70,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            : Text(
+                                                _username.isNotEmpty
+                                                    ? _username
+                                                    : 'Pengguna',
+                                                style: GoogleFonts.lexend(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.white,
+                                                  shadows: [
+                                                    Shadow(
+                                                        blurRadius: 5.0,
+                                                        color: Colors.black
+                                                            .withOpacity(0.4),
+                                                        offset: Offset(1, 1))
+                                                  ],
+                                                ),
+                                              ),
+                                      ],
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: _openSupportEmail,
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      margin: const EdgeInsets.only(left: 8),
                                       decoration: BoxDecoration(
                                         color: Colors.transparent,
                                         borderRadius: BorderRadius.circular(50),
@@ -221,117 +327,16 @@ class _HomePageState extends State<HomePage> {
                                           ),
                                         ],
                                       ),
-                                      child: Image.asset(
-                                        'assets/images/jir_logo8.png',
-                                        width: 45,
-                                        height: 45,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            _greetingForNow(),
-                                            style: GoogleFonts.lexend(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white,
-                                              shadows: [
-                                                Shadow(
-                                                    blurRadius: 5.0,
-                                                    color: Colors.black
-                                                        .withOpacity(0.4),
-                                                    offset: Offset(1, 1))
-                                              ],
-                                            ),
-                                          ),
-                                          const SizedBox(height: 1),
-                                          _profileLoading
-                                              ? SizedBox(
-                                                  height: 18,
-                                                  child: Row(
-                                                    children: const [
-                                                      SizedBox(
-                                                        width: 14,
-                                                        height: 14,
-                                                        child:
-                                                            CircularProgressIndicator(
-                                                          strokeWidth: 2,
-                                                          valueColor:
-                                                              AlwaysStoppedAnimation<
-                                                                      Color>(
-                                                                  Colors.white),
-                                                        ),
-                                                      ),
-                                                      SizedBox(width: 8),
-                                                      Text(
-                                                        'Memuat...',
-                                                        style: TextStyle(
-                                                          color: Colors.white70,
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                )
-                                              : Text(
-                                                  _username.isNotEmpty
-                                                      ? _username
-                                                      : 'Pengguna',
-                                                  style: GoogleFonts.lexend(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: Colors.white,
-                                                    shadows: [
-                                                      Shadow(
-                                                          blurRadius: 5.0,
-                                                          color: Colors.black
-                                                              .withOpacity(0.4),
-                                                          offset: Offset(1, 1))
-                                                    ],
-                                                  ),
-                                                ),
-                                        ],
-                                      ),
-                                    ),
-                                    GestureDetector(
-                                      onTap: _openSupportEmail,
-                                      child: Container(
-                                        width: 40,
-                                        height: 40,
-                                        margin: const EdgeInsets.only(
-                                          left: 8,
-                                          right: 20,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          borderRadius:
-                                              BorderRadius.circular(50),
-                                          boxShadow: const [
-                                            BoxShadow(
-                                              color:
-                                                  Color.fromRGBO(0, 0, 0, 0.25),
-                                              blurRadius: 2,
-                                              offset: Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: const Center(
-                                          child: Icon(
-                                            Icons.support_agent,
-                                            color: Colors.white,
-                                            size: 25,
-                                          ),
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.support_agent,
+                                          color: Colors.white,
+                                          size: 25,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
