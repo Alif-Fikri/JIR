@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:JIR/bindings/initial_binding.dart';
+import 'package:JIR/pages/auth/view/forgot_password_page.dart';
+import 'package:JIR/pages/auth/view/reset_password_page.dart';
 import 'package:JIR/pages/home/chat/view/chat_view.dart';
 import 'package:JIR/pages/home/report/view/report_user.dart';
 import 'package:JIR/pages/home/report/widget/report_detail.dart';
@@ -36,6 +38,8 @@ class AppRoutes {
   //auth
   static const login = '/login';
   static const signup = '/signup';
+  static const forgotPassword = '/forgot-password';
+  static const resetPassword = '/reset-password';
   //navbar
   static const home = '/home';
   static const profile = '/profile';
@@ -91,6 +95,31 @@ class AppRoutes {
       transitionDuration: const Duration(milliseconds: 300),
     ),
     GetPage(
+      name: forgotPassword,
+      page: () => ForgotPasswordPage(),
+      binding: InitialBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: resetPassword,
+      page: () {
+        final args = Get.arguments;
+        String oobCode = '';
+        if (args is String) {
+          oobCode = args;
+        } else if (args is Map<String, dynamic> && args['oobCode'] is String) {
+          oobCode = args['oobCode'];
+        } else if (Get.parameters['oobCode'] != null) {
+          oobCode = Get.parameters['oobCode']!;
+        }
+        return ResetPasswordPage(oobCode: oobCode);
+      },
+      binding: InitialBinding(),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
       name: home,
       page: () => const Menu(),
       transition: Transition.fadeIn,
@@ -129,7 +158,7 @@ class AppRoutes {
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     ),
-        GetPage(
+    GetPage(
       name: chatbottext,
       page: () => const ChatView(),
       transition: Transition.fadeIn,

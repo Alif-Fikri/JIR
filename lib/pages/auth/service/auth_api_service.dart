@@ -202,6 +202,71 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    if (email.isEmpty) {
+      return {'success': false, 'message': 'Email cannot be empty'};
+    }
+    final url = Uri.parse('$authUrl/forgot-password');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': 'Jika email ada, link reset telah dikirim.'
+        };
+      } else {
+        final data = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': data['detail'] ?? 'Request failed'
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Connection error'};
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword(
+      String oobCode, String newPassword) async {
+    if (oobCode.isEmpty || newPassword.isEmpty) {
+      return {'success': false, 'message': 'Invalid request'};
+    }
+    final url = Uri.parse('$authUrl/reset-password');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'oob_code': oobCode,
+          'new_password': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Password berhasil diubah'};
+      } else {
+        try {
+          final data = jsonDecode(response.body);
+          return {
+            'success': false,
+            'message': data['detail'] ?? 'Reset failed'
+          };
+        } catch (e) {
+          return {
+            'success': false,
+            'message': 'Server error (${response.statusCode})'
+          };
+        }
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Connection error'};
+    }
+  }
+
   Future<void> _saveToken(String token) async {
     var box = await Hive.openBox('authBox');
     await box.put('token', token);

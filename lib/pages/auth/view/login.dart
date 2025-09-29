@@ -96,14 +96,15 @@ class LoginPage extends GetView<LoginController> {
                         )),
                 ),
               ),
-              const SizedBox(height: 10),
               SizedBox(
                 width: fixedWidth,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Get.toNamed(AppRoutes.forgotPassword);
+                      },
                       child: Text(
                         'Forgot Password?',
                         style: GoogleFonts.inter(

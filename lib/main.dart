@@ -1,3 +1,4 @@
+import 'package:JIR/app/app_root.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -48,7 +49,7 @@ Future<void> main() async {
     debugPrint('Workmanager registerPeriodicTask error: $e');
   }
 
-  runApp(const MyApp());
+  runApp(const AppRoot());
 }
 
 class _FirebaseErrorApp extends StatelessWidget {

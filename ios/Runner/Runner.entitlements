@@ -4,5 +4,10 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:jir-smart-city.page.link</string>
+		<string>applinks:jir-smart-city.firebaseapp.com</string>
+	</array>
 </dict>
 </plist>
