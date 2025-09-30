@@ -218,8 +218,16 @@ class ChatController extends GetxController with StateMixin<void> {
 
   bool _isFallbackText(String s) {
     final low = s.toLowerCase();
-    if (low.trim().isEmpty) return true;
-    if (low.contains('{') && low.contains('}')) return true;
+    final trimmed = low.trim();
+    if (trimmed.isEmpty) return true;
+    if (trimmed == 'null' || trimmed == '{}' || trimmed == '[]') return true;
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      try {
+        final decoded = jsonDecode(s);
+        if (decoded is Map && decoded.isEmpty) return true;
+        if (decoded is List && decoded.isEmpty) return true;
+      } catch (_) {}
+    }
     if (low.contains('maaf') &&
         (low.contains('tidak') ||
             low.contains('mengerti') ||
@@ -352,18 +360,109 @@ class ChatController extends GetxController with StateMixin<void> {
     } catch (_) {}
   }
 
+  String? _resolveReadableText(dynamic value, {int depth = 0}) {
+    if (value == null) return null;
+    if (value is String) {
+      final trimmed = value.trim();
+      if (trimmed.isEmpty) return null;
+      return value;
+    }
+    if (value is bool) {
+      return depth == 0 ? (value ? 'true' : 'false') : null;
+    }
+    if (value is num) {
+      return depth == 0 ? value.toString() : null;
+    }
+    if (value is Map) {
+      const preferredKeys = [
+        'message',
+        'response',
+        'respons',
+        'reply',
+        'text',
+        'description',
+        'deskripsi',
+        'keterangan',
+        'hasil',
+        'result',
+        'answer',
+        'content',
+        'info',
+        'informasi',
+        'detail',
+        'caption',
+        'title',
+        'body',
+        'pesan'
+      ];
+      const skipKeys = {
+        'start',
+        'end',
+        'route',
+        'coords',
+        'coordinates',
+        'waypoints',
+        'geometry',
+        'points',
+        'lat',
+        'lon',
+        'lng',
+        'latitude',
+        'longitude'
+      };
+
+      final map = Map<dynamic, dynamic>.from(value);
+      for (final key in preferredKeys) {
+        if (map.containsKey(key)) {
+          final res = _resolveReadableText(map[key], depth: depth + 1);
+          if (res != null && res.trim().isNotEmpty) {
+            return res;
+          }
+        }
+      }
+      for (final entry in map.entries) {
+        final dynamic rawKey = entry.key;
+        String? keyLower;
+        if (rawKey is String) {
+          keyLower = rawKey.toLowerCase();
+        } else if (rawKey != null) {
+          keyLower = rawKey.toString().toLowerCase();
+        }
+        if (keyLower != null && skipKeys.contains(keyLower)) continue;
+        final res = _resolveReadableText(entry.value, depth: depth + 1);
+        if (res != null && res.trim().isNotEmpty) {
+          return res;
+        }
+      }
+      return null;
+    }
+    if (value is Iterable) {
+      for (final item in value) {
+        final res = _resolveReadableText(item, depth: depth + 1);
+        if (res != null && res.trim().isNotEmpty) {
+          return res;
+        }
+      }
+      return null;
+    }
+    return depth == 0 ? value.toString() : null;
+  }
+
   String _extractChatTextFromData(dynamic data) {
     try {
       if (data == null) return 'Maaf, server tidak merespon.';
-      if (data is String) return data;
-      if (data is Map) {
-        if (data['response'] != null) return data['response'].toString();
-        if (data['respons'] != null) return data['respons'].toString();
-        if (data['message'] != null) return data['message'].toString();
-        if (data['data'] != null) return _extractChatTextFromData(data['data']);
-        final s = data.toString().replaceAll(RegExp(r'\s+'), ' ');
-        if (s.length > 240) return '${s.substring(0, 220)}...';
-        return s;
+      final resolved = _resolveReadableText(data);
+      if (resolved != null && resolved.trim().isNotEmpty) {
+        return resolved;
+      }
+      if (data is Map || data is Iterable) {
+        try {
+          return jsonEncode(data);
+        } catch (_) {
+          final s = data.toString().replaceAll(RegExp(r'\s+'), ' ');
+          if (s.length > 240) return '${s.substring(0, 220)}...';
+          return s;
+        }
       }
       return data.toString();
     } catch (_) {
@@ -440,36 +539,16 @@ class ChatController extends GetxController with StateMixin<void> {
       dynamic resp, Map<String, dynamic>? routeData) {
     if (resp == null) return 'Maaf, server tidak merespon.';
     try {
-      if (resp is Map<String, dynamic>) {
-        if (resp.containsKey('data') && resp['data'] is Map) {
-          final d = resp['data'] as Map;
-          if (d['message'] != null) return d['message'].toString();
-          if (d['respons'] != null &&
-              d['respons'] is Map &&
-              d['respons']['message'] != null) {
-            return d['respons']['message'].toString();
-          }
-        }
-        if (resp.containsKey('response')) {
-          final r = resp['response'];
-          if (r is String && r.isNotEmpty) return r;
-          if (r is Map && r['message'] != null) return r['message'].toString();
-        }
-        if (resp.containsKey('reply')) return resp['reply'].toString();
-        final s = resp.toString();
-        final singleLine = s.replaceAll(RegExp(r'\s+'), ' ');
-        if (singleLine.length > 200) {
-          return '${singleLine.substring(0, 180)}...';
-        }
-        return singleLine;
-      } else {
-        final s = resp.toString();
-        final singleLine = s.replaceAll(RegExp(r'\s+'), ' ');
-        if (singleLine.length > 200) {
-          return '${singleLine.substring(0, 180)}...';
-        }
-        return singleLine;
+      final resolved = _resolveReadableText(resp);
+      if (resolved != null && resolved.trim().isNotEmpty) {
+        return resolved;
       }
+      final s = resp.toString();
+      final singleLine = s.replaceAll(RegExp(r'\s+'), ' ');
+      if (singleLine.length > 200) {
+        return '${singleLine.substring(0, 180)}...';
+      }
+      return singleLine;
     } catch (_) {
       return 'Balasan diterima.';
     }

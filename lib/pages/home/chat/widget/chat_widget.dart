@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:JIR/helper/voicefrequency.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -456,8 +457,8 @@ class MicOverlay extends StatelessWidget {
               animation: controllerValueGetter!,
               builder: (context, child) {
                 return CustomPaint(
-                  painter: VoiceDummyPainter(
-                      controllerValueGetter!.value * 2 * 3.141592653589793),
+                  painter:
+                      VoiceFrequencyPainter(controllerValueGetter!.value * 10),
                 );
               },
             ),
@@ -476,9 +477,9 @@ class MicOverlay extends StatelessWidget {
           ),
           child: CircleAvatar(
             backgroundColor: Colors.transparent,
-            radius: 50,
+            radius: 40,
             child: IconButton(
-                icon: const Icon(Icons.mic, color: Colors.red, size: 50),
+                icon: const Icon(Icons.mic, color: Colors.red, size: 30),
                 onPressed: onStop),
           ),
         ),
@@ -493,22 +494,6 @@ class MicOverlay extends StatelessWidget {
       ]),
     );
   }
-}
-
-class VoiceDummyPainter extends CustomPainter {
-  final double phase;
-  VoiceDummyPainter(this.phase);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.blue.withOpacity(0.06);
-    canvas.drawCircle(size.center(Offset.zero),
-        size.width * 0.45 * (0.8 + 0.2 * (phase % 1)), paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant VoiceDummyPainter oldDelegate) =>
-      oldDelegate.phase != phase;
 }
 
 class AnimatedDots extends StatefulWidget {
