@@ -105,15 +105,26 @@ class AppRoutes {
       name: resetPassword,
       page: () {
         final args = Get.arguments;
-        String oobCode = '';
+        String? email;
+        String? token;
         if (args is String) {
-          oobCode = args;
-        } else if (args is Map<String, dynamic> && args['oobCode'] is String) {
-          oobCode = args['oobCode'];
-        } else if (Get.parameters['oobCode'] != null) {
-          oobCode = Get.parameters['oobCode']!;
+          token = args;
+        } else if (args is Map<String, dynamic>) {
+          if (args['email'] is String) {
+            email = args['email'];
+          }
+          if (args['token'] is String) {
+            token = args['token'];
+          }
         }
-        return ResetPasswordPage(oobCode: oobCode);
+        final params = Get.parameters;
+        if (params['email'] != null) {
+          email = params['email'];
+        }
+        if (params['token'] != null) {
+          token = params['token'];
+        }
+        return ResetPasswordPage(initialEmail: email, initialToken: token);
       },
       binding: InitialBinding(),
       transition: Transition.fadeIn,

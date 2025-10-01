@@ -9,7 +9,7 @@ class AuthBinding implements Bindings {
   void dependencies() {
     Get.put<AuthService>(AuthService(), permanent: true);
     Get.put<GoogleAuthService>(GoogleAuthService(), permanent: true);
-    Get.lazyPut(() => SignupController());
-    Get.lazyPut(() => LoginController());
+    Get.put<SignupController>(SignupController(), permanent: true);
+    Get.put<LoginController>(LoginController(), permanent: true);
   }
 }

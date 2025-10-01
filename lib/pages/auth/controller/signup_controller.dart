@@ -1,5 +1,5 @@
+import 'dart:developer' as developer;
 import 'package:JIR/app/routes/app_routes.dart';
-import 'package:JIR/helper/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
@@ -23,7 +23,7 @@ class SignupController extends GetxController {
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
 
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+com$');
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[a-zA-Z]{2,}$');
     final passwordRegex = RegExp(r'^(?=.*[A-Z])(?=.*\d).+$');
 
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
@@ -32,7 +32,7 @@ class SignupController extends GetxController {
     }
 
     if (!emailRegex.hasMatch(email)) {
-      errorMessage.value = 'Email harus valid dan berakhiran .com';
+      errorMessage.value = 'Email tidak valid';
       return;
     }
 
@@ -55,30 +55,25 @@ class SignupController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
 
-    final response = await _authService.signup(
-      username,
-      email,
-      password,
-    );
+    try {
+      final response = await _authService.signup(
+        username,
+        email,
+        password,
+      );
 
-    if (response['success']) {
-      CustomSnackbar.show(
-        context: Get.context!,
-        message: "Pendaftaran berhasil! Silakan login.",
-        useAppIcon: true,
-      );
-      Get.offNamed(AppRoutes.login);
-    } else {
-      CustomSnackbar.show(
-        context: Get.context!,
-        message: response['message'] ?? "Terjadi kesalahan, silakan coba lagi.",
-        useAppIcon: true,
-      );
-      errorMessage.value =
-          response['message'] ?? "Terjadi kesalahan, silakan coba lagi.";
+      if (response['success'] == true) {
+        Get.offNamed(AppRoutes.login);
+      } else {
+        errorMessage.value = response['message'] ?? 'Pendaftaran gagal.';
+      }
+    } catch (e, st) {
+      developer.log('Signup error',
+          error: e, stackTrace: st, name: 'SignupController');
+      errorMessage.value = 'Terjadi kesalahan. Silakan coba lagi nanti.';
+    } finally {
+      isLoading.value = false;
     }
-
-    isLoading.value = false;
   }
 
   @override

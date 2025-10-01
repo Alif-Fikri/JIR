@@ -46,29 +46,39 @@ class _AppRootState extends State<AppRoot> {
     if (uri == null) return;
     debugPrint('Received deep link: $uri');
 
-    var oob = uri.queryParameters['oobCode'] ?? uri.queryParameters['oob_code'];
+    var token = uri.queryParameters['token'] ??
+        uri.queryParameters['oobCode'] ??
+        uri.queryParameters['oob_code'];
+    var email = uri.queryParameters['email'];
 
-    if (oob == null || oob.isEmpty) {
+    if (token == null || token.isEmpty) {
       final nested =
           uri.queryParameters['link'] ?? uri.queryParameters['deep_link_id'];
       if (nested != null && nested.isNotEmpty) {
         final nestedDecoded = Uri.decodeFull(nested);
         try {
           final nestedUri = Uri.parse(nestedDecoded);
-          oob = nestedUri.queryParameters['oobCode'] ??
+          token = nestedUri.queryParameters['token'] ??
+              nestedUri.queryParameters['oobCode'] ??
               nestedUri.queryParameters['oob_code'];
+          email = email ??
+              nestedUri.queryParameters['email'] ??
+              nestedUri.queryParameters['userEmail'];
         } catch (e) {
           debugPrint('Failed to parse nested link: $e; nested: $nestedDecoded');
         }
       }
     }
 
-    if (oob != null && oob.isNotEmpty) {
+    if (token != null && token.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.offAll(() => ResetPasswordPage(oobCode: oob!));
+        Get.offAll(() => ResetPasswordPage(
+              initialEmail: email,
+              initialToken: token,
+            ));
       });
     } else {
-      debugPrint('No oobCode found in link');
+      debugPrint('No reset token found in link');
     }
   }
 

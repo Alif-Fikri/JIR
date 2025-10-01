@@ -43,7 +43,7 @@ class SignupPage extends GetView<SignupController> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Welcome to JIR',
+                    'Selamat Datang di JIR',
                     style: GoogleFonts.inter(
                       textStyle: const TextStyle(
                         fontSize: 18,
@@ -55,7 +55,7 @@ class SignupPage extends GetView<SignupController> {
               ),
               const SizedBox(height: 20),
               buildTextField(
-                label: 'Username',
+                label: 'Nama Pengguna',
                 icon: 'assets/images/person.png',
                 controller: controller.usernameController,
               ),
@@ -67,14 +67,14 @@ class SignupPage extends GetView<SignupController> {
               ),
               const SizedBox(height: 25),
               buildTextField(
-                label: 'Password',
+                label: 'Kata Sandi',
                 icon: 'assets/images/password.png',
                 isObscure: true,
                 controller: controller.passwordController,
               ),
               const SizedBox(height: 25),
               buildTextField(
-                label: 'Confirm Password',
+                label: 'Konfirmasi Kata Sandi',
                 icon: 'assets/images/password.png',
                 isObscure: true,
                 controller: controller.confirmPasswordController,
@@ -96,12 +96,11 @@ class SignupPage extends GetView<SignupController> {
                           onChanged: (value) =>
                               controller.isTermsAccepted.value = value ?? false,
                         )),
-                    const SizedBox(width: 2),
                     Expanded(
                       child: Wrap(
                         children: [
                           Text(
-                            'I have read and accept the ',
+                            'Saya telah membaca dan menyetujui ',
                             style: GoogleFonts.inter(
                               textStyle: const TextStyle(
                                 color: Colors.black,
@@ -119,7 +118,7 @@ class SignupPage extends GetView<SignupController> {
                               Get.toNamed(AppRoutes.termsOfService);
                             },
                             child: Text(
-                              'terms of service',
+                              'Ketentuan Layanan ',
                               style: GoogleFonts.inter(
                                 textStyle: const TextStyle(
                                   fontSize: 12,
@@ -129,7 +128,7 @@ class SignupPage extends GetView<SignupController> {
                             ),
                           ),
                           Text(
-                            'and ',
+                            'dan ',
                             style: GoogleFonts.inter(
                               textStyle: const TextStyle(
                                 color: Colors.black,
@@ -147,7 +146,7 @@ class SignupPage extends GetView<SignupController> {
                               Get.toNamed(AppRoutes.privacyPolicy);
                             },
                             child: Text(
-                              'privacy policy',
+                              'Kebijakan Privasi',
                               style: GoogleFonts.inter(
                                 textStyle: const TextStyle(
                                   fontSize: 12,
@@ -177,7 +176,7 @@ class SignupPage extends GetView<SignupController> {
                   child: Obx(() => controller.isLoading.value
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
-                          'Sign Up',
+                          'Daftar',
                           style: GoogleFonts.inter(
                             textStyle: const TextStyle(
                               fontSize: 14,
@@ -191,7 +190,7 @@ class SignupPage extends GetView<SignupController> {
               const SizedBox(height: 10),
               RichText(
                 text: TextSpan(
-                  text: 'Already have an account? ',
+                  text: 'Sudah punya akun? ',
                   style: GoogleFonts.inter(
                     textStyle: const TextStyle(
                       color: Colors.black,
@@ -200,7 +199,7 @@ class SignupPage extends GetView<SignupController> {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Sign In',
+                      text: 'Masuk',
                       style: GoogleFonts.inter(
                         textStyle: const TextStyle(
                           color: Color(0xFF005FCB),

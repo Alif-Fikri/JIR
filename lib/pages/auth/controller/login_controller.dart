@@ -1,3 +1,4 @@
+import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:JIR/helper/menu.dart';
@@ -18,26 +19,38 @@ class LoginController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
 
-    final result = await _authService.login(
-      emailController.text,
-      passwordController.text,
-    );
+    try {
+      final result = await _authService.login(
+        emailController.text.trim(),
+        passwordController.text,
+      );
 
-    if (result['success']) {
-      Get.offAll(() => const Menu());
-    } else {
-      errorMessage.value = result['message'];
+      if (result['success'] == true) {
+        Get.offAll(AppRoutes.home);
+      } else {
+        errorMessage.value =
+            result['message'] ?? 'Login gagal. Silakan coba lagi.';
+      }
+    } catch (e) {
+      errorMessage.value = 'Terjadi kesalahan. Silakan coba lagi nanti.';
+    } finally {
+      isLoading.value = false;
     }
-
-    isLoading.value = false;
   }
 
   void googleSignIn() async {
-    final result = await _googleAuthService.signInWithGoogle();
-    if (result != null) {
-      Get.offAll(() => const Menu());
-    } else {
-      errorMessage.value = 'Google sign in failed';
+    try {
+      isLoading.value = true;
+      final result = await _googleAuthService.signInWithGoogle();
+      if (result != null) {
+        Get.offAll(() => const Menu());
+      } else {
+        errorMessage.value = 'Login dengan Google gagal.';
+      }
+    } catch (e) {
+      errorMessage.value = 'Terjadi kesalahan saat login dengan Google.';
+    } finally {
+      isLoading.value = false;
     }
   }
 

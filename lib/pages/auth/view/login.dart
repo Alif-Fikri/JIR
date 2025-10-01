@@ -42,7 +42,7 @@ class LoginPage extends GetView<LoginController> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Welcome Back to JIR',
+                    'Selamat Datang Kembali di JIR',
                     style: GoogleFonts.inter(
                       textStyle: const TextStyle(
                         fontSize: 18,
@@ -55,13 +55,13 @@ class LoginPage extends GetView<LoginController> {
               const SizedBox(height: 20),
               buildTextField(
                 controller: controller.emailController,
-                label: 'Username/Email',
+                label: 'Email',
                 icon: 'assets/images/person.png',
               ),
               const SizedBox(height: 25),
               buildTextField(
                 controller: controller.passwordController,
-                label: 'Password',
+                label: 'Kata Sandi',
                 icon: 'assets/images/password.png',
                 isObscure: true,
               ),
@@ -85,7 +85,7 @@ class LoginPage extends GetView<LoginController> {
                           color: Color(0xffFF4136),
                         )
                       : Text(
-                          'Sign In',
+                          'Masuk',
                           style: GoogleFonts.inter(
                             textStyle: const TextStyle(
                               fontSize: 14,
@@ -106,7 +106,7 @@ class LoginPage extends GetView<LoginController> {
                         Get.toNamed(AppRoutes.forgotPassword);
                       },
                       child: Text(
-                        'Forgot Password?',
+                        'Lupa Kata Sandi?',
                         style: GoogleFonts.inter(
                           textStyle: const TextStyle(color: Color(0xFF005FCB)),
                         ),
@@ -131,7 +131,7 @@ class LoginPage extends GetView<LoginController> {
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10.0),
                     child: Text(
-                      "OR",
+                      "ATAU",
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w300,
@@ -174,7 +174,7 @@ class LoginPage extends GetView<LoginController> {
                     width: 24,
                   ),
                   label: Text(
-                    'Sign In with Google',
+                    'Masuk dengan Google',
                     style: GoogleFonts.inter(
                       textStyle: const TextStyle(
                           color: Colors.black, fontWeight: FontWeight.w700),
@@ -191,7 +191,7 @@ class LoginPage extends GetView<LoginController> {
               const SizedBox(height: 10),
               RichText(
                 text: TextSpan(
-                  text: "Don't have an account? ",
+                  text: "Belum punya akun? ",
                   style: GoogleFonts.inter(
                     textStyle: const TextStyle(
                       color: Colors.black,
@@ -200,7 +200,7 @@ class LoginPage extends GetView<LoginController> {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Sign Up',
+                      text: 'Daftar',
                       style: GoogleFonts.inter(
                         textStyle: const TextStyle(
                           color: Color(0xFF005FCB),
