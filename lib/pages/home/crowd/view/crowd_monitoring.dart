@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:JIR/pages/home/crowd/controller/crowd_controller.dart';
 import 'package:JIR/helper/map.dart';
-import 'package:JIR/pages/home/crowd/crowd_marker.dart';
+import 'package:JIR/pages/home/crowd/widget/crowd_marker.dart';
 
 class CrowdMonitoringPage extends StatelessWidget {
   final CrowdController controller = Get.put(CrowdController());
@@ -26,13 +27,13 @@ class CrowdMonitoringPage extends StatelessWidget {
       title: Text(
         'Kerumunan',
         style: GoogleFonts.inter(
-          fontSize: 20,
+          fontSize: 20.sp,
           color: Colors.white,
           fontWeight: FontWeight.w700,
         ),
       ),
       backgroundColor: const Color(0xFF45557B),
-      elevation: 10,
+      elevation: 10.r,
       shadowColor: Colors.black,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
@@ -55,16 +56,16 @@ class CrowdMonitoringPage extends StatelessWidget {
 
   Widget _buildMapSection() {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       child: Container(
-        height: 250,
+        height: 250.h,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [
             BoxShadow(
               color: Colors.black26,
-              blurRadius: 5,
-              spreadRadius: 2,
+              blurRadius: 5.r,
+              spreadRadius: 2.r,
             ),
           ],
         ),
@@ -87,8 +88,8 @@ class CrowdMonitoringPage extends StatelessWidget {
 
       return Marker(
         point: entry.value,
-        width: 60,
-        height: 60,
+        width: 60.w,
+        height: 60.h,
         child: CrowdMarker(
           count: count,
           level: level,
@@ -100,18 +101,18 @@ class CrowdMonitoringPage extends StatelessWidget {
 
   Widget _buildDataSection() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Level Kerumunan',
             style: GoogleFonts.publicSans(
-              fontSize: 28,
+              fontSize: 28.sp,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildLiveData(),
           const SizedBox(height: 16),
           // _buildHistoricalData(),
@@ -127,11 +128,11 @@ class CrowdMonitoringPage extends StatelessWidget {
         Text(
           "Kerumunan Hari Ini",
           style: GoogleFonts.publicSans(
-            fontSize: 20,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         _buildCrowdList(controller.liveData),
       ],
     );
@@ -190,11 +191,11 @@ class CrowdListItem extends StatelessWidget {
 
     return ListTile(
       leading: Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           color: const Color(0xffF0F2F5),
           shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
         ),
         child: const Icon(
           Icons.location_on_outlined,
@@ -207,26 +208,26 @@ class CrowdListItem extends StatelessWidget {
           Text(
             item['location'],
             style: GoogleFonts.publicSans(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Row(
             children: [
               Container(
-                width: 10,
-                height: 10,
+                width: 10.w,
+                height: 10.h,
                 decoration: BoxDecoration(
                   color: controller.getLevelColor(item['level']),
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6.w),
               Text(
                 item['level'],
                 style: GoogleFonts.publicSans(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
                   color: Colors.grey,
                 ),
@@ -238,7 +239,7 @@ class CrowdListItem extends StatelessWidget {
       trailing: Text(
         '${item['count']} Orang',
         style: GoogleFonts.publicSans(
-          fontSize: 18,
+          fontSize: 18.sp,
           fontWeight: FontWeight.w400,
           color: Colors.black,
         ),

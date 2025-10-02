@@ -1,5 +1,6 @@
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -16,8 +17,8 @@ class ChatbotOpeningPage extends StatelessWidget {
         leading: IconButton(
           icon: Image.asset(
             'assets/images/close_icon.png',
-            width: 17,
-            height: 17,
+            width: 17.w,
+            height: 17.w,
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -27,7 +28,7 @@ class ChatbotOpeningPage extends StatelessWidget {
       body: Stack(
         children: [
           Positioned(
-            bottom: 340,
+            bottom: 340.h,
             left: 0,
             right: 0,
             child: Center(
@@ -55,16 +56,16 @@ class ChatbotOpeningPage extends StatelessWidget {
                         "Hallo\nAku Suki",
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
-                          fontSize: 28,
+                          fontSize: 28.sp,
                           fontWeight: FontWeight.bold,
                           color: const Color(0xff2A3342),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       Image.asset(
                         'assets/images/suki.png',
-                        width: 195,
-                        height: 270,
+                        width: 195.w,
+                        height: 270.h,
                       ),
                     ],
                   ),
@@ -72,12 +73,12 @@ class ChatbotOpeningPage extends StatelessWidget {
                     "Asisten anda untuk \nmendeteksi banjir \ndan kerumunan",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       color: const Color(0xff2A3342),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   ElevatedButton(
                     onPressed: () {
                       Get.toNamed(AppRoutes.chatbottext);
@@ -92,30 +93,29 @@ class ChatbotOpeningPage extends StatelessWidget {
                       }),
                       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(10.r),
                         ),
                       ),
                       padding: WidgetStateProperty.all<EdgeInsets>(
-                        const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 20),
+                        EdgeInsets.symmetric(horizontal: 40.w, vertical: 20.h),
                       ),
                     ),
                     child: Text(
                       "Start New Chat",
                       style: GoogleFonts.inter(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   FloatingActionButton(
                     onPressed: () {},
                     backgroundColor: const Color(0xffEAEFF3),
-                    child: const Icon(
+                    child: Icon(
                       Icons.mic,
-                      size: 30,
+                      size: 30.sp,
                       color: Colors.red,
                     ),
                   ),

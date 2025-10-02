@@ -85,8 +85,7 @@ class ReportController extends GetxController {
       }).toList();
 
       await box.put('list', toStore);
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<void> pickImage(ImageSource source) async {
@@ -309,7 +308,6 @@ class ReportController extends GetxController {
 
       await box.put('list', current);
       reports.assignAll(List<Map<String, dynamic>>.from(current));
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 }

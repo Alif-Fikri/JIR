@@ -1,3 +1,4 @@
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 
 class DiagonalContainer extends StatelessWidget {
@@ -11,7 +12,7 @@ class DiagonalContainer extends StatelessWidget {
         clipper: DiagonalClipper(),
         child: Container(
           width: double.infinity,
-          height: 310,
+          height: 330.h,
           color: const Color(0xffFEE67A),
         ),
       ),
@@ -20,8 +21,8 @@ class DiagonalContainer extends StatelessWidget {
 }
 
 Path getDiagonalPath(Size size) {
-  const radius = 20.0;
-  const diagonalHeight = 48.3;
+  final radius = 20.w;
+  final diagonalHeight = 48.3.h;
 
   Path path = Path();
 
@@ -48,9 +49,7 @@ Path getDiagonalPath(Size size) {
 
 class DiagonalClipper extends CustomClipper<Path> {
   @override
-  Path getClip(Size size) {
-    return getDiagonalPath(size);
-  }
+  Path getClip(Size size) => getDiagonalPath(size);
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
@@ -62,8 +61,8 @@ class DiagonalShadowPainter extends CustomPainter {
     Path path = getDiagonalPath(size);
     canvas.drawShadow(
       path,
-      Colors.black.withOpacity(0.9),
-      5,
+      Colors.black.withValues(alpha: 0.9),
+      5.r,
       true,
     );
   }

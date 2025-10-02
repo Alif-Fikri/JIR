@@ -2,6 +2,7 @@ import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/pages/home/chat/controller/chat_controller.dart';
 import 'package:JIR/pages/home/chat/widget/chat_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 class ChatView extends StatefulWidget {
@@ -52,7 +53,7 @@ class _ChatViewState extends State<ChatView>
       body: Stack(
         children: [
           Positioned(
-              top: 150,
+              top: 150.h,
               left: 0,
               right: 0,
               child: Image.asset('assets/images/bg2.png', fit: BoxFit.cover)),
@@ -64,7 +65,7 @@ class _ChatViewState extends State<ChatView>
               padding: EdgeInsets.only(bottom: screenHeight * 0.1),
               child: ListView.builder(
                 controller: ctrl.scrollController,
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(20.w),
                 itemCount: ctrl.messages.length,
                 itemBuilder: (context, index) {
                   final m = ctrl.messages[index];

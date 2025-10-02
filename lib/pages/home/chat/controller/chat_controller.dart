@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:JIR/pages/auth/service/auth_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -21,17 +22,35 @@ class ChatController extends GetxController with StateMixin<void> {
   String recognizedText = '';
   Timer? _typingTimer;
   int? _typingMessageIndex;
-
   final ScrollController scrollController = ScrollController();
   final TextEditingController textController = TextEditingController();
-
   AnimationController? visualizerController;
+  final RxString username = ''.obs;
+  final AuthService _authService = Get.find<AuthService>();
 
   @override
   void onInit() {
     super.onInit();
     _speech = stt.SpeechToText();
-    _simulateInitialMessages();
+    _initProfileAndMessages();
+  }
+
+  Future<void> _initProfileAndMessages() async {
+    await _loadUsername();
+    await _simulateInitialMessages();
+  }
+
+  Future<void> _loadUsername() async {
+    try {
+      final profile = await _authService.fetchProfile();
+      if (profile['username'] is String) {
+        username.value = profile['username'];
+      } else {
+        username.value = 'Pengguna';
+      }
+    } catch (_) {
+      username.value = 'Pengguna';
+    }
   }
 
   @override
@@ -46,11 +65,14 @@ class ChatController extends GetxController with StateMixin<void> {
     super.onClose();
   }
 
-  void _simulateInitialMessages() async {
+  Future<void> _simulateInitialMessages() async {
+    final displayName =
+        (username.value.isNotEmpty) ? username.value : 'Pengguna';
+
     final initialMessages = [
       {
         "text":
-            "Hallo Zee, aku Suki asisten anda untuk memantau banjir dan kerumunan",
+            "Halo $displayName, aku Suki, asisten Anda untuk memantau banjir dan kerumunan.",
         "isSender": false
       },
       {"text": "Ingin tahu kondisi di area tertentu?", "isSender": false},

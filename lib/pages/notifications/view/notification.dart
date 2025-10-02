@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -77,15 +78,15 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Widget _buildShimmerItem() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      constraints: const BoxConstraints(minHeight: 112),
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      constraints: BoxConstraints(minHeight: 112.h),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -98,25 +99,26 @@ class _NotificationPageState extends State<NotificationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                          height: 18,
+                          height: 18.h,
                           width: double.infinity,
                           color: Colors.white),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8.h),
                       Container(
-                          height: 14,
+                          height: 14.h,
                           width: double.infinity,
                           color: Colors.white),
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Container(width: 44, height: 44, color: Colors.white),
+                SizedBox(width: 12.w),
+                Container(width: 44.w, height: 44.w, color: Colors.white),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Align(
                 alignment: Alignment.centerRight,
-                child: Container(height: 12, width: 120, color: Colors.white)),
+                child:
+                    Container(height: 12.h, width: 120.w, color: Colors.white)),
           ],
         ),
       ),
@@ -140,7 +142,7 @@ class _NotificationPageState extends State<NotificationPage> {
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Text('Notifikasi',
             style: GoogleFonts.inter(
-                fontSize: 20,
+                fontSize: 20.sp,
                 color: Colors.black,
                 fontWeight: FontWeight.bold)),
         actions: [
@@ -150,8 +152,8 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
         ],
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(2.0),
-            child: Container(color: const Color(0xff51669D), height: 2.0)),
+            preferredSize: Size.fromHeight(2.h),
+            child: Container(color: const Color(0xff51669D), height: 2.h)),
       ),
       body: ValueListenableBuilder(
         valueListenable: boxRef.listenable(keys: ['list']),
@@ -165,9 +167,9 @@ class _NotificationPageState extends State<NotificationPage> {
                 onRefresh: _onRefresh,
                 child: ListView.separated(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   itemCount: 6,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, __) => SizedBox(height: 12.h),
                   itemBuilder: (_, __) => _buildShimmerItem(),
                 ),
               ),
@@ -179,9 +181,11 @@ class _NotificationPageState extends State<NotificationPage> {
               onRefresh: _onRefresh,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 200),
-                  Center(child: Text("Belum ada notifikasi")),
+                children: [
+                  SizedBox(height: 200.h),
+                  Center(
+                      child: Text("Belum ada notifikasi",
+                          style: GoogleFonts.inter(fontSize: 14.sp))),
                 ],
               ),
             );
@@ -191,9 +195,9 @@ class _NotificationPageState extends State<NotificationPage> {
             backgroundColor: const Color(0xff45557B),
             onRefresh: _onRefresh,
             child: ListView.separated(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.w),
               itemCount: rawList.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, __) => SizedBox(height: 12.h),
               itemBuilder: (context, index) {
                 final m = Map<String, dynamic>.from(rawList[index]);
                 final notification = NotificationModel.fromMap(m);
@@ -217,10 +221,10 @@ class _NotificationPageState extends State<NotificationPage> {
                   },
                   background: Container(
                     alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
                     decoration: BoxDecoration(
                         color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12.r)),
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
                   child: NotificationItem(notification: notification),
@@ -280,26 +284,26 @@ class NotificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeStr = _friendlyTime(notification.time);
     final iconAsset = _resolveIconAsset();
-    const double cardMinHeight = 112;
+    final double cardMinHeight = 112.h;
     return Container(
-      constraints: const BoxConstraints(minHeight: cardMinHeight),
+      constraints: BoxConstraints(minHeight: cardMinHeight),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade100, width: 0.6),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.grey.shade100, width: 0.6.w),
         boxShadow: [
           BoxShadow(
               color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 6)),
+              blurRadius: 12.r,
+              offset: Offset(0, 6.h)),
           BoxShadow(
               color: Colors.black.withOpacity(0.03),
-              blurRadius: 4,
-              offset: const Offset(0, 2)),
+              blurRadius: 4.r,
+              offset: Offset(0, 2.h)),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -313,42 +317,42 @@ class NotificationItem extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
-                                fontSize: 16,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black)),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8.h),
                         Text(notification.message,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
-                                fontSize: 14,
+                                fontSize: 14.sp,
                                 color: Colors.black87,
                                 fontWeight: FontWeight.w400)),
                       ]),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 44.w,
+                  height: 44.w,
                   decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                       boxShadow: [
                         BoxShadow(
                             color: Colors.black.withOpacity(0.08),
-                            blurRadius: 6,
-                            offset: const Offset(0, 3))
+                            blurRadius: 6.r,
+                            offset: Offset(0, 3.h))
                       ]),
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8.w),
                   child: _buildIconWidget(iconAsset),
                 ),
               ]),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Align(
                   alignment: Alignment.centerRight,
                   child: Text(timeStr,
-                      style:
-                          GoogleFonts.inter(fontSize: 11, color: Colors.grey))),
+                      style: GoogleFonts.inter(
+                          fontSize: 11.sp, color: Colors.grey))),
             ]),
       ),
     );
@@ -356,9 +360,10 @@ class NotificationItem extends StatelessWidget {
 
   Widget _buildIconWidget(String asset) {
     if (asset.startsWith('http')) {
-      return Image.network(asset, width: 40, height: 40, fit: BoxFit.contain);
+      return Image.network(asset,
+          width: 40.w, height: 40.w, fit: BoxFit.contain);
     }
-    return Image.asset(asset, width: 40, height: 40, fit: BoxFit.contain);
+    return Image.asset(asset, width: 40.w, height: 40.w, fit: BoxFit.contain);
   }
 }
 

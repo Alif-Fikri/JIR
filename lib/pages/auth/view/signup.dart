@@ -1,15 +1,13 @@
 import 'package:JIR/pages/auth/widget/helper_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/pages/auth/controller/signup_controller.dart';
 import 'package:JIR/app/routes/app_routes.dart';
 
 class SignupPage extends GetView<SignupController> {
-  final fixedWidth = 350.0;
-  final fixedHeight = 50.0;
-
   const SignupPage({super.key});
 
   @override
@@ -34,10 +32,10 @@ class SignupPage extends GetView<SignupController> {
             children: [
               Image.asset(
                 'assets/images/ic_launcher.png',
-                width: 100,
-                height: 100,
+                width: 100.w,
+                height: 100.h,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               SizedBox(
                 width: fixedWidth,
                 child: Align(
@@ -45,34 +43,34 @@ class SignupPage extends GetView<SignupController> {
                   child: Text(
                     'Selamat Datang di JIR',
                     style: GoogleFonts.inter(
-                      textStyle: const TextStyle(
-                        fontSize: 18,
+                      textStyle: TextStyle(
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               buildTextField(
                 label: 'Nama Pengguna',
                 icon: 'assets/images/person.png',
                 controller: controller.usernameController,
               ),
-              const SizedBox(height: 25),
+              SizedBox(height: 25.h),
               buildTextField(
                 label: 'Email',
                 icon: 'assets/images/email.png',
                 controller: controller.emailController,
               ),
-              const SizedBox(height: 25),
+              SizedBox(height: 25.h),
               buildTextField(
                 label: 'Kata Sandi',
                 icon: 'assets/images/password.png',
                 isObscure: true,
                 controller: controller.passwordController,
               ),
-              const SizedBox(height: 25),
+              SizedBox(height: 25.h),
               buildTextField(
                 label: 'Konfirmasi Kata Sandi',
                 icon: 'assets/images/password.png',
@@ -82,11 +80,11 @@ class SignupPage extends GetView<SignupController> {
               Obx(() => controller.errorMessage.isNotEmpty
                   ? buildErrorMessage(controller.errorMessage.value)
                   : const SizedBox.shrink()),
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               SizedBox(
                 width: fixedWidth,
                 child: Row(
-                  spacing: 8,
+                  spacing: 8.w,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Obx(() => Checkbox(
@@ -102,9 +100,9 @@ class SignupPage extends GetView<SignupController> {
                           Text(
                             'Saya telah membaca dan menyetujui ',
                             style: GoogleFonts.inter(
-                              textStyle: const TextStyle(
+                              textStyle: TextStyle(
                                 color: Colors.black,
-                                fontSize: 12,
+                                fontSize: 12.sp,
                               ),
                             ),
                           ),
@@ -120,8 +118,8 @@ class SignupPage extends GetView<SignupController> {
                             child: Text(
                               'Ketentuan Layanan ',
                               style: GoogleFonts.inter(
-                                textStyle: const TextStyle(
-                                  fontSize: 12,
+                                textStyle: TextStyle(
+                                  fontSize: 12.sp,
                                   color: Color(0xFF005FCB),
                                 ),
                               ),
@@ -130,9 +128,9 @@ class SignupPage extends GetView<SignupController> {
                           Text(
                             'dan ',
                             style: GoogleFonts.inter(
-                              textStyle: const TextStyle(
+                              textStyle: TextStyle(
                                 color: Colors.black,
-                                fontSize: 12,
+                                fontSize: 12.sp,
                               ),
                             ),
                           ),
@@ -148,8 +146,8 @@ class SignupPage extends GetView<SignupController> {
                             child: Text(
                               'Kebijakan Privasi',
                               style: GoogleFonts.inter(
-                                textStyle: const TextStyle(
-                                  fontSize: 12,
+                                textStyle: TextStyle(
+                                  fontSize: 12.sp,
                                   color: Color(0xFF005FCB),
                                 ),
                               ),
@@ -161,7 +159,7 @@ class SignupPage extends GetView<SignupController> {
                   ],
                 ),
               ),
-              const SizedBox(height: 25),
+              SizedBox(height: 25.h),
               SizedBox(
                 width: fixedWidth,
                 height: fixedHeight,
@@ -169,7 +167,7 @@ class SignupPage extends GetView<SignupController> {
                   onPressed: controller.validateAndRegister,
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     backgroundColor: const Color(0xFF45557B),
                   ),
@@ -178,8 +176,8 @@ class SignupPage extends GetView<SignupController> {
                       : Text(
                           'Daftar',
                           style: GoogleFonts.inter(
-                            textStyle: const TextStyle(
-                              fontSize: 14,
+                            textStyle: TextStyle(
+                              fontSize: 14.sp,
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
                             ),
@@ -187,23 +185,23 @@ class SignupPage extends GetView<SignupController> {
                         )),
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               RichText(
                 text: TextSpan(
                   text: 'Sudah punya akun? ',
                   style: GoogleFonts.inter(
-                    textStyle: const TextStyle(
+                    textStyle: TextStyle(
                       color: Colors.black,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                     ),
                   ),
                   children: [
                     TextSpan(
                       text: 'Masuk',
                       style: GoogleFonts.inter(
-                        textStyle: const TextStyle(
+                        textStyle: TextStyle(
                           color: Color(0xFF005FCB),
-                          fontSize: 12,
+                          fontSize: 12.sp,
                         ),
                       ),
                       recognizer: TapGestureRecognizer()

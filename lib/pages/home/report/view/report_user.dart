@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/pages/home/report/controller/report_controller.dart';
@@ -16,7 +17,7 @@ class ReportFormPage extends StatelessWidget {
       context: context,
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(16),
+        insetPadding: EdgeInsets.all(16.w),
         child: InteractiveViewer(
           child: Image.file(file, fit: BoxFit.contain),
         ),
@@ -88,7 +89,7 @@ class ReportFormPage extends StatelessWidget {
                 return Colors.white;
               }),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
             ),
           ),
@@ -111,7 +112,7 @@ class ReportFormPage extends StatelessWidget {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(20.w),
               child: Obx(() {
                 final dt = controller.dateTime.value;
                 final formatted = DateFormat('yyyy-MM-dd HH:mm').format(dt);
@@ -119,17 +120,17 @@ class ReportFormPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildImagePreview(context),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     _buildTypeAndSeverity(),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12.h),
                     _buildAddressSection(),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12.h),
                     _buildDescriptionField(),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12.h),
                     _buildContactSection(),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12.h),
                     _buildDateTimeField(context, formatted),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24.h),
                   ],
                 );
               }),
@@ -138,7 +139,7 @@ class ReportFormPage extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        minimum: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: _buildSubmitButton(),
       ),
     );
@@ -148,11 +149,11 @@ class ReportFormPage extends StatelessWidget {
         title: Text('Laporan Baru',
             style: GoogleFonts.inter(
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
+                fontSize: 20.sp,
                 color: Colors.white)),
         backgroundColor: const Color(0xff45557B),
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.sp),
             onPressed: () => Get.back()),
       );
 
@@ -160,9 +161,9 @@ class ReportFormPage extends StatelessWidget {
     final file = controller.imageFile.value;
     if (file == null) {
       return Container(
-        height: 180,
+        height: 180.h,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           color: Colors.white,
           border: Border.all(color: Colors.grey.shade300),
         ),
@@ -173,25 +174,25 @@ class ReportFormPage extends StatelessWidget {
     return Column(children: [
       Stack(children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           child: Image.file(file,
-              width: double.infinity, height: 200, fit: BoxFit.cover),
+              width: double.infinity, height: 200.h, fit: BoxFit.cover),
         ),
         Positioned(
-          top: 8,
-          right: 8,
+          top: 8.h,
+          right: 8.w,
           child: GestureDetector(
             onTap: () => _showFullImage(context),
             child: Container(
-              padding: const EdgeInsets.all(6),
+              padding: EdgeInsets.all(6.w),
               decoration: const BoxDecoration(
                   color: Colors.black54, shape: BoxShape.circle),
-              child: const Icon(Icons.fullscreen, color: Colors.white),
+              child: Icon(Icons.fullscreen, color: Colors.white, size: 24.sp),
             ),
           ),
         ),
       ]),
-      const SizedBox(height: 8),
+      SizedBox(height: 8.h),
     ]);
   }
 
@@ -203,7 +204,7 @@ class ReportFormPage extends StatelessWidget {
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Tipe Laporan',
                 style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             DropdownButtonFormField<String>(
               dropdownColor: Colors.white,
               value: controller.reportType.value,
@@ -219,7 +220,7 @@ class ReportFormPage extends StatelessWidget {
                         value: e,
                         child: Text(e,
                             style: GoogleFonts.inter(
-                                fontSize: 14, fontWeight: FontWeight.w500)),
+                                fontSize: 14.sp, fontWeight: FontWeight.w500)),
                       ))
                   .toList(),
               onChanged: (v) => controller.reportType.value =
@@ -229,20 +230,20 @@ class ReportFormPage extends StatelessWidget {
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r)),
               ),
             ),
           ]),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         Expanded(
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Keparahan',
                 style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             DropdownButtonFormField<String>(
               dropdownColor: Colors.white,
               value: controller.severity.value,
@@ -251,7 +252,7 @@ class ReportFormPage extends StatelessWidget {
                         value: e,
                         child: Text(e,
                             style: GoogleFonts.inter(
-                                fontSize: 14, fontWeight: FontWeight.w500)),
+                                fontSize: 14.sp, fontWeight: FontWeight.w500)),
                       ))
                   .toList(),
               onChanged: (v) =>
@@ -261,9 +262,9 @@ class ReportFormPage extends StatelessWidget {
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r)),
               ),
             ),
           ]),
@@ -276,7 +277,7 @@ class ReportFormPage extends StatelessWidget {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Alamat / Lokasi',
           style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-      const SizedBox(height: 6),
+      SizedBox(height: 6.h),
       Row(children: [
         Expanded(
           child: TextFormField(
@@ -287,34 +288,35 @@ class ReportFormPage extends StatelessWidget {
               filled: true,
               fillColor: Colors.white,
               border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         SizedBox(
-          width: 48,
-          height: 48,
+          width: 48.w,
+          height: 48.h,
           child: ElevatedButton(
             onPressed: controller.fillLocationFromGPS,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xff45557B),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(8.r)),
               padding: EdgeInsets.zero,
-              minimumSize: const Size(48, 48),
+              minimumSize: Size(48.w, 48.h),
             ),
-            child: const Center(
-                child: Icon(Icons.my_location, color: Colors.white)),
+            child: Center(
+                child:
+                    Icon(Icons.my_location, color: Colors.white, size: 24.sp)),
           ),
         ),
       ]),
-      const SizedBox(height: 8),
+      SizedBox(height: 8.h),
       Text(
         'Koordinat: ${controller.latitude.value.toStringAsFixed(6)}, ${controller.longitude.value.toStringAsFixed(6)}',
-        style: GoogleFonts.inter(fontSize: 12),
+        style: GoogleFonts.inter(fontSize: 12.sp),
       ),
     ]);
   }
@@ -322,7 +324,7 @@ class ReportFormPage extends StatelessWidget {
   Widget _buildDescriptionField() {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Deskripsi', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-      const SizedBox(height: 6),
+      SizedBox(height: 6.h),
       TextFormField(
         initialValue: controller.description.value,
         onChanged: (v) => controller.description.value = v,
@@ -331,8 +333,8 @@ class ReportFormPage extends StatelessWidget {
           hintText: 'Jelaskan kronologi / detail',
           filled: true,
           fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.all(12),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+          contentPadding: EdgeInsets.all(12.w),
         ),
       ),
     ]);
@@ -349,7 +351,7 @@ class ReportFormPage extends StatelessWidget {
             child: Text('No. Telepon',
                 style: GoogleFonts.inter(fontWeight: FontWeight.w600))),
       ]),
-      const SizedBox(height: 6),
+      SizedBox(height: 6.h),
       Row(children: [
         Expanded(
           child: TextFormField(
@@ -360,13 +362,13 @@ class ReportFormPage extends StatelessWidget {
               filled: true,
               fillColor: Colors.white,
               border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         Expanded(
           child: TextFormField(
             initialValue: controller.contactPhone.value,
@@ -377,9 +379,9 @@ class ReportFormPage extends StatelessWidget {
               filled: true,
               fillColor: Colors.white,
               border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             ),
           ),
         ),
@@ -399,21 +401,21 @@ class ReportFormPage extends StatelessWidget {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Waktu Kejadian',
           style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-      const SizedBox(height: 6),
+      SizedBox(height: 6.h),
       InkWell(
         onTap: () => _pickDateTime(context),
         child: Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          height: 48.h,
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             border: Border.all(color: Colors.grey.shade300),
           ),
           child: Row(
             children: [
               Expanded(child: Text(formatted, style: GoogleFonts.inter())),
-              const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+              Icon(Icons.calendar_today, size: 18.sp, color: Colors.grey),
             ],
           ),
         ),
@@ -424,18 +426,19 @@ class ReportFormPage extends StatelessWidget {
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 56.h,
       child: ElevatedButton(
         onPressed: controller.submitReport,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xff45557B),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
         ),
         child: Text('Kirim Laporan',
             style: GoogleFonts.inter(
                 color: Colors.white,
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600)),
       ),
     );

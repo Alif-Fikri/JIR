@@ -4,6 +4,7 @@ import 'package:JIR/pages/profile/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProfilePage extends StatelessWidget {
   ProfilePage({super.key});
@@ -21,7 +22,7 @@ class ProfilePage extends StatelessWidget {
             alignment: Alignment.centerLeft,
             children: [
               Container(
-                height: 320,
+                height: 320.h,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage('assets/images/group_38.png'),
@@ -30,25 +31,25 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 20.0, bottom: 90),
+                padding: EdgeInsets.only(left: 20.w, bottom: 90.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Obx(() => Text(
                           'Halo, ${pc.name.value} !',
                           style: GoogleFonts.inter(
-                            fontSize: 22,
+                            fontSize: 22.sp,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         )),
-                    const SizedBox(height: 5),
+                    SizedBox(height: 5.h),
                     Obx(() => Text(
                           pc.email.value,
                           style: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             color: Colors.white,
                           ),
                           maxLines: 1,
@@ -57,16 +58,16 @@ class ProfilePage extends StatelessWidget {
                   ],
                 ),
               ),
-              const Positioned(
-                right: 50,
-                bottom: 15,
+              Positioned(
+                right: 50.w,
+                bottom: 15.h,
                 child: SizedBox(
-                  width: 160,
-                  height: 160,
+                  width: 160.w,
+                  height: 160.h,
                   child: CircleAvatar(
                     backgroundColor: Colors.white,
                     child: CircleAvatar(
-                      radius: 74,
+                      radius: 74.r,
                       backgroundColor: Colors.grey,
                     ),
                   ),
@@ -76,18 +77,19 @@ class ProfilePage extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: ListView(
                 children: [
                   ProfileMenuItem(
-                    icon: Image.asset('assets/images/settings.png', width: 24),
+                    icon:
+                        Image.asset('assets/images/settings.png', width: 24.w),
                     text: "Pengaturan",
                     onTap: () {
                       Get.toNamed(AppRoutes.settings);
                     },
                   ),
                   ProfileMenuItem(
-                    icon: Image.asset('assets/images/about.png', width: 24),
+                    icon: Image.asset('assets/images/about.png', width: 24.w),
                     text: "Tentang JIR",
                     onTap: () {
                       Get.toNamed(AppRoutes.about);
@@ -95,7 +97,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/privacypolicy.png',
-                        width: 24),
+                        width: 24.w),
                     text: "Kebijakan Privasi",
                     onTap: () {
                       Get.toNamed(AppRoutes.privacyPolicy);
@@ -103,14 +105,14 @@ class ProfilePage extends StatelessWidget {
                   ),
                   ProfileMenuItem(
                     icon: Image.asset('assets/images/termsofservice.png',
-                        width: 24),
+                        width: 24.w),
                     text: "Syarat dan Ketentuan",
                     onTap: () {
                       Get.toNamed(AppRoutes.termsOfService);
                     },
                   ),
                   ProfileMenuItem(
-                    icon: Image.asset('assets/images/logout.png', width: 24),
+                    icon: Image.asset('assets/images/logout.png', width: 24.w),
                     text: "Keluar",
                     onTap: () {
                       LogoutDialog.show(
@@ -154,7 +156,7 @@ class ProfileMenuItem extends StatelessWidget {
             title: Text(
               text,
               style: GoogleFonts.inter(
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w500,
                 color: const Color(0xFF435482),
               ),
@@ -176,12 +178,12 @@ class LogoutDialog {
         return AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(15.r),
           ),
           title: Text(
             'Keluar?',
             style: GoogleFonts.inter(
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -189,7 +191,7 @@ class LogoutDialog {
           content: Text(
             'Apakah Anda yakin ingin keluar?',
             style: GoogleFonts.inter(
-              fontSize: 16,
+              fontSize: 16.sp,
               color: Colors.black,
             ),
           ),
@@ -200,7 +202,7 @@ class LogoutDialog {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(4.r),
                         color: const Color(0xff4B5C82)),
                     child: TextButton(
                       onPressed: () {
@@ -213,7 +215,7 @@ class LogoutDialog {
                         child: Text(
                           'Batal',
                           style: GoogleFonts.inter(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -221,13 +223,13 @@ class LogoutDialog {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10.w),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(4.r),
                         border: Border.all(
-                            color: const Color(0xff4B5C82), width: 1.5)),
+                            color: const Color(0xff4B5C82), width: 1.5.w)),
                     child: TextButton(
                       onPressed: () async {
                         Navigator.of(context).pop();
@@ -240,7 +242,7 @@ class LogoutDialog {
                         child: Text(
                           'Keluar',
                           style: GoogleFonts.inter(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

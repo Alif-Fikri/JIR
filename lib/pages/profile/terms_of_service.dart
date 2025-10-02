@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TermsOfService extends StatelessWidget {
   const TermsOfService({super.key});
@@ -12,7 +13,7 @@ class TermsOfService extends StatelessWidget {
         title: const Text('Kebijakan Layanan'),
         titleTextStyle: GoogleFonts.inter(
           fontWeight: FontWeight.bold,
-          fontSize: 20,
+          fontSize: 20.sp,
           color: Colors.white,
         ),
         backgroundColor: const Color(0xff45557B),
@@ -22,42 +23,42 @@ class TermsOfService extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(20.w),
         child: ListView(
           children: [
             _buildTitle("Syarat dan Ketentuan Layanan Penggunaan JIR"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildUpdate("Terakhir diperbarui: 12 Januari 2025"),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildParagraph(
               "Dengan menggunakan aplikasi JIR, Anda setuju untuk mematuhi syarat dan ketentuan berikut:",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildTitle("1. PENGGUNAAN LAYANAN"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "Kami dapat mengumpulkan informasi berikut untuk menyediakan layanan yang lebih baik:\n"
               "• Aplikasi JIR hanya boleh digunakan untuk tujuan pemantauan banjir, kerumunan, dan kebakaran.\n"
               "• Pengguna dilarang menyalahgunakan layanan untuk tujuan yang melanggar hukum atau mengganggu keamanan publik.",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildSubtitle("2. HAK DAN KEWAJIBAN PENGGUNA"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "• Pengguna bertanggung jawab atas kebenaran data yang diberikan.\n"
               "• Pengguna wajib menjaga kerahasiaan akun dan kata sandi mereka.\n"
               "• Pengguna dilarang mengunggah konten yang melanggar hukum atau hak pihak ketiga.",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildSubtitle("3. BATASAN TANGGUNG JAWAB"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "• Aplikasi JIR tidak bertanggung jawab atas kesalahan data atau keterlambatan informasi dari pihak ketiga.\n"
               "• Kami tidak bertanggung jawab atas kehilangan atau kerusakan yang diakibatkan oleh penggunaan aplikasi ini.",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildTitle("4. PENGHENTIAN LAYANAN"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "Kami berhak menghentikan akses pengguna yang melanggar kebijakan ini tanpa pemberitahuan sebelumnya.",
             ),
@@ -71,7 +72,7 @@ class TermsOfService extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 10,
+        fontSize: 10.sp,
         fontWeight: FontWeight.w300,
         color: Colors.black,
       ),
@@ -82,7 +83,7 @@ class TermsOfService extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 16,
+        fontSize: 16.sp,
         fontWeight: FontWeight.bold,
         color: Colors.black,
       ),
@@ -93,7 +94,7 @@ class TermsOfService extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 13,
+        fontSize: 13.sp,
         fontWeight: FontWeight.w300,
         color: Colors.black,
       ),
@@ -104,7 +105,7 @@ class TermsOfService extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-          fontSize: 13,
+          fontSize: 13.sp,
           height: 1.5,
           color: Colors.black,
           fontWeight: FontWeight.w300),

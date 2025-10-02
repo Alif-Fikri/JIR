@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 
@@ -17,25 +18,25 @@ class CrowdMarker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 60,
-      height: 60,
+      width: 60.w,
+      height: 60.h,
       decoration: BoxDecoration(
         color: color.withOpacity(0.3),
         shape: BoxShape.circle,
       ),
       child: Center(
         child: Container(
-          width: 40,
-          height: 40,
+          width: 40.w,
+          height: 40.h,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
+            border: Border.all(color: Colors.white, width: 2.w),
             boxShadow: [
               BoxShadow(
                 color: color.withOpacity(0.5),
-                blurRadius: 10,
-                spreadRadius: 2,
+                blurRadius: 10.r,
+                spreadRadius: 2.r,
               )
             ],
           ),
@@ -102,12 +103,12 @@ class _AnimatedMarkerState extends State<AnimatedMarker>
             ),
             child: Center(
               child: Container(
-                width: 40,
-                height: 40,
+                width: 40.w,
+                height: 40.h,
                 decoration: BoxDecoration(
                   color: color,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+                  border: Border.all(color: Colors.white, width: 2.w),
                   boxShadow: [
                     BoxShadow(
                       color: color.withOpacity(0.5),
@@ -121,7 +122,7 @@ class _AnimatedMarkerState extends State<AnimatedMarker>
                     widget.count,
                     style: GoogleFonts.publicSans(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

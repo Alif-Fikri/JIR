@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PrivacyPolicy extends StatelessWidget {
   const PrivacyPolicy({super.key});
@@ -12,7 +13,7 @@ class PrivacyPolicy extends StatelessWidget {
         title: const Text('Kebijakan Privasi'),
         titleTextStyle: GoogleFonts.inter(
           fontWeight: FontWeight.bold,
-          fontSize: 20,
+          fontSize: 20.sp,
           color: Colors.white,
         ),
         backgroundColor: const Color(0xff45557B),
@@ -22,19 +23,19 @@ class PrivacyPolicy extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(20.w),
         child: ListView(
           children: [
             _buildTitle("Kebijakan Privasi JIR"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildUpdate("Terakhir diperbarui: 12 Januari 2025"),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildParagraph(
               "Selamat datang di aplikasi JIR. Kami menghormati privasi Anda dan berkomitmen untuk melindungi data pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, mengungkapkan, dan melindungi informasi Anda saat menggunakan aplikasi JIR.",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildTitle("1. INFORMASI YANG KAMI KUMPULKAN"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "Kami dapat mengumpulkan informasi berikut untuk menyediakan layanan yang lebih baik:\n"
               "• Informasi Pribadi. Nama, email, nomor telepon, dan informasi lainnya yang Anda berikan secara langsung.\n"
@@ -42,9 +43,9 @@ class PrivacyPolicy extends StatelessWidget {
               "• Informasi Perangkat. Tipe perangkat, sistem operasi, dan data teknis lainnya.\n"
               "• Data Penggunaan. Informasi tentang bagaimana Anda menggunakan aplikasi, seperti fitur yang sering digunakan.",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildSubtitle("2. PENGGUNAAN INFORMASI"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "Kami tidak akan menjual atau membagikan informasi pribadi Anda kepada pihak ketiga. Kami menggunakan informasi yang dikumpulkan untuk:\n"
               "• Menyediakan layanan pemantauan banjir, kerumunan, dan kebakaran.\n"
@@ -52,18 +53,18 @@ class PrivacyPolicy extends StatelessWidget {
               "• Meningkatkan pengalaman pengguna dengan pengembangan fitur yang lebih baik.\n"
               "• Mematuhi ketentuan hukum yang berlaku.",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildSubtitle("3. KEAMANAN DATA"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "Kami menerapkan langkah-langkah keamanan yang sesuai untuk melindungi data Anda dari akses tidak sah, perubahan, atau pengungkapan yang tidak diizinkan. Anda memiliki hak untuk:\n"
               "• Mengakses, memperbarui, atau menghapus data pribadi Anda.\n"
               "• Menonaktifkan akses lokasi kapan saja melalui pengaturan perangkat Anda.\n"
               "• Menarik persetujuan penggunaan data kapan saja.",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildTitle("4. Hubungi Kami"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "Jika Anda memiliki pertanyaan atau permintaan terkait kebijakan privasi ini, silakan hubungi kami di:\n"
               "Email: aduanjaki@gmail.com\n"
@@ -80,7 +81,7 @@ class PrivacyPolicy extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 10,
+        fontSize: 10.sp,
         fontWeight: FontWeight.w300,
         color: Colors.black,
       ),
@@ -91,7 +92,7 @@ class PrivacyPolicy extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 16,
+        fontSize: 16.sp,
         fontWeight: FontWeight.bold,
         color: Colors.black,
       ),
@@ -102,7 +103,7 @@ class PrivacyPolicy extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 13,
+        fontSize: 13.sp,
         fontWeight: FontWeight.w300,
         color: Colors.black,
       ),
@@ -113,7 +114,7 @@ class PrivacyPolicy extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-          fontSize: 13,
+          fontSize: 13.sp,
           height: 1.5,
           color: Colors.black,
           fontWeight: FontWeight.w300),

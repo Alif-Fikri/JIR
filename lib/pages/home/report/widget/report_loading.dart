@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
@@ -14,13 +15,13 @@ class ReportLoadingPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Lottie.asset('assets/lottie/loading.json',
-                width: 200, height: 200, repeat: true),
-            const SizedBox(height: 20),
+                width: 200.w, height: 200.w, repeat: true),
+            SizedBox(height: 20.h),
             Center(
               child: Text(
                 'Terimakasih atas laporan\nAnda, silahkan tunggu\nbeberapa saat',
                 style: GoogleFonts.inter(
-                  fontSize: 24,
+                  fontSize: 24.sp,
                   color: Colors.black,
                 ),
                 textAlign: TextAlign.center,

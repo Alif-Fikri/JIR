@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:JIR/pages/home/main/controller/home_controller.dart';
 import 'package:JIR/pages/home/main/widget/home_shimmer.dart';
 
@@ -25,36 +25,36 @@ class WeatherCard extends StatelessWidget {
       final bgPath = controller.backgroundImage.value.trim();
 
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
+        padding: EdgeInsets.symmetric(horizontal: 25.w),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             Container(
-              height: cardHeight,
+              height: cardHeight.h,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.4),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
+                    blurRadius: 15.r,
+                    offset: Offset(0, 8.h),
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 child: _buildBackgroundWidget(bgPath, isLoading),
               ),
             ),
             Positioned(
-              bottom: 8,
-              left: 8,
+              bottom: 8.h,
+              left: 8.w,
               child: Container(
-                padding: const EdgeInsets.all(10),
-                width: 110,
+                padding: EdgeInsets.all(10.w),
+                width: 110.w,
                 decoration: BoxDecoration(
                   color: Colors.black.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(15.r),
                 ),
                 child: ready
                     ? _buildContent(weatherIcon, weatherDesc, temp, location)
@@ -62,17 +62,17 @@ class WeatherCard extends StatelessWidget {
               ),
             ),
             Positioned(
-              top: -20,
-              right: -10,
+              top: -20.h,
+              right: -10.w,
               child: CircleAvatar(
-                radius: 35,
+                radius: 35.r,
                 backgroundColor: Colors.white,
                 child: Image.asset(
                   'assets/images/path.png',
-                  width: 45,
-                  height: 45,
+                  width: 45.w,
+                  height: 45.h,
                   color: Colors.black,
-                  errorBuilder: (_, __, ___) => const SizedBox(),
+                  errorBuilder: (_, __, ___) => SizedBox.shrink(),
                 ),
               ),
             ),
@@ -94,22 +94,22 @@ class WeatherCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
-          width: 80,
-          height: 50,
+          width: 80.w,
+          height: 50.h,
           child: iconPath.isNotEmpty
               ? Image.asset(
                   iconPath,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  errorBuilder: (_, __, ___) => SizedBox.shrink(),
                 )
-              : const SizedBox.shrink(),
+              : SizedBox.shrink(),
         ),
-        const SizedBox(height: 5),
+        SizedBox(height: 5.h),
         Text(
           description,
           style: GoogleFonts.inter(
             color: Colors.white,
-            fontSize: 11,
+            fontSize: 11.sp,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -117,7 +117,7 @@ class WeatherCard extends StatelessWidget {
           '$temperature°',
           style: GoogleFonts.inter(
             color: Colors.white,
-            fontSize: 11,
+            fontSize: 11.sp,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -125,7 +125,7 @@ class WeatherCard extends StatelessWidget {
           location,
           style: GoogleFonts.inter(
             color: Colors.white,
-            fontSize: 8,
+            fontSize: 8.sp,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -140,20 +140,20 @@ class WeatherCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
-          width: 80,
-          height: 50,
+          width: 80.w,
+          height: 50.h,
           child: HomeShimmer.rect(
-            height: 50,
-            width: 80,
-            radius: BorderRadius.circular(6),
+            height: 50.h,
+            width: 80.w,
+            radius: BorderRadius.circular(6.r),
           ),
         ),
-        const SizedBox(height: 8),
-        HomeShimmer.rect(height: 12, width: 80),
-        const SizedBox(height: 6),
-        HomeShimmer.rect(height: 12, width: 40),
-        const SizedBox(height: 6),
-        HomeShimmer.rect(height: 9, width: 70),
+        SizedBox(height: 8.h),
+        HomeShimmer.rect(height: 12.h, width: 80.w),
+        SizedBox(height: 6.h),
+        HomeShimmer.rect(height: 12.h, width: 40.w),
+        SizedBox(height: 6.h),
+        HomeShimmer.rect(height: 9.h, width: 70.w),
       ],
     );
   }
@@ -181,7 +181,7 @@ class WeatherCard extends StatelessWidget {
     }
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xff51669D), Color(0xff45557B)],
           begin: Alignment.topLeft,
@@ -196,7 +196,7 @@ class WeatherCard extends StatelessWidget {
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
-            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            errorBuilder: (_, __, ___) => SizedBox.shrink(),
           ),
         ),
       ),

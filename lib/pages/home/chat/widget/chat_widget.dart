@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:JIR/helper/voicefrequency.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -146,7 +147,7 @@ class ChatBubble extends StatelessWidget {
         rawText,
         style: GoogleFonts.inter(
           color: Colors.white,
-          fontSize: 14,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w600,
         ),
       );
@@ -155,18 +156,18 @@ class ChatBubble extends StatelessWidget {
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 12.0),
-        padding: const EdgeInsets.all(12.0),
+        margin: EdgeInsets.symmetric(vertical: 12.h),
+        padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: isSender ? const Color(0xffE45835) : const Color(0xff45557B),
-          borderRadius: BorderRadius.circular(10.0),
+          borderRadius: BorderRadius.circular(10.r),
         ),
         child: Column(
           crossAxisAlignment:
               isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             buildMainText(),
-            if (showButtons) const SizedBox(height: 10),
+            if (showButtons) SizedBox(height: 10.h),
             if (showButtons)
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -174,10 +175,10 @@ class ChatBubble extends StatelessWidget {
                   TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white24,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0, vertical: 8.0),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(8.r)),
                     ),
                     onPressed: () {
                       if (onOpenRoute != null && route != null) {
@@ -192,14 +193,14 @@ class ChatBubble extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8.w),
                   TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white12,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 8.0),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(8.r)),
                     ),
                     onPressed: onPreviewToggle,
                     child: Text(
@@ -210,17 +211,17 @@ class ChatBubble extends StatelessWidget {
                   ),
                 ],
               ),
-            if (showButtons && previewVisible) const SizedBox(height: 10),
+            if (showButtons && previewVisible) SizedBox(height: 10.h),
             if (showButtons && previewVisible)
               GestureDetector(
                 onTap: () {
                   if (onOpenRoute != null) onOpenRoute!(route);
                 },
                 child: Container(
-                  height: 120,
+                  height: 120.h,
                   width: MediaQuery.of(context).size.width * 0.65,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                       border: Border.all(color: Colors.white24)),
                   clipBehavior: Clip.hardEdge,
                   child: SmallMapPreview(route: route!),
@@ -359,19 +360,19 @@ class ChatInput extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
       color: Colors.white,
       child: Row(children: [
         Expanded(
           child: Container(
             decoration: BoxDecoration(
               color: const Color(0xffEAEFF3),
-              borderRadius: BorderRadius.circular(10.0),
+              borderRadius: BorderRadius.circular(10.r),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(0.1),
-                    blurRadius: 6,
-                    offset: const Offset(0, 4))
+                    blurRadius: 6.r,
+                    offset: Offset(0, 4.h))
               ],
             ),
             child: TextField(
@@ -384,29 +385,30 @@ class ChatInput extends StatelessWidget {
                     fontSize: screenWidth * 0.04,
                     color: const Color(0xFF435482)),
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                    borderRadius: BorderRadius.circular(10.r),
                     borderSide:
                         const BorderSide(color: Color(0x14000000), width: 1.0)),
                 enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                    borderRadius: BorderRadius.circular(10.r),
                     borderSide:
                         const BorderSide(color: Color(0x14000000), width: 1.0)),
                 focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                    borderRadius: BorderRadius.circular(10.r),
                     borderSide:
                         const BorderSide(color: Color(0x14000000), width: 1.0)),
                 filled: true,
                 fillColor: const Color(0xffEAEFF3),
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 10.0, horizontal: 20.0),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 10.h, horizontal: 20.w),
                 suffixIcon: IconButton(
-                    icon: const Icon(Icons.send, color: Color(0xffE45835)),
+                    icon: Icon(Icons.send,
+                        color: const Color(0xffE45835), size: 24.sp),
                     onPressed: controller.sendFromInput),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 8.0),
+        SizedBox(width: 8.w),
         Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
@@ -415,17 +417,17 @@ class ChatInput extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                   color: Colors.black.withOpacity(0.1),
-                  blurRadius: 6,
-                  offset: const Offset(0, 4))
+                  blurRadius: 6.r,
+                  offset: Offset(0, 4.h))
             ],
           ),
           child: CircleAvatar(
             backgroundColor: Colors.transparent,
-            radius: 24,
+            radius: 24.r,
             child: ObxValue<RxBool>(
               (rx) => IconButton(
                 icon: Icon(rx.value ? Icons.mic : Icons.mic_none,
-                    color: Colors.red),
+                    color: Colors.red, size: 24.sp),
                 onPressed: rx.value
                     ? controller.stopListening
                     : controller.startListening,
@@ -448,7 +450,7 @@ class MicOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 180,
+      height: 180.h,
       width: double.infinity,
       child: Stack(alignment: Alignment.center, children: [
         if (controllerValueGetter != null)
@@ -528,7 +530,7 @@ class _AnimatedDotsState extends State<AnimatedDots> {
     return Text(
       dots,
       style: GoogleFonts.inter(
-          color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+          color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.w700),
     );
   }
 }

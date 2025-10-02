@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -169,10 +170,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final screenHeight = media.size.height;
-    const headerHeight = 308.0;
+    final headerHeight = 308.h;
     const weatherCardHeight = WeatherCard.cardHeight;
-    final overlap = math.min(180.0, screenHeight * 0.22);
-    const appBarHeight = 90.0;
+    final overlap = math.min(180.h, screenHeight * 0.22);
+    final appBarHeight = 90.h;
 
     return PopScope(
       canPop: false,
@@ -191,9 +192,9 @@ class _HomePageState extends State<HomePage> {
                       clipBehavior: Clip.none,
                       children: [
                         ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(87),
-                              bottomRight: Radius.circular(87)),
+                          borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(87.r),
+                              bottomRight: Radius.circular(87.r)),
                           child: Container(
                             height: headerHeight,
                             decoration:
@@ -208,13 +209,13 @@ class _HomePageState extends State<HomePage> {
                             bottom: false,
                             child: Container(
                               height: appBarHeight,
-                              padding: const EdgeInsets.only(
-                                  left: 16, right: 16, bottom: 50),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF45557B),
+                              padding: EdgeInsets.only(
+                                  left: 16.w, right: 16.w, bottom: 50.h),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF45557B),
                                 borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(87),
-                                    bottomRight: Radius.circular(87)),
+                                    bottomLeft: Radius.circular(87.r),
+                                    bottomRight: Radius.circular(87.r)),
                               ),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -222,23 +223,24 @@ class _HomePageState extends State<HomePage> {
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Colors.transparent,
-                                      borderRadius: BorderRadius.circular(50),
-                                      boxShadow: const [
+                                      borderRadius: BorderRadius.circular(50.r),
+                                      boxShadow: [
                                         BoxShadow(
-                                          color: Color.fromRGBO(0, 0, 0, 0.25),
-                                          blurRadius: 2,
-                                          offset: Offset(0, 2),
+                                          color: const Color.fromRGBO(
+                                              0, 0, 0, 0.25),
+                                          blurRadius: 2.r,
+                                          offset: Offset(0, 2.h),
                                         ),
                                       ],
                                     ),
                                     child: Image.asset(
                                       'assets/images/jir_logo8.png',
-                                      width: 45,
-                                      height: 45,
+                                      width: 45.w,
+                                      height: 45.w,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  SizedBox(width: 12.w),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -248,42 +250,42 @@ class _HomePageState extends State<HomePage> {
                                         Text(
                                           _greetingForNow(),
                                           style: GoogleFonts.lexend(
-                                            fontSize: 14,
+                                            fontSize: 14.sp,
                                             fontWeight: FontWeight.w700,
                                             color: Colors.white,
                                             shadows: [
                                               Shadow(
-                                                  blurRadius: 5.0,
+                                                  blurRadius: 5.r,
                                                   color: Colors.black
                                                       .withOpacity(0.4),
-                                                  offset: Offset(1, 1))
+                                                  offset: Offset(1.w, 1.h))
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(height: 1),
+                                        SizedBox(height: 1.h),
                                         _profileLoading
                                             ? SizedBox(
-                                                height: 18,
+                                                height: 18.h,
                                                 child: Row(
-                                                  children: const [
+                                                  children: [
                                                     SizedBox(
-                                                      width: 14,
-                                                      height: 14,
+                                                      width: 14.w,
+                                                      height: 14.w,
                                                       child:
                                                           CircularProgressIndicator(
-                                                        strokeWidth: 2,
+                                                        strokeWidth: 2.w,
                                                         valueColor:
-                                                            AlwaysStoppedAnimation<
+                                                            const AlwaysStoppedAnimation<
                                                                     Color>(
                                                                 Colors.white),
                                                       ),
                                                     ),
-                                                    SizedBox(width: 8),
+                                                    SizedBox(width: 8.w),
                                                     Text(
                                                       'Memuat...',
                                                       style: TextStyle(
                                                         color: Colors.white70,
-                                                        fontSize: 14,
+                                                        fontSize: 14.sp,
                                                       ),
                                                     ),
                                                   ],
@@ -294,15 +296,16 @@ class _HomePageState extends State<HomePage> {
                                                     ? _username
                                                     : 'Pengguna',
                                                 style: GoogleFonts.lexend(
-                                                  fontSize: 12,
+                                                  fontSize: 12.sp,
                                                   fontWeight: FontWeight.w700,
                                                   color: Colors.white,
                                                   shadows: [
                                                     Shadow(
-                                                        blurRadius: 5.0,
+                                                        blurRadius: 5.r,
                                                         color: Colors.black
                                                             .withOpacity(0.4),
-                                                        offset: Offset(1, 1))
+                                                        offset:
+                                                            Offset(1.w, 1.h))
                                                   ],
                                                 ),
                                               ),
@@ -312,26 +315,27 @@ class _HomePageState extends State<HomePage> {
                                   GestureDetector(
                                     onTap: _openSupportEmail,
                                     child: Container(
-                                      width: 40,
-                                      height: 40,
-                                      margin: const EdgeInsets.only(left: 8),
+                                      width: 40.w,
+                                      height: 40.w,
+                                      margin: EdgeInsets.only(left: 8.w),
                                       decoration: BoxDecoration(
                                         color: Colors.transparent,
-                                        borderRadius: BorderRadius.circular(50),
-                                        boxShadow: const [
+                                        borderRadius:
+                                            BorderRadius.circular(50.r),
+                                        boxShadow: [
                                           BoxShadow(
-                                            color:
-                                                Color.fromRGBO(0, 0, 0, 0.25),
-                                            blurRadius: 2,
-                                            offset: Offset(0, 2),
+                                            color: const Color.fromRGBO(
+                                                0, 0, 0, 0.25),
+                                            blurRadius: 2.r,
+                                            offset: Offset(0, 2.h),
                                           ),
                                         ],
                                       ),
-                                      child: const Center(
+                                      child: Center(
                                         child: Icon(
                                           Icons.support_agent,
                                           color: Colors.white,
-                                          size: 25,
+                                          size: 25.sp,
                                         ),
                                       ),
                                     ),
@@ -352,22 +356,34 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: (weatherCardHeight - overlap) + 20),
+                    SizedBox(height: (weatherCardHeight - overlap) + 20.h),
                     const HomeSearchBar(),
                     HomeFeatureGrid(controller: controller),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12.h),
                     Image.asset('assets/images/line2.png'),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     HomeWarningSection(
                       homeController: controller,
                       notificationController: nc,
                     ),
                     Obx(() {
                       final hasWarnings = nc.warnings.isNotEmpty;
-                      return SizedBox(height: hasWarnings ? 16 : 0);
+                      return SizedBox(height: hasWarnings ? 16.h : 0);
                     }),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Berita Terkini',
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF333333),
+                        ),
+                      ),
+                    ),
                     NewsCarousel(controller: controller),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                   ],
                 ),
               ),
@@ -377,14 +393,14 @@ class _HomePageState extends State<HomePage> {
               builder: (context, child) {
                 double bounce = math.sin(
                         controller.animationController.value * 2 * math.pi) *
-                    5;
+                    5.h;
                 return Positioned(
-                    bottom: 50 + bounce,
-                    right: 25,
+                    bottom: 50.h + bounce,
+                    right: 25.w,
                     child: GestureDetector(
                         onTap: () => Get.toNamed(AppRoutes.chatbot),
                         child: Image.asset('assets/images/robot.png',
-                            width: 70, height: 70)));
+                            width: 70.w, height: 70.w)));
               },
             ),
           ],

@@ -26,7 +26,7 @@ class LoginController extends GetxController {
       );
 
       if (result['success'] == true) {
-        Get.offAll(AppRoutes.home);
+        Get.offAllNamed(AppRoutes.home);
       } else {
         errorMessage.value =
             result['message'] ?? 'Login gagal. Silakan coba lagi.';

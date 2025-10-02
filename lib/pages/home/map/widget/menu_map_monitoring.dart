@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/home/map/controller/flood_controller.dart';
 
@@ -62,8 +63,8 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 70,
-      height: 70 + (_menuItems.length * 65).toDouble(),
+      width: 70.w,
+      height: 70.h + (_menuItems.length * 65).toDouble().h,
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.bottomCenter,
@@ -74,7 +75,7 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
 
             return AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
-              bottom: _isExpanded ? (70 + (index * 60)) : 0,
+              bottom: _isExpanded ? (70.h + (index * 60.h)) : 0,
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 300),
                 opacity: _isExpanded ? 1.0 : 0.0,
@@ -93,15 +94,15 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
                       Icon(
                         item['icon'],
                         color: Colors.black,
-                        size: 18,
+                        size: 18.sp,
                       ),
-                      const SizedBox(height: 3),
+                      SizedBox(height: 3.h),
                       Text(
                         item['label'],
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.black,
-                          fontSize: 9,
+                          fontSize: 9.sp,
                           height: 1.1,
                         ),
                       ),
@@ -121,8 +122,8 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.3),
-                      blurRadius: 10,
-                      spreadRadius: 2,
+                      blurRadius: 10.r,
+                      spreadRadius: 2.r,
                     )
                   ],
                 ),

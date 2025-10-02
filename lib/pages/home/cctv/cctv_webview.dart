@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -28,7 +29,7 @@ class _CCTVWebViewState extends State<CCTVWebView> {
       appBar: AppBar(
         title: Text("Live CCTV",
             style: GoogleFonts.inter(
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.w700,
               color: Colors.white,
             )),
@@ -36,7 +37,7 @@ class _CCTVWebViewState extends State<CCTVWebView> {
         shadowColor: Colors.black,
         backgroundColor: const Color(0xFF45557B),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.sp),
           onPressed: () => Navigator.pop(context),
         ),
       ),

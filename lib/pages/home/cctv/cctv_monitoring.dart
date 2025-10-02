@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:JIR/pages/home/cctv/cctv_webview.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:JIR/helper/map.dart';
@@ -11,7 +12,7 @@ class CCTVPage extends StatelessWidget {
       name: "DPR",
       url:
           "https://cctv.balitower.co.id/Bendungan-Hilir-003-700014_1/embed.html",
-      coordinates: const LatLng(-6.2096, 106.8005), // Koordinat DPR
+      coordinates: const LatLng(-6.2096, 106.8005),
     ),
     CCTVLocation(
       name: "Bundaran HI",
@@ -37,17 +38,17 @@ class CCTVPage extends StatelessWidget {
     final cctvMarkers = cctvLocations.map((location) {
       return Marker(
         point: location.coordinates,
-        width: 40,
-        height: 40,
+        width: 40.w,
+        height: 40.w,
         child: GestureDetector(
           onTap: () => _navigateToCCTV(context, location.url),
           child: Container(
             decoration: BoxDecoration(
               color: const Color(0xFF45557B),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
+              border: Border.all(color: Colors.white, width: 2.w),
             ),
-            child: const Icon(Icons.videocam, color: Colors.white, size: 20),
+            child: Icon(Icons.videocam, color: Colors.white, size: 20.sp),
           ),
         ),
       );
@@ -58,30 +59,30 @@ class CCTVPage extends StatelessWidget {
       appBar: AppBar(
         title: Text("CCTV",
             style: GoogleFonts.inter(
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w700,
                 color: Colors.white)),
         backgroundColor: const Color(0xFF45557B),
         elevation: 10,
         shadowColor: Colors.black,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.sp),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             child: Container(
-              height: 250,
+              height: 250.h,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: const [
+                borderRadius: BorderRadius.circular(20.r),
+                boxShadow: [
                   BoxShadow(
                     color: Colors.black26,
-                    blurRadius: 5,
-                    spreadRadius: 2,
+                    blurRadius: 5.r,
+                    spreadRadius: 2.r,
                   ),
                 ],
               ),
@@ -95,12 +96,12 @@ class CCTVPage extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+            padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 15.w),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text("Ayo Pantau !",
                   style: GoogleFonts.inter(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
+                      fontSize: 20.sp, fontWeight: FontWeight.bold)),
             ),
           ),
           Expanded(
@@ -113,11 +114,11 @@ class CCTVPage extends StatelessWidget {
 
   Widget _buildLocationGrid() {
     return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      padding: EdgeInsets.symmetric(horizontal: 15.w),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 10,
+        crossAxisSpacing: 15.w,
+        mainAxisSpacing: 10.h,
         childAspectRatio: 1.2,
       ),
       itemCount: cctvLocations.length,
@@ -126,21 +127,21 @@ class CCTVPage extends StatelessWidget {
         return GestureDetector(
           onTap: () => _navigateToCCTV(context, location.url),
           child: Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r)),
             color: Colors.white,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10.r),
                   child: Image.asset(
                     "assets/images/${location.name.toLowerCase().replaceAll(' ', '_')}.jpg",
-                    height: 80,
+                    height: 80.h,
                     fit: BoxFit.cover,
                   ),
                 ),
-                Text(location.name, style: GoogleFonts.inter(fontSize: 14)),
+                Text(location.name, style: GoogleFonts.inter(fontSize: 14.sp)),
               ],
             ),
           ),

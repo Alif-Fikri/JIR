@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -39,7 +40,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
       context: context,
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(12),
+        insetPadding: EdgeInsets.all(12.w),
         child: InteractiveViewer(
           child: imageUrl.startsWith('http')
               ? Image.network(
@@ -87,10 +88,10 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
       children: [
         Text(label,
             style: GoogleFonts.inter(
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF45557B))),
-        const SizedBox(height: 6),
+        SizedBox(height: 6.h),
         TextFormField(
           initialValue: value,
           readOnly: true,
@@ -101,13 +102,13 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
             fillColor: Colors.white,
             enabled: false,
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: BorderSide(color: Colors.grey.shade300),
             ),
             disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: BorderSide(color: Colors.grey.shade300),
             ),
           ),
@@ -122,10 +123,10 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
       highlightColor: Colors.grey.shade100,
       child: Container(
         width: width,
-        height: height,
+        height: height.h,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: BorderRadius.circular(radius.r),
         ),
       ),
     );
@@ -151,11 +152,11 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
             style: GoogleFonts.inter(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 20)),
+                fontSize: 20.sp)),
         backgroundColor: const Color(0xFF45557B),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, size: 24.sp),
           color: Colors.white,
           onPressed: () => Navigator.pop(context),
         ),
@@ -165,9 +166,9 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.only(bottom: 84),
+              padding: EdgeInsets.only(bottom: 84.h),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 20.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -175,7 +176,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         border: Border.all(color: Colors.grey.shade200),
                       ),
                       clipBehavior: Clip.hardEdge,
@@ -201,7 +202,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                             )
                           else
                             Container(
-                              height: 160,
+                              height: 160.h,
                               color: Colors.grey[100],
                               child: Center(
                                 child: Text('Tidak ada foto',
@@ -211,8 +212,8 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                             ),
                           Container(
                             color: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12.w, vertical: 10.h),
                             child: Row(
                               children: [
                                 Expanded(
@@ -229,7 +230,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                                       : Text(
                                           title,
                                           style: GoogleFonts.inter(
-                                              fontSize: 16,
+                                              fontSize: 16.sp,
                                               fontWeight: FontWeight.w700,
                                               color: Colors.black87),
                                         ),
@@ -241,7 +242,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                                         label: Text(status,
                                             style: GoogleFonts.inter(
                                                 color: Colors.white,
-                                                fontSize: 12)),
+                                                fontSize: 12.sp)),
                                         backgroundColor: status
                                                 .toLowerCase()
                                                 .contains('diterima')
@@ -258,19 +259,19 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12.w),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         border: Border.all(color: Colors.grey.shade200),
                         boxShadow: [
                           BoxShadow(
                               color: Colors.black.withOpacity(0.02),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2)),
+                              blurRadius: 6.r,
+                              offset: Offset(0, 2.h)),
                         ],
                       ),
                       child: Column(
@@ -290,7 +291,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                                     : _buildField(
                                         'Waktu Kejadian', _formatDate(date)),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: 12.w),
                               Expanded(
                                 child: isLoading
                                     ? _shimmerBox(
@@ -299,36 +300,36 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12.h),
                           isLoading
                               ? _shimmerBox(height: 48, width: double.infinity)
                               : _buildField('Alamat / Lokasi',
                                   address.isNotEmpty ? address : '-'),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12.h),
                           isLoading
                               ? _shimmerBox(height: 48, width: double.infinity)
                               : _buildField('Pelapor',
                                   name + (phone.isNotEmpty ? ' • $phone' : '')),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12.h),
                           Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Deskripsi',
                                     style: GoogleFonts.inter(
-                                        fontSize: 12,
+                                        fontSize: 12.sp,
                                         fontWeight: FontWeight.w600,
                                         color: const Color(0xFF45557B))),
-                                const SizedBox(height: 6),
+                                SizedBox(height: 6.h),
                                 isLoading
                                     ? _shimmerBox(
                                         height: 80, width: double.infinity)
                                     : Container(
                                         width: double.infinity,
-                                        padding: const EdgeInsets.all(12),
+                                        padding: EdgeInsets.all(12.w),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           borderRadius:
-                                              BorderRadius.circular(8),
+                                              BorderRadius.circular(8.r),
                                           border: Border.all(
                                               color: Colors.grey.shade300),
                                         ),
@@ -341,15 +342,15 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10.h),
                   ],
                 ),
               ),
             ),
             Positioned(
-              left: 16,
-              right: 16,
-              bottom: 16,
+              left: 16.w,
+              right: 16.w,
+              bottom: 16.h,
               child: Row(
                 children: [
                   Expanded(
@@ -357,33 +358,33 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                       onPressed: imageUrl.isNotEmpty && !isLoading
                           ? () => _showFullImage(context, imageUrl)
                           : null,
-                      icon: const Icon(Icons.fullscreen,
-                          color: Color(0xFF45557B)),
+                      icon: Icon(Icons.fullscreen,
+                          color: const Color(0xFF45557B), size: 20.sp),
                       label: Text('Lihat Foto',
                           style: GoogleFonts.inter(
-                              color: const Color(0xFF45557B), fontSize: 14)),
+                              color: const Color(0xFF45557B), fontSize: 14.sp)),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey.shade300),
                         backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(8.r)),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF45557B),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(8.r)),
                       ),
                       child: Text('Kembali',
                           style: GoogleFonts.inter(
-                              color: Colors.white, fontSize: 14)),
+                              color: Colors.white, fontSize: 14.sp)),
                     ),
                   ),
                 ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/pages/home/main/controller/home_controller.dart';
 import 'package:JIR/pages/home/main/widget/home_shimmer.dart';
@@ -14,14 +14,14 @@ class HomeFeatureGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Obx(() {
         if (controller.isLoading.value) {
           return GridView.count(
             crossAxisCount: 4,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 30,
+            mainAxisSpacing: 30.h,
             children: List.generate(8, (_) => const _FeatureShimmer()),
           );
         }
@@ -30,7 +30,7 @@ class HomeFeatureGrid extends StatelessWidget {
           crossAxisCount: 4,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 30,
+          mainAxisSpacing: 30.h,
           children: const [
             _FeatureIcon(
               label: 'Pantau Banjir',
@@ -84,20 +84,20 @@ class _FeatureShimmer extends StatelessWidget {
       children: [
         Material(
           elevation: 2,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(30.r),
           child: CircleAvatar(
-            radius: 30,
+            radius: 30.r,
             backgroundColor: Colors.white,
             child: HomeShimmer.circle(size: 36),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 70),
+          constraints: BoxConstraints(maxWidth: 70.w),
           child: HomeShimmer.rect(
-            height: 10,
-            width: 50,
-            radius: BorderRadius.circular(6),
+            height: 10.h,
+            width: 50.w,
+            radius: BorderRadius.circular(6.r),
           ),
         ),
       ],
@@ -125,27 +125,27 @@ class _FeatureIcon extends StatelessWidget {
         children: [
           Material(
             elevation: 5,
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(30.r),
             shadowColor: Colors.grey.withOpacity(1),
             child: CircleAvatar(
-              radius: 30,
+              radius: 30.r,
               backgroundColor: const Color(0xFFEAEFF3),
               child: Image.asset(
                 imagePath,
-                width: 30,
-                height: 30,
+                width: 30.w,
+                height: 30.h,
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Flexible(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 70),
+              constraints: BoxConstraints(maxWidth: 70.w),
               child: Text(
                 label,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
-                  fontSize: 11,
+                  fontSize: 11.sp,
                   color: const Color(0xFF355469),
                 ),
                 softWrap: true,

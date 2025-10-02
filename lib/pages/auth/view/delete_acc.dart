@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/pages/auth/controller/delete_acc_controller.dart';
@@ -30,7 +31,9 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Text(
           'Pengaturan',
           style: GoogleFonts.inter(
-              fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white),
         ),
         backgroundColor: const Color(0xff45557B),
         leading: IconButton(
@@ -42,18 +45,18 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         child: ListView(
           children: [
             ListTile(
               leading: Image.asset(
                 'assets/images/delete.png',
-                height: 26,
-                width: 26,
+                height: 26.h,
+                width: 26.w,
               ),
               title: Text('Hapus Akun',
                   style: GoogleFonts.inter(
-                      fontSize: 20,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xff45557B))),
               onTap: () => _showDeleteAccountDialog(context),
@@ -62,12 +65,12 @@ class _SettingsPageState extends State<SettingsPage> {
             ListTile(
               leading: Image.asset(
                 'assets/images/change.png',
-                height: 26,
-                width: 26,
+                height: 26.h,
+                width: 26.w,
               ),
               title: Text('Ubah Kata Sandi',
                   style: GoogleFonts.inter(
-                      fontSize: 20,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xff45557B))),
               trailing: const Icon(Icons.arrow_forward_ios),
@@ -99,7 +102,7 @@ class _SettingsPageState extends State<SettingsPage> {
               style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
-                  fontSize: 20),
+                  fontSize: 20.sp),
               textAlign: TextAlign.center,
             ),
             content: Column(
@@ -112,9 +115,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       labelText: 'Kata Sandi',
                       hintText: 'Masukkan kata sandi Anda',
                       labelStyle: GoogleFonts.inter(
-                          fontSize: 14, fontStyle: FontStyle.italic),
+                          fontSize: 14.sp, fontStyle: FontStyle.italic),
                       hintStyle: GoogleFonts.inter(
-                          fontSize: 14, fontWeight: FontWeight.w500),
+                          fontSize: 14.sp, fontWeight: FontWeight.w500),
                       suffixIcon: IconButton(
                         icon: Icon(
                           isPasswordVisible
@@ -134,19 +137,19 @@ class _SettingsPageState extends State<SettingsPage> {
                           borderSide: BorderSide(color: Colors.red)),
                       border: const OutlineInputBorder()),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10.h),
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: const Color(0xffFFE3E3),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(6.r),
                   ),
-                  padding: const EdgeInsets.all(10.0),
+                  padding: EdgeInsets.all(10.w),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.warning, color: Colors.red, size: 20),
-                      const SizedBox(width: 8),
+                      Icon(Icons.warning, color: Colors.red, size: 20.sp),
+                      SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
                           "Anda akan menghapus akun secara permanen. "
@@ -154,7 +157,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           "Semua data, riwayat, dan informasi pribadi Anda akan hilang selamanya.",
                           style: GoogleFonts.inter(
                             color: Colors.black,
-                            fontSize: 12,
+                            fontSize: 12.sp,
                           ),
                           softWrap: true,
                           textAlign: TextAlign.left,
@@ -175,7 +178,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Text(
                   'Tutup',
                   style: GoogleFonts.inter(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                       color: const Color(0xff323232)),
                 ),
@@ -194,7 +197,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   'Hapus',
                   style: GoogleFonts.inter(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500),
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -12,7 +13,7 @@ class AboutPage extends StatelessWidget {
         title: const Text('Tentang Kami'),
         titleTextStyle: GoogleFonts.inter(
           fontWeight: FontWeight.bold,
-          fontSize: 20,
+          fontSize: 20.sp,
           color: Colors.white,
         ),
         backgroundColor: const Color(0xff45557B),
@@ -22,24 +23,24 @@ class AboutPage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(20.w),
         child: ListView(
           children: [
             _buildImageHeader(),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildTitle("Tentang JIR"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "Aplikasi JIR adalah platform inovatif yang dikembangkan untuk membantu masyarakat dalam pemantauan bencana dan kondisi lingkungan sekitar. JIR hadir dengan tujuan utama untuk meningkatkan kesadaran dan respons terhadap ancaman banjir, kerumunan berlebih, dan kebakaran melalui sistem pemantauan real-time.\n"
               "Dengan menggabungkan teknologi canggih seperti analisis data, pemantauan CCTV publik, dan laporan berbasis pengguna, JIR bertujuan untuk menyediakan informasi yang cepat dan akurat bagi warga, petugas keamanan, serta pemerintah daerah.",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildTitle("Visi & Misi"),
-            const SizedBox(height: 15),
+            SizedBox(height: 15.h),
             _buildParagraph(
               "Visi kami adalah menjadi platform pemantauan lingkungan yang andal dan berbasis teknologi guna menciptakan komunitas yang lebih aman dan tanggap terhadap bencana.",
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
             _buildSubtitle("Misi kami:"),
             _buildParagraph(
               "• Menyediakan informasi terkini mengenai potensi bencana dan kondisi lingkungan.\n"
@@ -47,7 +48,7 @@ class AboutPage extends StatelessWidget {
               "• Memanfaatkan teknologi pemantauan untuk meningkatkan keselamatan publik.\n"
               "• Berkolaborasi dengan pemerintah dan lembaga terkait dalam pengelolaan bencana.",
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildParagraph(
               "Kami terus berinovasi dan mengembangkan fitur-fitur baru agar aplikasi JIR dapat memberikan manfaat yang lebih besar bagi penggunanya. Dengan menggunakan aplikasi ini, Anda turut serta dalam membangun sistem tanggap darurat yang lebih baik untuk masyarakat.",
             ),
@@ -59,11 +60,11 @@ class AboutPage extends StatelessWidget {
 
   Widget _buildImageHeader() {
     return Container(
-      height: 150,
+      height: 150.h,
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         image: const DecorationImage(
           image: AssetImage('assets/images/afternoon.png'),
           fit: BoxFit.cover,
@@ -76,7 +77,7 @@ class AboutPage extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 16,
+        fontSize: 16.sp,
         fontWeight: FontWeight.bold,
         color: Colors.black,
       ),
@@ -87,7 +88,7 @@ class AboutPage extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 13,
+        fontSize: 13.sp,
         fontWeight: FontWeight.w300,
         color: Colors.black,
       ),
@@ -98,7 +99,7 @@ class AboutPage extends StatelessWidget {
     return Text(
       text,
       style: GoogleFonts.inter(
-          fontSize: 13,
+          fontSize: 13.sp,
           height: 1.5,
           color: Colors.black,
           fontWeight: FontWeight.w300),

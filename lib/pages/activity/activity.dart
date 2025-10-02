@@ -2,6 +2,7 @@ import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/utils/file_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
@@ -82,53 +83,53 @@ class _ActivityPageState extends State<ActivityPage> {
 
   Widget _buildShimmerItem() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 0),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.symmetric(horizontal: 0),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(width: 0.2, color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
               color: Colors.black.withOpacity(0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 3))
+              blurRadius: 6.r,
+              offset: Offset(0, 3.h))
         ],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Container(
-              width: 40,
-              height: 40,
+              width: 40.w,
+              height: 40.w,
               decoration: const BoxDecoration(
                   color: Colors.white, shape: BoxShape.circle)),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                 Container(
-                    height: 14, width: double.infinity, color: Colors.white),
-                const SizedBox(height: 6),
-                Container(height: 12, width: 140, color: Colors.white),
+                    height: 14.h, width: double.infinity, color: Colors.white),
+                SizedBox(height: 6.h),
+                Container(height: 12.h, width: 140.w, color: Colors.white),
               ])),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Container(
-              width: 60,
-              height: 24,
+              width: 60.w,
+              height: 24.h,
               decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16))),
+                  borderRadius: BorderRadius.circular(16.r))),
         ]),
-        const SizedBox(height: 12),
-        Container(height: 12, width: double.infinity, color: Colors.white),
-        const SizedBox(height: 8),
-        Container(height: 12, width: double.infinity, color: Colors.white),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
+        Container(height: 12.h, width: double.infinity, color: Colors.white),
+        SizedBox(height: 8.h),
+        Container(height: 12.h, width: double.infinity, color: Colors.white),
+        SizedBox(height: 12.h),
         ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10.r),
             child: Container(
-                height: 180, width: double.infinity, color: Colors.white)),
+                height: 180.h, width: double.infinity, color: Colors.white)),
       ]),
     );
   }
@@ -147,12 +148,12 @@ class _ActivityPageState extends State<ActivityPage> {
           systemOverlayStyle: SystemUiOverlayStyle.dark,
           title: Text('Aktivitas',
               style: GoogleFonts.inter(
-                  fontSize: 20,
+                  fontSize: 20.sp,
                   color: Colors.black,
                   fontWeight: FontWeight.bold)),
           bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(2.0),
-              child: Container(color: const Color(0xff51669D), height: 2.0)),
+              preferredSize: Size.fromHeight(2.h),
+              child: Container(color: const Color(0xff51669D), height: 2.h)),
         ),
         body: Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
@@ -161,9 +162,9 @@ class _ActivityPageState extends State<ActivityPage> {
             onRefresh: _onRefresh,
             child: ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.w),
               itemCount: 5,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, __) => SizedBox(height: 12.h),
               itemBuilder: (_, __) => _buildShimmerItem(),
             ),
           ),
@@ -186,20 +187,20 @@ class _ActivityPageState extends State<ActivityPage> {
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Text('Aktivitas',
             style: GoogleFonts.inter(
-                fontSize: 20,
+                fontSize: 20.sp,
                 color: Colors.black,
                 fontWeight: FontWeight.bold)),
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(2.0),
-            child: Container(color: const Color(0xff51669D), height: 2.0)),
+            preferredSize: Size.fromHeight(2.h),
+            child: Container(color: const Color(0xff51669D), height: 2.h)),
         actions: [
           IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.black87),
+              icon: Icon(Icons.refresh, color: Colors.black87, size: 24.sp),
               onPressed: _onRefresh)
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.w),
         child: Obx(() {
           final reports = controller.reports;
           if (reports.isEmpty) {
@@ -208,7 +209,7 @@ class _ActivityPageState extends State<ActivityPage> {
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  const SizedBox(height: 200),
+                  SizedBox(height: 200.h),
                   Center(
                       child: Text('Belum ada laporan',
                           style: GoogleFonts.inter(color: Colors.grey)))
@@ -223,7 +224,7 @@ class _ActivityPageState extends State<ActivityPage> {
             child: ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: reports.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, __) => SizedBox(height: 12.h),
               itemBuilder: (context, index) {
                 final report = Map<String, dynamic>.from(reports[index]);
                 final id = report['id']?.toString() ?? index.toString();
@@ -231,12 +232,12 @@ class _ActivityPageState extends State<ActivityPage> {
                   key: ValueKey('report_$id'),
                   direction: DismissDirection.endToStart,
                   background: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
                     alignment: Alignment.centerRight,
                     decoration: BoxDecoration(
                         color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(8)),
-                    child: const Icon(Icons.delete, color: Colors.white),
+                        borderRadius: BorderRadius.circular(8.r)),
+                    child: Icon(Icons.delete, color: Colors.white, size: 24.sp),
                   ),
                   onDismissed: (_) async {
                     controller.reports.removeAt(index);
@@ -272,7 +273,7 @@ class _ActivityPageState extends State<ActivityPage> {
                         context: context,
                         builder: (_) => Dialog(
                           backgroundColor: Colors.transparent,
-                          insetPadding: const EdgeInsets.all(16),
+                          insetPadding: EdgeInsets.all(16.w),
                           child: InteractiveViewer(
                             child: isNetworkImage
                                 ? Image.network(imageUrl,

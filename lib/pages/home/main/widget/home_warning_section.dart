@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:JIR/pages/home/main/controller/home_controller.dart';
 import 'package:JIR/pages/home/main/widget/home_shimmer.dart';
 import 'package:JIR/pages/notifications/controller/notification_controller.dart';
@@ -19,7 +19,7 @@ class HomeWarningSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Obx(() {
         if (homeController.isLoading.value) {
           return const _WarningShimmer();
@@ -36,12 +36,12 @@ class HomeWarningSection extends StatelessWidget {
             Text(
               'WARNING',
               style: GoogleFonts.inter(
-                fontSize: 24,
+                fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             ...toShow.map(
               (item) => _WarningBox(
                 title: (item['title'] ?? item['message'] ?? '').toString(),
@@ -62,21 +62,21 @@ class _WarningShimmer extends StatelessWidget {
     return Column(
       children: [
         HomeShimmer.rect(
-          height: 28,
-          width: 120,
-          radius: BorderRadius.circular(6),
+          height: 28.h,
+          width: 120.w,
+          radius: BorderRadius.circular(6.r),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         HomeShimmer.rect(
-          height: 64,
+          height: 64.h,
           width: double.infinity,
-          radius: BorderRadius.circular(8),
+          radius: BorderRadius.circular(8.r),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         HomeShimmer.rect(
-          height: 64,
+          height: 64.h,
           width: double.infinity,
-          radius: BorderRadius.circular(8),
+          radius: BorderRadius.circular(8.r),
         ),
       ],
     );
@@ -91,25 +91,27 @@ class _WarningBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: const Color(0xFFFFD205),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.warning, color: Colors.red),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-              color: Colors.black,
+          Icon(Icons.warning, color: Colors.red, size: 20.r),
+          SizedBox(width: 8.w),
+          Flexible(
+            child: Text(
+              title,
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w700,
+                fontSize: 13.sp,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

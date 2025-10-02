@@ -14,7 +14,7 @@ import 'package:JIR/pages/auth/view/login.dart';
 import 'package:JIR/pages/auth/view/signup.dart';
 import 'package:JIR/pages/home/cctv/cctv_monitoring.dart';
 import 'package:JIR/pages/home/chat/view/chatbot.dart';
-import 'package:JIR/pages/home/crowd/crowd_monitoring.dart';
+import 'package:JIR/pages/home/crowd/view/crowd_monitoring.dart';
 import 'package:JIR/pages/home/flood/view/flood_monitoring.dart';
 import 'package:JIR/pages/home/map/view/map_monitoring.dart';
 import 'package:JIR/pages/home/park/view/park.dart';

@@ -1,5 +1,6 @@
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,24 +27,24 @@ class ReportPage extends StatelessWidget {
         'Lapor',
         style: GoogleFonts.inter(
           fontWeight: FontWeight.bold,
-          fontSize: 20,
+          fontSize: 20.sp,
           color: Colors.white,
         ),
       ),
       backgroundColor: const Color(0xff45557B),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        icon: Icon(Icons.arrow_back, color: Colors.white, size: 24.sp),
         onPressed: () => Get.back(),
       ),
     );
   }
 
   Widget _buildBody() {
-    return const Padding(
-      padding: EdgeInsets.all(16.0),
+    return Padding(
+      padding: EdgeInsets.all(16.w),
       child: Column(
         children: [
-          SizedBox(height: 30),
+          SizedBox(height: 30.h),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:JIR/app/app_root.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -42,14 +43,23 @@ Future<void> main() async {
     await Workmanager().registerPeriodicTask(
       "floodTaskUnique",
       floodTaskName,
-      frequency: const Duration(minutes: 15), 
+      frequency: const Duration(minutes: 15),
       initialDelay: const Duration(seconds: 10),
     );
   } catch (e) {
     debugPrint('Workmanager registerPeriodicTask error: $e');
   }
 
-  runApp(const AppRoot());
+  runApp(
+    ScreenUtilInit(
+      designSize:
+          const Size(390, 844), 
+      minTextAdapt: true,
+      builder: (context, child) {
+        return AppRoot();
+      },
+    ),
+  );
 }
 
 class _FirebaseErrorApp extends StatelessWidget {

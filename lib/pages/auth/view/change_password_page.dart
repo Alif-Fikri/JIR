@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/pages/auth/controller/change_password_controller.dart';
@@ -27,10 +28,9 @@ class ChangePasswordPage extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
               ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -40,7 +40,7 @@ class ChangePasswordPage extends StatelessWidget {
                       Text(
                         'Ubah Kata Sandi',
                         style: GoogleFonts.inter(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
                           color: Colors.black,
                         ),
@@ -51,7 +51,7 @@ class ChangePasswordPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   Obx(() => TextField(
                         controller: controller.newPasswordController,
                         obscureText: controller.isObscuredNew.value,
@@ -75,23 +75,23 @@ class ChangePasswordPage extends StatelessWidget {
                           filled: true,
                           fillColor: const Color(0xffF6F6F6),
                           labelStyle: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.black,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.r),
                             borderSide:
                                 const BorderSide(color: Color(0xffD8D8D8)),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                                color: Color(0xff45557B), width: 2.0),
+                            borderRadius: BorderRadius.circular(8.r),
+                            borderSide: BorderSide(
+                                color: const Color(0xff45557B), width: 2.w),
                           ),
                         ),
                       )),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   Obx(() => TextField(
                         controller: controller.confirmPasswordController,
                         obscureText: controller.isObscuredConfirm.value,
@@ -116,33 +116,33 @@ class ChangePasswordPage extends StatelessWidget {
                           filled: true,
                           fillColor: const Color(0xffF6F6F6),
                           labelStyle: GoogleFonts.inter(
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.black,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.r),
                             borderSide:
                                 const BorderSide(color: Color(0xffD8D8D8)),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: const BorderSide(
-                                color: Color(0xff45557B), width: 2.0),
+                            borderRadius: BorderRadius.circular(8.r),
+                            borderSide: BorderSide(
+                                color: const Color(0xff45557B), width: 2.w),
                           ),
                         ),
                       )),
-                  const SizedBox(height: 30),
+                  SizedBox(height: 30.h),
                   Obx(() => ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xff45557B),
                           foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 48),
+                          minimumSize: Size(double.infinity, 48.h),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
                           textStyle: GoogleFonts.inter(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -154,7 +154,7 @@ class ChangePasswordPage extends StatelessWidget {
                                 color: Colors.white)
                             : const Text('Perbarui Kata Sandi'),
                       )),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                 ],
               ),
             ),

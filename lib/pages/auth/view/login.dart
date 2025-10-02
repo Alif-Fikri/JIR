@@ -1,15 +1,13 @@
 import 'package:JIR/pages/auth/widget/helper_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/auth/controller/login_controller.dart';
 import 'package:JIR/app/routes/app_routes.dart';
 
 class LoginPage extends GetView<LoginController> {
-  final fixedWidth = 350.0;
-  final fixedHeight = 50.0;
-
   const LoginPage({super.key});
 
   @override
@@ -33,10 +31,10 @@ class LoginPage extends GetView<LoginController> {
             children: [
               Image.asset(
                 'assets/images/ic_launcher.png',
-                width: 100,
-                height: 100,
+                width: 100.w,
+                height: 100.h,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               SizedBox(
                 width: fixedWidth,
                 child: Align(
@@ -44,21 +42,21 @@ class LoginPage extends GetView<LoginController> {
                   child: Text(
                     'Selamat Datang Kembali di JIR',
                     style: GoogleFonts.inter(
-                      textStyle: const TextStyle(
-                        fontSize: 18,
+                      textStyle: TextStyle(
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               buildTextField(
                 controller: controller.emailController,
                 label: 'Email',
                 icon: 'assets/images/person.png',
               ),
-              const SizedBox(height: 25),
+              SizedBox(height: 25.h),
               buildTextField(
                 controller: controller.passwordController,
                 label: 'Kata Sandi',
@@ -68,7 +66,7 @@ class LoginPage extends GetView<LoginController> {
               Obx(() => controller.errorMessage.isNotEmpty
                   ? buildErrorMessage(controller.errorMessage.value)
                   : const SizedBox.shrink()),
-              const SizedBox(height: 25),
+              SizedBox(height: 25.h),
               SizedBox(
                 width: fixedWidth,
                 height: fixedHeight,
@@ -76,7 +74,7 @@ class LoginPage extends GetView<LoginController> {
                   onPressed: controller.login,
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     backgroundColor: const Color(0xFF45557B),
                   ),
@@ -87,8 +85,8 @@ class LoginPage extends GetView<LoginController> {
                       : Text(
                           'Masuk',
                           style: GoogleFonts.inter(
-                            textStyle: const TextStyle(
-                              fontSize: 14,
+                            textStyle: TextStyle(
+                              fontSize: 14.sp,
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
                             ),
@@ -108,14 +106,17 @@ class LoginPage extends GetView<LoginController> {
                       child: Text(
                         'Lupa Kata Sandi?',
                         style: GoogleFonts.inter(
-                          textStyle: const TextStyle(color: Color(0xFF005FCB)),
+                          textStyle: TextStyle(
+                            color: Color(0xFF005FCB),
+                            fontSize: 12.sp,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               Row(
                 children: <Widget>[
                   Expanded(
@@ -128,13 +129,14 @@ class LoginPage extends GetView<LoginController> {
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w),
                     child: Text(
                       "ATAU",
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w300,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ),
@@ -150,19 +152,19 @@ class LoginPage extends GetView<LoginController> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               Container(
                 width: fixedWidth,
                 height: fixedHeight,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10.r),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.2),
-                      spreadRadius: 1,
-                      blurRadius: 5,
-                      offset: const Offset(0, 5),
+                      spreadRadius: 1.r,
+                      blurRadius: 5.r,
+                      offset: Offset(0, 5.h),
                     ),
                   ],
                 ),
@@ -170,41 +172,44 @@ class LoginPage extends GetView<LoginController> {
                   onPressed: controller.googleSignIn,
                   icon: Image.asset(
                     'assets/images/logo_google.png',
-                    height: 24,
-                    width: 24,
+                    height: 24.h,
+                    width: 24.w,
                   ),
                   label: Text(
                     'Masuk dengan Google',
                     style: GoogleFonts.inter(
-                      textStyle: const TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.w700),
+                      textStyle: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14.sp,
+                      ),
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     backgroundColor: const Color(0xFFF6F6F6),
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               RichText(
                 text: TextSpan(
                   text: "Belum punya akun? ",
                   style: GoogleFonts.inter(
-                    textStyle: const TextStyle(
+                    textStyle: TextStyle(
                       color: Colors.black,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                     ),
                   ),
                   children: [
                     TextSpan(
                       text: 'Daftar',
                       style: GoogleFonts.inter(
-                        textStyle: const TextStyle(
+                        textStyle: TextStyle(
                           color: Color(0xFF005FCB),
-                          fontSize: 12,
+                          fontSize: 12.sp,
                         ),
                       ),
                       recognizer: TapGestureRecognizer()

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -59,7 +60,8 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = 1.sw;
+    final screenHeight = 1.sh;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -70,8 +72,8 @@ class _SplashScreenState extends State<SplashScreen>
             child: Center(
               child: Image.asset(
                 'assets/images/jir_logo7.png',
-                width: 200,
-                height: 200,
+                width: 200.w,
+                height: 200.h,
               ),
             ),
           ),
@@ -80,15 +82,15 @@ class _SplashScreenState extends State<SplashScreen>
               animation: _waveController,
               builder: (context, child) {
                 return Positioned(
-                  right: -screenSize.width * 0.5,
-                  bottom: -screenSize.height * 0.5,
+                  right: -screenWidth * 0.5,
+                  bottom: -screenHeight * 0.5,
                   child: Transform.rotate(
                     angle: 9.0,
                     child: ClipPath(
                       clipper: ComplexWaveClipper(_waveController.value),
                       child: Container(
-                        width: screenSize.width * 2,
-                        height: screenSize.height * 2,
+                        width: screenWidth * 2,
+                        height: screenHeight * 2,
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
@@ -113,19 +115,19 @@ class _SplashScreenState extends State<SplashScreen>
                 Center(
                   child: Image.asset(
                     'assets/images/jir_logo2.png',
-                    width: 200,
+                    width: 200.w,
                   ),
                 ),
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: 40,
+                  bottom: 40.h,
                   child: Center(
                     child: Text(
                       'JIR',
                       style: GoogleFonts.koHo(
                         color: Colors.white,
-                        fontSize: 32,
+                        fontSize: 32.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

@@ -56,7 +56,7 @@ class HomeController extends GetxController
   Future<void> fetchData() async {
     isLoading.value = true;
     try {
-      await _getLocationAndWeather().timeout(const Duration(seconds: 12));
+      await _getLocationAndWeather().timeout(const Duration(seconds: 15));
     } on TimeoutException catch (e) {
       debugPrint('HomeController.fetchData timeout: $e');
       _setError('Gagal memuat data cuaca (timeout)');
