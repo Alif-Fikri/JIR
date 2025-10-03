@@ -1,7 +1,6 @@
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:JIR/helper/menu.dart';
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
 import 'package:JIR/pages/auth/service/google_api_auth.dart';
 
@@ -43,7 +42,7 @@ class LoginController extends GetxController {
       isLoading.value = true;
       final result = await _googleAuthService.signInWithGoogle();
       if (result != null) {
-        Get.offAll(() => const Menu());
+        Get.offAllNamed(AppRoutes.home);
       } else {
         errorMessage.value = 'Login dengan Google gagal.';
       }

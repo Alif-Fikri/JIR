@@ -1,7 +1,8 @@
+import 'package:get/get.dart';
 import 'package:JIR/pages/auth/service/auth_api_service.dart';
 import 'package:JIR/pages/home/main/controller/home_controller.dart';
 import 'package:JIR/pages/home/weather/widget/weather_helper.dart';
-import 'package:get/get.dart';
+import 'package:JIR/pages/home/weather/service/weather_service.dart';
 
 class WeatherController extends GetxController {
   final RxBool loading = true.obs;
@@ -14,27 +15,56 @@ class WeatherController extends GetxController {
   final RxString backgroundImage = ''.obs;
   final RxString username = 'Pengguna'.obs;
 
+  final RxList<Map<String, dynamic>> hourlyWindow = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> history = <Map<String, dynamic>>[].obs;
+
   HomeController? _homeController;
   late final AuthService _authService;
+  late final WeatherService _service;
   final List<Worker> _workers = [];
 
   @override
   void onInit() {
     super.onInit();
-    _authService = Get.find<AuthService>();
-    _homeController =
-        Get.isRegistered<HomeController>() ? Get.find<HomeController>() : null;
-
+    _auth_service_init();
+    _service = WeatherService();
+    _homeController = Get.isRegistered<HomeController>() ? Get.find<HomeController>() : null;
     _initUsername();
     _bindHomeData();
+    fetchHourlyWindow();
+  }
+
+  Future<void> _auth_service_init() async {
+    _auth_service_init_sync();
+  }
+
+  void _auth_service_init_sync() {
+    _authService = Get.find<AuthService>();
+  }
+
+  Future<void> fetchHourlyWindow() async {
+    try {
+      final list = await _service.fetchHourlyWindow(before: 2, after: 2);
+      hourlyWindow.assignAll(list);
+    } catch (e) {
+      error.value = e.toString();
+    }
+  }
+
+  Future<void> fetchHistory({int hours = 24}) async {
+    try {
+      final list = await _service.fetchHistory(hours: hours);
+      history.assignAll(list);
+    } catch (e) {
+      error.value = e.toString();
+    }
   }
 
   Future<void> refreshWeather() async {
-    if (_homeController == null) {
-      return;
-    }
+    if (_homeController == null) return;
     try {
       await _homeController!.refreshData();
+      await fetchHourlyWindow();
     } catch (e) {
       error.value = e.toString();
     }
@@ -75,8 +105,7 @@ class WeatherController extends GetxController {
       final parsedTemp = double.tryParse(rawTemp.replaceAll(',', '.'));
       if (parsedTemp != null) {
         temperatureRange.value = '${parsedTemp.toStringAsFixed(1)}° C';
-      } else if (rawTemp.isNotEmpty &&
-          !rawTemp.toLowerCase().contains('loading')) {
+      } else if (rawTemp.isNotEmpty && !rawTemp.toLowerCase().contains('loading')) {
         temperatureRange.value = rawTemp;
       } else {
         temperatureRange.value = '-';
@@ -89,9 +118,7 @@ class WeatherController extends GetxController {
       location.value = loc.isNotEmpty ? loc : 'Lokasi tidak diketahui';
 
       final iconPath = home.weatherIcon.value;
-      weatherIcon.value = iconPath.isNotEmpty
-          ? iconPath
-          : 'assets/images/Cuaca Smart City Icon-01.png';
+      weatherIcon.value = iconPath.isNotEmpty ? iconPath : 'assets/images/Cuaca Smart City Icon-01.png';
 
       final bg = home.backgroundImage.value;
       backgroundImage.value = bg.isNotEmpty ? bg : '';

@@ -4,12 +4,60 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/pages/home/weather/widget/diagonal_container.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:JIR/pages/home/weather/widget/weather_helper.dart';
+
+class Shimmer extends StatefulWidget {
+  final Widget child;
+  final Duration period;
+  const Shimmer(
+      {super.key,
+      required this.child,
+      this.period = const Duration(milliseconds: 1200)});
+  @override
+  State<Shimmer> createState() => _ShimmerState();
+}
+
+class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: widget.period)..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = Colors.grey.shade300;
+    final highlightColor = Colors.grey.shade100;
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (context, child) {
+        final double slide = (_ctrl.value * 2) - 1;
+        final gradient = LinearGradient(
+          colors: [baseColor, highlightColor, baseColor],
+          stops: const [0.1, 0.5, 0.9],
+          begin: Alignment(-1.0 - slide, 0),
+          end: Alignment(1.0 - slide, 0),
+        );
+        return ShaderMask(
+          shaderCallback: (bounds) => gradient.createShader(bounds),
+          blendMode: BlendMode.srcATop,
+          child: widget.child,
+        );
+      },
+    );
+  }
+}
 
 class WeatherPage extends StatelessWidget {
   WeatherPage({super.key});
-
   final WeatherController controller = Get.put(WeatherController());
-
   String _greeting() {
     final hour = DateTime.now().hour;
     if (hour >= 4 && hour < 10) return 'Selamat Pagi,';
@@ -24,6 +72,182 @@ class WeatherPage extends StatelessWidget {
         const Shadow(
             color: Colors.black26, offset: Offset(0, 1), blurRadius: 1),
       ];
+  String _hourLabelFor(DateTime dt) {
+    final now = DateTime.now();
+    final diff =
+        dt.difference(DateTime(now.year, now.month, now.day, now.hour)).inHours;
+    if (diff == 0) return 'Sekarang';
+    if (diff < 0) return '${-diff} jam lalu';
+    return '$diff jam lagi';
+  }
+
+  int _floorHourEpochSeconds(DateTime dt) {
+    return DateTime(dt.year, dt.month, dt.day, dt.hour)
+            .millisecondsSinceEpoch ~/
+        1000;
+  }
+
+  Widget _buildShimmerSkeleton() {
+    return SafeArea(
+      top: false,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 260.h,
+              child: Stack(
+                children: [
+                  const DiagonalContainer(),
+                  Positioned.fill(
+                      child: Shimmer(child: Container(color: Colors.white))),
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: MediaQueryData.fromWindow(
+                                    WidgetsBinding.instance.window)
+                                .padding
+                                .top +
+                            16.w,
+                        left: 16.w,
+                        right: 16.w,
+                        bottom: 35.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            IconButton(
+                                icon: Icon(Icons.arrow_back, size: 22.sp),
+                                color: Colors.white,
+                                onPressed: () {}),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Shimmer(
+                                child: Container(
+                                    width: double.infinity,
+                                    height: 18.h,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        Shimmer(
+                            child: Container(
+                                width: 220.w,
+                                height: 22.h,
+                                color: Colors.white)),
+                        SizedBox(height: 6.h),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: Shimmer(
+                                  child: Container(
+                                      width: 120.w,
+                                      height: 100.h,
+                                      color: Colors.white)),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Shimmer(
+                                      child: Container(
+                                          width: double.infinity,
+                                          height: 28.h,
+                                          color: Colors.white)),
+                                  SizedBox(height: 8.h),
+                                  Shimmer(
+                                      child: Container(
+                                          width: 140.w,
+                                          height: 18.h,
+                                          color: Colors.white)),
+                                  SizedBox(height: 8.h),
+                                  Shimmer(
+                                      child: Container(
+                                          width: 100.w,
+                                          height: 16.h,
+                                          color: Colors.white)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 18.h),
+            SizedBox(
+              height: 110.h,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 5,
+                  separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                  itemBuilder: (context, index) {
+                    return Shimmer(
+                      child: Container(
+                        width: 100.w,
+                        padding: EdgeInsets.all(12.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(50.r),
+                          border: Border.all(
+                              color: Colors.grey.shade300, width: 1.w),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(height: 22.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Shimmer(
+                  child: Container(
+                      width: 140.w, height: 20.h, color: Colors.white)),
+            ),
+            SizedBox(height: 16.h),
+            SizedBox(
+              height: 110.h,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 5,
+                  separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                  itemBuilder: (context, index) {
+                    return Shimmer(
+                      child: Container(
+                        width: 92.w,
+                        padding: EdgeInsets.symmetric(
+                            vertical: 12.h, horizontal: 8.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(50.r),
+                          border: Border.all(
+                              color: Colors.grey.shade300, width: 1.w),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(height: 30.h),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +255,11 @@ class WeatherPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Obx(() {
         if (controller.loading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return _buildShimmerSkeleton();
         }
-
         if (controller.error.isNotEmpty) {
           return Center(child: Text(controller.error.value));
         }
-
         final greeting = _greeting();
         final username = controller.username.value.isNotEmpty
             ? controller.username.value
@@ -52,7 +274,6 @@ class WeatherPage extends StatelessWidget {
         final description = controller.description.value;
         final weatherIcon = controller.weatherIcon.value;
         final background = controller.backgroundImage.value;
-
         final today = DateTime.now();
         final monthNames = [
           'Jan',
@@ -72,7 +293,8 @@ class WeatherPage extends StatelessWidget {
             7,
             (i) => DateTime(today.year, today.month, today.day)
                 .add(Duration(days: i)));
-
+        final now = DateTime.now();
+        final nowHourEpoch = _floorHourEpochSeconds(now);
         return SafeArea(
           top: false,
           child: Column(
@@ -95,21 +317,19 @@ class WeatherPage extends StatelessWidget {
                     ),
                   Padding(
                     padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + 16.w,
-                      left: 16.w,
-                      right: 16.w,
-                      bottom: 35.w,
-                    ),
+                        top: MediaQuery.of(context).padding.top + 16.w,
+                        left: 16.w,
+                        right: 16.w,
+                        bottom: 35.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
                             IconButton(
-                              icon: Icon(Icons.arrow_back, size: 22.sp),
-                              color: Colors.white,
-                              onPressed: () => Navigator.pop(context),
-                            ),
+                                icon: Icon(Icons.arrow_back, size: 22.sp),
+                                color: Colors.white,
+                                onPressed: () => Navigator.pop(context)),
                             SizedBox(width: 12.w),
                             Expanded(
                               child: Text(
@@ -117,11 +337,10 @@ class WeatherPage extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.lexend(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                  shadows: _textShadows(),
-                                ),
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    shadows: _textShadows()),
                               ),
                             ),
                           ],
@@ -130,11 +349,10 @@ class WeatherPage extends StatelessWidget {
                         Text(
                           '$greeting $username',
                           style: GoogleFonts.lexend(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            shadows: _textShadows(),
-                          ),
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              shadows: _textShadows()),
                         ),
                         SizedBox(height: 6.h),
                         Row(
@@ -160,35 +378,26 @@ class WeatherPage extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    mainTempDisplay,
-                                    style: GoogleFonts.lexend(
-                                      fontSize: 40.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      shadows: _textShadows(),
-                                    ),
-                                  ),
+                                  Text(mainTempDisplay,
+                                      style: GoogleFonts.lexend(
+                                          fontSize: 40.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          shadows: _textShadows())),
                                   SizedBox(height: 4.h),
-                                  Text(
-                                    description,
-                                    style: GoogleFonts.lexend(
-                                      fontSize: 24.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                      shadows: _textShadows(),
-                                    ),
-                                  ),
+                                  Text(description,
+                                      style: GoogleFonts.lexend(
+                                          fontSize: 24.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                          shadows: _textShadows())),
                                   SizedBox(height: 4.h),
-                                  Text(
-                                    rangeDisplay,
-                                    style: GoogleFonts.lexend(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white,
-                                      shadows: _textShadows(),
-                                    ),
-                                  ),
+                                  Text(rangeDisplay,
+                                      style: GoogleFonts.lexend(
+                                          fontSize: 18.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white,
+                                          shadows: _textShadows())),
                                 ],
                               ),
                             ),
@@ -202,56 +411,111 @@ class WeatherPage extends StatelessWidget {
               SizedBox(height: 30.h),
               SizedBox(
                 height: 110.h,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 12,
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: EdgeInsets.symmetric(horizontal: 8.w),
-                      padding: EdgeInsets.all(12.w),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: const Color(0xff355469), width: 1.w),
-                        borderRadius: BorderRadius.circular(50.r),
-                        color: Colors.white,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('01:00',
-                              style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12.sp,
-                                  color: const Color(0xff355469))),
-                          SizedBox(height: 5.h),
-                          Image.asset(
-                            'assets/images/Cuaca Smart City Icon-02.png',
-                            width: 40.w,
-                            height: 35.h,
+                child: Obx(() {
+                  final list = controller.hourlyWindow;
+                  if (list.isEmpty) {
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 5,
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: EdgeInsets.symmetric(horizontal: 8.w),
+                          padding: EdgeInsets.all(12.w),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: const Color(0xff355469), width: 1.w),
+                            borderRadius: BorderRadius.circular(50.r),
+                            color: Colors.white,
                           ),
-                          SizedBox(height: 5.h),
-                          Text(
-                            '23°C',
-                            style: GoogleFonts.inter(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12.sp,
-                                color: const Color(0xff355469)),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('-',
+                                  style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.sp,
+                                      color: const Color(0xff355469))),
+                              SizedBox(height: 5.h),
+                              Image.asset(
+                                  'assets/images/Cuaca Smart City Icon-02.png',
+                                  width: 40.w,
+                                  height: 35.h),
+                              SizedBox(height: 5.h),
+                              Text('-',
+                                  style: GoogleFonts.inter(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.sp,
+                                      color: const Color(0xff355469))),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     );
-                  },
-                ),
+                  }
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: list.length,
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
+                    itemBuilder: (context, index) {
+                      final item = list[index];
+                      final dt = DateTime.fromMillisecondsSinceEpoch(
+                          (item['dt'] as int) * 1000);
+                      final label = _hourLabelFor(dt);
+                      final temp = (item['temp'] is num)
+                          ? '${(item['temp'] as num).toDouble().toStringAsFixed(1)}°'
+                          : item['temp'].toString();
+                      final desc = item['description'] ?? '';
+                      final iconPath = WeatherHelper.getImageForWeather(desc);
+                      final itemEpoch = (item['dt'] as int);
+                      final isActive = itemEpoch == nowHourEpoch;
+                      return Container(
+                        margin: EdgeInsets.symmetric(horizontal: 8.w),
+                        padding: EdgeInsets.all(12.w),
+                        decoration: BoxDecoration(
+                          color:
+                              isActive ? const Color(0xff355469) : Colors.white,
+                          borderRadius: BorderRadius.circular(50.r),
+                          border: Border.all(
+                              color: const Color(0xff355469), width: 1.w),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(label,
+                                style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12.sp,
+                                    color: isActive
+                                        ? Colors.white
+                                        : const Color(0xff355469))),
+                            SizedBox(height: 5.h),
+                            Image.asset(iconPath,
+                                width: 40.w,
+                                height: 35.h,
+                                color: isActive ? Colors.white : null),
+                            SizedBox(height: 5.h),
+                            Text(temp,
+                                style: GoogleFonts.inter(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12.sp,
+                                    color: isActive
+                                        ? Colors.white
+                                        : const Color(0xff355469))),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }),
               ),
               SizedBox(height: 25.h),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Center(
-                  child: Text('Hari ini',
-                      style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold, fontSize: 18.sp)),
-                ),
+                    child: Text('Hari ini',
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.bold, fontSize: 18.sp))),
               ),
               SizedBox(height: 18.h),
               SizedBox(
@@ -278,30 +542,27 @@ class WeatherPage extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            monthShort,
-                            style: GoogleFonts.inter(
-                              color: isActive ? Colors.white : Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          Text(
-                            '${d.day}',
-                            style: GoogleFonts.inter(
-                              color: isActive ? Colors.white : Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          Text(
-                            '${d.year}',
-                            style: GoogleFonts.inter(
-                              color: isActive ? Colors.white : Colors.black,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          Text(monthShort,
+                              style: GoogleFonts.inter(
+                                  color: isActive
+                                      ? Colors.white
+                                      : const Color(0xff355469),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12.sp)),
+                          Text('${d.day}',
+                              style: GoogleFonts.inter(
+                                  color: isActive
+                                      ? Colors.white
+                                      : const Color(0xff355469),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12.sp)),
+                          Text('${d.year}',
+                              style: GoogleFonts.inter(
+                                  color: isActive
+                                      ? Colors.white
+                                      : const Color(0xff355469),
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600)),
                         ],
                       ),
                     );

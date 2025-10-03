@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -100,7 +101,7 @@ class _WarningBox extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.warning, color: Colors.red, size: 20.r),
+          ShakingIcon(icon: Icons.warning, color: Colors.red, size: 20.r),
           SizedBox(width: 8.w),
           Flexible(
             child: Text(
@@ -113,8 +114,74 @@ class _WarningBox extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ),
+          SizedBox(width: 8.w),
+          ShakingIcon(icon: Icons.warning, color: Colors.red, size: 20.r),
         ],
       ),
+    );
+  }
+}
+
+class ShakingIcon extends StatefulWidget {
+  const ShakingIcon({
+    super.key,
+    required this.icon,
+    required this.color,
+    required this.size,
+    this.duration = const Duration(milliseconds: 3000),
+    this.amplitudeX = 3.0,
+    this.amplitudeY = 1.5,
+    this.rotationDegrees = 4.0,
+  });
+
+  final IconData icon;
+  final Color color;
+  final double size;
+  final Duration duration;
+  final double amplitudeX;
+  final double amplitudeY;
+  final double rotationDegrees;
+
+  @override
+  State<ShakingIcon> createState() => _ShakingIconState();
+}
+
+class _ShakingIconState extends State<ShakingIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: widget.duration)
+      ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (context, child) {
+        final t = _ctrl.value * 2 * math.pi;
+        final dx = math.sin(t * 3) * widget.amplitudeX;
+        final dy = math.cos(t * 2.2) * widget.amplitudeY;
+        final angle =
+            math.sin(t * 3.6) * (widget.rotationDegrees * math.pi / 180);
+        return Transform.translate(
+          offset: Offset(dx, dy),
+          child: Transform.rotate(
+            angle: angle,
+            child: child,
+          ),
+        );
+      },
+      child: Icon(widget.icon, color: widget.color, size: widget.size),
     );
   }
 }
