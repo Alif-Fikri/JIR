@@ -24,7 +24,7 @@ class NoInternetPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Tidak Ada Koneksi Internet',
+                'Tidak Ada Koneksi Internet.',
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   color: Colors.black38,
