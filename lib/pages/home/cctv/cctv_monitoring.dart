@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:JIR/pages/home/cctv/cctv_webview.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' as ll;
 import 'package:JIR/helper/map.dart';
+import 'package:JIR/helper/mapbox_config.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 class CCTVPage extends StatelessWidget {
   final List<CCTVLocation> cctvLocations = [
@@ -35,25 +37,10 @@ class CCTVPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cctvMarkers = cctvLocations.map((location) {
-      return Marker(
-        point: location.coordinates,
-        width: 40.w,
-        height: 40.w,
-        child: GestureDetector(
-          onTap: () => _navigateToCCTV(context, location.url),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF45557B),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2.w),
-            ),
-            child: Icon(Icons.videocam, color: Colors.white, size: 20.sp),
-          ),
-        ),
-      );
-    }).toList();
-
+    final cctvPositions = cctvLocations
+        .map((loc) =>
+            ll.LatLng(loc.coordinates.latitude, loc.coordinates.longitude))
+        .toList();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -86,12 +73,16 @@ class CCTVPage extends StatelessWidget {
                   ),
                 ],
               ),
-              child: ReusableMap(
-                initialLocation: const LatLng(-6.2000, 106.8167),
-                markers: cctvMarkers,
-                userLocation: null,
-                destination: null,
-                routePoints: null,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.r),
+                child: MapboxReusableMap(
+                  accessToken: MapboxConfig.accessToken,
+                  styleUri: MapboxStyles.MAPBOX_STREETS,
+                  initialLocation: ll.LatLng(-6.2000, 106.8167),
+                  markers: cctvPositions,
+                  userLocation: null,
+                  routePoints: null,
+                ),
               ),
             ),
           ),
@@ -163,7 +154,7 @@ class CCTVPage extends StatelessWidget {
 class CCTVLocation {
   final String name;
   final String url;
-  final LatLng coordinates;
+  final ll.LatLng coordinates;
 
   CCTVLocation({
     required this.name,

@@ -1,5 +1,6 @@
 import 'package:JIR/app/app_root.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
 import 'firebase_options.dart';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/bindings/initial_binding.dart';
@@ -17,6 +19,16 @@ import 'package:JIR/services/notification_service/workmanager_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  if (!kIsWeb) {
+    final mapboxToken = dotenv.env['MAPBOX_ACCESS_TOKEN'] ?? '';
+    if (mapboxToken.isNotEmpty) {
+      mapbox.MapboxOptions.setAccessToken(mapboxToken);
+      debugPrint('Mapbox token initialized for ${defaultTargetPlatform.name}');
+    } else {
+      debugPrint('MAPBOX_ACCESS_TOKEN not found in .env');
+    }
+  }
+
   await Hive.initFlutter();
   debugPrint('Starting app - platform: ${TargetPlatform.values}');
   FirebaseApp? app;
@@ -52,8 +64,7 @@ Future<void> main() async {
 
   runApp(
     ScreenUtilInit(
-      designSize:
-          const Size(390, 844), 
+      designSize: const Size(390, 844),
       minTextAdapt: true,
       builder: (context, child) {
         return AppRoot();

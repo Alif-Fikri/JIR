@@ -1,16 +1,16 @@
-import 'package:JIR/pages/home/flood/widgets/radar_map.dart';
 import 'package:JIR/pages/home/map/widget/route_bottom_sheet.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:JIR/helper/mapbox_config.dart';
+import 'package:latlong2/latlong.dart' as ll;
 import 'package:JIR/helper/map.dart';
 import 'package:JIR/pages/home/flood/view/flood_monitoring.dart';
 import 'package:JIR/pages/home/map/widget/detail_flood.dart';
 import 'package:JIR/pages/home/map/controller/flood_controller.dart';
 import 'package:JIR/pages/home/map/widget/menu_map_monitoring.dart';
 import 'package:JIR/pages/home/map/controller/route_controller.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
 
 class MapMonitoring extends StatelessWidget {
   final RouteController _routeController = Get.put(RouteController());
@@ -52,55 +52,48 @@ class MapMonitoring extends StatelessWidget {
   }
 
   Widget _buildMap() {
-    Get.find<FloodController>();
-
     return GetX<FloodController>(
-      builder: (controller) {
-        if (controller.isLoading.value) {
+      builder: (floodController) {
+        if (floodController.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final floodMarkers = controller.floodData.map((item) {
+        final floodDataList = floodController.floodData.toList();
+        final floodPositions = floodDataList.map((item) {
           final lat =
               double.tryParse(item['LATITUDE']?.toString() ?? '0.0') ?? 0.0;
           final lng =
               double.tryParse(item['LONGITUDE']?.toString() ?? '0.0') ?? 0.0;
-
-          return Marker(
-            point: LatLng(lat, lng),
-            child: GestureDetector(
-              onTap: () => _showDisasterDetails(item),
-              child: RadarMarker(status: item['STATUS_SIAGA']?.toString()),
-            ),
-          );
+          return ll.LatLng(lat, lng);
         }).toList();
 
         return GetX<RouteController>(
           builder: (routeController) {
-            final waypointMarkers =
-                routeController.optimizedWaypoints.map((waypoint) {
-              return Marker(
-                point: waypoint,
-                width: 30,
-                height: 30,
-                child: const Icon(
-                  Icons.location_pin,
-                  color: Colors.orange,
-                  size: 30,
-                ),
-              );
-            }).toList();
+            final routePoints = routeController.routePoints
+                .map((point) => ll.LatLng(point.latitude, point.longitude))
+                .toList();
+            final waypointPositions = routeController.optimizedWaypoints
+                .map((point) => ll.LatLng(point.latitude, point.longitude))
+                .toList();
+            final userLoc = routeController.userLocation.value;
+            final userPosition = userLoc != null
+                ? ll.LatLng(userLoc.latitude, userLoc.longitude)
+                : null;
 
-            final allMarkers = [...floodMarkers, ...waypointMarkers];
-
-            return ReusableMap(
-              initialLocation: const LatLng(-6.2088, 106.8456),
-              markers: allMarkers,
-              userLocation: routeController.userLocation.value,
-              userHeading: routeController.userHeading.value,
-              destination: routeController.destination.value,
-              routePoints: routeController.routePoints,
-              waypoints: routeController.optimizedWaypoints,
+            return MapboxReusableMap(
+              accessToken: MapboxConfig.accessToken,
+              styleUri: mb.MapboxStyles.MAPBOX_STREETS,
+              initialLocation: userPosition,
+              markers: floodPositions,
+              markerData: floodDataList,
+              userLocation: userPosition,
+              routePoints: routePoints,
+              waypoints: waypointPositions,
+              onMarkerTap: (index) {
+                if (index >= 0 && index < floodDataList.length) {
+                  _showDisasterDetails(floodDataList[index]);
+                }
+              },
             );
           },
         );
@@ -289,7 +282,7 @@ class MapMonitoring extends StatelessWidget {
               final distance = _routeController.userLocation.value != null
                   ? RouteController.calculateDistance(
                         _routeController.userLocation.value!,
-                        LatLng(lat, lon),
+                        ll.LatLng(lat, lon),
                       ) /
                       1000
                   : null;
@@ -319,7 +312,7 @@ class MapMonitoring extends StatelessWidget {
   void _handleSuggestionTap(double? lat, double? lon, dynamic suggestion) {
     if (lat == null || lon == null) return;
 
-    _routeController.destination(LatLng(lat, lon));
+    _routeController.destination(ll.LatLng(lat, lon));
     _searchController.text = suggestion['display_name'] ?? '';
     _routeController.searchSuggestions.clear();
     _routeController.fetchOptimizedRoute();
@@ -374,7 +367,8 @@ class MapMonitoring extends StatelessWidget {
         status: item['STATUS_SIAGA']?.toString() ?? 'N/A',
         onViewLocation: () {
           Get.back();
-          Get.to(() => FloodMonitoringPage(initialLocation: LatLng(lat, lng)));
+          Get.to(
+              () => FloodMonitoringPage(initialLocation: ll.LatLng(lat, lng)));
         },
       ),
       isScrollControlled: true,

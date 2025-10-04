@@ -11,9 +11,38 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
 	private val CHANNEL = "jir/native/email"
+	private val MAPBOX_CHANNEL = "jir/mapbox/token"
 
 	override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
 		super.configureFlutterEngine(flutterEngine)
+
+		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+			if (call.method == "openEmail") {
+				val to = call.argument<String>("to")
+				val subject = call.argument<String>("subject")
+				val body = call.argument<String>("body")
+				try {
+					openEmailIntent(to, subject, body)
+					result.success(true)
+				} catch (e: Exception) {
+					result.error("ERROR", e.message, null)
+				}
+			} else {
+				result.notImplemented()
+			}
+		}
+
+		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, MAPBOX_CHANNEL).setMethodCallHandler { call, result ->
+			if (call.method == "getToken") {
+				try {
+					result.success(null)
+				} catch (e: Exception) {
+					result.error("ERROR", e.message, null)
+				}
+			} else {
+				result.notImplemented()
+			}
+		}
 
 		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
 			if (call.method == "openEmail") {

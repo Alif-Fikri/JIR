@@ -1,15 +1,21 @@
 import 'package:JIR/helper/map.dart';
+import 'package:JIR/helper/mapbox_config.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:JIR/pages/home/flood/controller/flood_controller.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:JIR/pages/home/map/controller/route_controller.dart';
+import 'package:latlong2/latlong.dart' as ll;
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 class FloodMonitoringPage extends StatelessWidget {
   final LatLng? initialLocation;
   final FloodMonitoringController controller =
       Get.put(FloodMonitoringController());
+  final RouteController routeController = Get.isRegistered<RouteController>()
+      ? Get.find<RouteController>()
+      : Get.put(RouteController());
 
   FloodMonitoringPage({super.key, this.initialLocation});
 
@@ -37,24 +43,43 @@ class FloodMonitoringPage extends StatelessWidget {
       body: Stack(
         children: [
           Obx(() {
-            final lat = controller.currentLocation.value;
-            final userMarker = lat != null
-                ? Marker(
-                    point: lat,
-                    width: 60,
-                    height: 60,
-                    child: UserLocationMarker(),
-                  )
+            final floodDataList = controller.floodData.toList();
+            final floodPositions = controller.floodData.map((item) {
+              final lat =
+                  double.tryParse(item['LATITUDE']?.toString() ?? '0') ?? 0.0;
+              final lng =
+                  double.tryParse(item['LONGITUDE']?.toString() ?? '0') ?? 0.0;
+              return ll.LatLng(lat, lng);
+            }).toList();
+
+            print(
+                '[FLOOD PAGE] floodPositions length=${floodPositions.length}');
+
+            final userLocation = controller.currentLocation.value;
+            final userPosition = userLocation != null
+                ? ll.LatLng(userLocation.latitude, userLocation.longitude)
                 : null;
-            final combined = [
-              ...controller.floodMarkers,
-              if (userMarker != null) userMarker
-            ];
-            return ReusableMap(
-              markers: combined,
-              initialLocation: controller.currentLocation.value,
-              onMapCreated: (mapCtrl) {
-                controller.setMapController(mapCtrl);
+
+            final routePoints = routeController.routePoints
+                .map((p) => ll.LatLng(p.latitude, p.longitude))
+                .toList();
+            final waypoints = routeController.optimizedWaypoints
+                .map((p) => ll.LatLng(p.latitude, p.longitude))
+                .toList();
+
+            return MapboxReusableMap(
+              accessToken: MapboxConfig.accessToken,
+              styleUri: MapboxStyles.MAPBOX_STREETS,
+              initialLocation: userPosition,
+              markers: floodPositions,
+              markerData: floodDataList,
+              userLocation: userPosition,
+              routePoints: routePoints,
+              waypoints: waypoints,
+              onMarkerDataTap: controller.onMarkerDataTap,
+              onMapCreated: (mbMap) {
+                controller
+                    .setMapController(mbMap);
               },
             );
           }),

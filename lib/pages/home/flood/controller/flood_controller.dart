@@ -1,21 +1,19 @@
 import 'package:JIR/pages/home/flood/widgets/flood_item_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:JIR/services/flood_service/flood_api_service.dart';
-import 'package:JIR/pages/home/flood/widgets/radar_map.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
 
 class FloodMonitoringController extends GetxController {
-  var currentLocation = Rxn<LatLng>();
+  final currentLocation = Rxn<LatLng>();
   LatLng? _pendingCenter;
-  var floodMarkers = <Marker>[].obs;
-  var floodData = <Map<String, dynamic>>[].obs;
-  var suggestions = <Map<String, dynamic>>[].obs;
+  final floodData = <Map<String, dynamic>>[].obs;
+  final suggestions = <Map<String, dynamic>>[].obs;
 
-  MapController? mapController;
+  mb.MapboxMap? _mapboxMap;
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocus = FocusNode();
 
@@ -31,33 +29,29 @@ class FloodMonitoringController extends GetxController {
     });
     ever(currentLocation, (_) {
       final loc = currentLocation.value;
-      if (loc != null && mapController != null && !_didInitialCameraMove) {
-        try {
-          mapController!.move(loc, 15.0);
-          _didInitialCameraMove = true;
-        } catch (_) {}
+      if (loc != null && !_didInitialCameraMove) {
+        _moveCamera(loc, zoom: 15.0);
+        _didInitialCameraMove = true;
       }
     });
   }
 
-  void setMapController(MapController mc) {
-    mapController = mc;
-    try {
-      if (_pendingCenter != null) {
-        debugPrint('[FloodController] Applying pendingCenter: $_pendingCenter');
-        mapController!.move(_pendingCenter!, 15.0);
-        _didInitialCameraMove = true;
-        _pendingCenter = null;
-        return;
-      }
+  void setMapController(mb.MapboxMap map) {
+    _mapboxMap = map;
+    if (_pendingCenter != null) {
+      final target = _pendingCenter!;
+      _pendingCenter = null;
+      _moveCamera(target, zoom: 15.0);
+      _didInitialCameraMove = true;
+      return;
+    }
 
-      final loc = currentLocation.value;
-      if (!_didInitialCameraMove && loc != null) {
-        debugPrint('[FloodController] Moving to user location: $loc');
-        mapController!.move(loc, 15.0);
-        _didInitialCameraMove = true;
-      }
-    } catch (_) {}
+    final loc = currentLocation.value;
+    if (!_didInitialCameraMove && loc != null) {
+      debugPrint('[FloodController] Moving to user location: $loc');
+      _moveCamera(loc, zoom: 15.0);
+      _didInitialCameraMove = true;
+    }
   }
 
   Future<void> fetchFloodData() async {
@@ -86,21 +80,9 @@ class FloodMonitoringController extends GetxController {
         };
       }).toList();
       floodData.assignAll(normalized);
-      final markers = normalized.map((item) {
-        final lat = item["LATITUDE"] as double;
-        final lon = item["LONGITUDE"] as double;
-        return Marker(
-          point: LatLng(lat, lon),
-          width: 36,
-          height: 36,
-          child: GestureDetector(
-            onTap: () => _openFloodInfo(item),
-            child: RadarMarker(status: item['STATUS_SIAGA']?.toString()),
-          ),
-        );
-      }).toList();
-      floodMarkers.assignAll(markers);
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('[FloodController] fetchFloodData error: $e');
+      debugPrint(stack.toString());
     }
   }
 
@@ -120,21 +102,31 @@ class FloodMonitoringController extends GetxController {
     final lat = item["LATITUDE"] as double;
     final lon = item["LONGITUDE"] as double;
     final target = LatLng(lat, lon);
-    try {
-      mapController?.move(target, 15.0);
-    } catch (_) {}
-    _openFloodInfo(item);
+    _moveCamera(target, zoom: 15.0);
+    _openFloodInfo(item, history: _historyForLocation(item));
     suggestions.clear();
     searchController.text = item["NAMA_PINTU_AIR"].toString();
     FocusScope.of(Get.context!).unfocus();
   }
 
-  void _openFloodInfo(Map<String, dynamic> item) {
+  void onMarkerDataTap(Map<String, dynamic> item) {
+    final lat = _coerceDouble(item["LATITUDE"]);
+    final lon = _coerceDouble(item["LONGITUDE"]);
+    if (lat != null && lon != null) {
+      _moveCamera(LatLng(lat, lon), zoom: 15.0);
+    }
+    _openFloodInfo(item, history: _historyForLocation(item));
+  }
+
+  void _openFloodInfo(Map<String, dynamic> item,
+      {List<Map<String, dynamic>>? history}) {
     final String statusStr = item["STATUS_SIAGA"]?.toString() ?? "Unknown";
     final int height = item["TINGGI_AIR"] is int
         ? item["TINGGI_AIR"] as int
         : int.tryParse(item["TINGGI_AIR"].toString()) ?? 0;
     final String name = item["NAMA_PINTU_AIR"]?.toString() ?? "N/A";
+    final List<Map<String, dynamic>> series =
+        history ?? _historyForLocation(item);
     Get.bottomSheet(
       FloodInfoBottomSheet(
         status: statusStr,
@@ -143,7 +135,7 @@ class FloodMonitoringController extends GetxController {
         waterIconPath: "assets/images/ketinggian.png",
         location: name,
         locationIconPath: "assets/images/lokasi.png",
-        floodData: floodData,
+        floodData: series,
       ),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -157,14 +149,13 @@ class FloodMonitoringController extends GetxController {
       final pos = await Geolocator.getCurrentPosition();
       final latlng = LatLng(pos.latitude, pos.longitude);
       currentLocation.value = latlng;
-      if (mapController != null &&
-          !_didInitialCameraMove &&
-          _pendingCenter == null) {
-        mapController!.move(latlng, 15.0);
+      if (!_didInitialCameraMove && _pendingCenter == null) {
+        _moveCamera(latlng, zoom: 15.0);
         _didInitialCameraMove = true;
       }
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint('[FloodController] getCurrentLocation error: $e');
+      debugPrint(stack.toString());
     }
   }
 
@@ -187,24 +178,25 @@ class FloodMonitoringController extends GetxController {
         final lat = found["LATITUDE"] as double;
         final lon = found["LONGITUDE"] as double;
         final target = LatLng(lat, lon);
-        try {
-          mapController?.move(target, 15.0);
-        } catch (_) {}
-        _openFloodInfo(found);
+        _moveCamera(target, zoom: 15.0);
+        _openFloodInfo(found, history: _historyForLocation(found));
         return;
       }
-    } catch (_) {}
+    } catch (e, stack) {
+      debugPrint('[FloodController] searchLocation data lookup error: $e');
+      debugPrint(stack.toString());
+    }
     try {
       final locations = await locationFromAddress(q);
       if (locations.isNotEmpty) {
         final loc = locations.first;
         final target = LatLng(loc.latitude, loc.longitude);
-        try {
-          mapController?.move(target, 15.0);
-        } catch (_) {}
+        _moveCamera(target, zoom: 15.0);
         return;
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('[FloodController] searchLocation geocode error: $e');
+      debugPrint(stack.toString());
     }
     Get.snackbar('Tidak Ditemukan', 'Lokasi atau data banjir tidak ditemukan');
   }
@@ -220,15 +212,39 @@ class FloodMonitoringController extends GetxController {
   void gotoLocation(LatLng loc, {double zoom = 15.0}) {
     try {
       debugPrint(
-          '[FloodController] gotoLocation requested: $loc (mapController ready=${mapController != null})');
-      if (mapController != null) {
-        mapController!.move(loc, zoom);
-        _didInitialCameraMove = true;
-      } else {
+          '[FloodController] gotoLocation requested: $loc (mapReady=${_mapboxMap != null})');
+      _moveCamera(loc, zoom: zoom);
+      if (_mapboxMap == null) {
         _pendingCenter = loc;
+      } else {
+        _didInitialCameraMove = true;
       }
-    } catch (_) {}
+    } catch (e, stack) {
+      debugPrint('[FloodController] gotoLocation error: $e');
+      debugPrint(stack.toString());
+    }
   }
+
+  Future<void> _moveCamera(LatLng target, {double zoom = 15.0}) async {
+    final map = _mapboxMap;
+    if (map == null) {
+      _pendingCenter = target;
+      return;
+    }
+    _pendingCenter = null;
+    try {
+      await map.flyTo(
+        mb.CameraOptions(center: _toPoint(target), zoom: zoom),
+        mb.MapAnimationOptions(duration: 700),
+      );
+    } catch (e, stack) {
+      debugPrint('[FloodController] _moveCamera error: $e');
+      debugPrint(stack.toString());
+    }
+  }
+
+  mb.Point _toPoint(LatLng value) =>
+      mb.Point(coordinates: mb.Position(value.longitude, value.latitude));
 
   String _formatStatus(dynamic statusRaw) {
     if (statusRaw == null) return 'Normal';
@@ -268,5 +284,59 @@ class FloodMonitoringController extends GetxController {
       default:
         return 'Normal';
     }
+  }
+
+  List<Map<String, dynamic>> _historyForLocation(
+      Map<String, dynamic> reference) {
+    final name = reference["NAMA_PINTU_AIR"]?.toString().trim().toLowerCase();
+    final lat = _coerceDouble(reference["LATITUDE"]);
+    final lon = _coerceDouble(reference["LONGITUDE"]);
+
+    final matches = floodData
+        .where((item) {
+          final itemName =
+              item["NAMA_PINTU_AIR"]?.toString().trim().toLowerCase() ?? '';
+          final itemLat = _coerceDouble(item["LATITUDE"]);
+          final itemLon = _coerceDouble(item["LONGITUDE"]);
+
+          final nameMatches =
+              name != null && name.isNotEmpty && itemName == name;
+          final coordsMatch = lat != null &&
+              lon != null &&
+              itemLat != null &&
+              itemLon != null &&
+              (itemLat - lat).abs() < 0.0001 &&
+              (itemLon - lon).abs() < 0.0001;
+
+          return nameMatches || coordsMatch;
+        })
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+
+    matches.sort((a, b) {
+      final aDate = DateTime.tryParse(a["TANGGAL"]?.toString() ?? '');
+      final bDate = DateTime.tryParse(b["TANGGAL"]?.toString() ?? '');
+      if (aDate != null && bDate != null) {
+        return aDate.compareTo(bDate);
+      }
+      if (aDate != null) return 1;
+      if (bDate != null) return -1;
+      return a["NAMA_PINTU_AIR"]
+          .toString()
+          .compareTo(b["NAMA_PINTU_AIR"].toString());
+    });
+
+    if (matches.isEmpty) {
+      matches.add(Map<String, dynamic>.from(reference));
+    }
+
+    return matches;
+  }
+
+  double? _coerceDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    return double.tryParse(value.toString());
   }
 }

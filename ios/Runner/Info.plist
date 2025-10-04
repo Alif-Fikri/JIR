@@ -2,12 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
-		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>We need your location to show the weather data and location-based features while the app is in use.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-		<string>We need your location even when the app is in background to provide location-based alerts and background updates (e.g. hazard warnings).</string>
-		<key>NSLocationAlwaysUsageDescription</key>
-		<string>We need your location to provide continuous location-based services.</string>
+		<string>App membutuhkan lokasi untuk fitur tertentu.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>App membutuhkan lokasi untuk menampilkan peta dan navigasi.</string>
 		<key>NSBluetoothAlwaysUsageDescription</key>
 		<string>The app uses Bluetooth to connect to nearby devices and provide real-time data.</string>
 		<key>NSCameraUsageDescription</key>
@@ -28,6 +26,8 @@
 		<string>Allow tracking to provide personalized content and improve app features. We will not sell your data.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<key>MGLMapboxAccessToken</key>
+		<string>pk.eyJ1IjoiYWxpZmZpa3JpaSIsImEiOiJjbWdhbnQ2M2YwNnptMmtxODdhb3h1dXA0In0.bkDLBhUy_d7-GYTlRNyt_w</string>
 		<key>CFBundleDisplayName</key>
 		<string>JIR</string>
 		<key>CFBundleExecutable</key>
