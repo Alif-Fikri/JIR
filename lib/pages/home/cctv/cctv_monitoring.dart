@@ -1,45 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:JIR/pages/home/cctv/cctv_webview.dart';
-import 'package:latlong2/latlong.dart' as ll;
 import 'package:JIR/helper/map.dart';
 import 'package:JIR/helper/mapbox_config.dart';
+import 'package:JIR/pages/home/cctv/cctv_webview.dart';
+import 'package:JIR/pages/home/cctv/model/cctv_location.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' as ll;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 class CCTVPage extends StatelessWidget {
-  final List<CCTVLocation> cctvLocations = [
-    CCTVLocation(
-      name: "DPR",
-      url:
-          "https://cctv.balitower.co.id/Bendungan-Hilir-003-700014_1/embed.html",
-      coordinates: const LatLng(-6.2096, 106.8005),
-    ),
-    CCTVLocation(
-      name: "Bundaran HI",
-      url: "https://cctv.balitower.co.id/Menteng-001-700123_5/embed.html",
-      coordinates: const LatLng(-6.1945, 106.8229),
-    ),
-    CCTVLocation(
-      name: "Monas",
-      url: "https://cctv.balitower.co.id/Monas-Barat-009-506632_2/embed.html",
-      coordinates: const LatLng(-6.1754, 106.8273),
-    ),
-    CCTVLocation(
-      name: "Patung Kuda",
-      url: "https://cctv.balitower.co.id/JPO-Merdeka-Barat-507357_9/embed.html",
-      coordinates: const LatLng(-6.1715, 106.8343),
-    ),
-  ];
+  final List<CCTVLocation> cctvLocations =
+      List<CCTVLocation>.from(defaultCctvLocations);
 
   CCTVPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final cctvPositions = cctvLocations
-        .map((loc) =>
-            ll.LatLng(loc.coordinates.latitude, loc.coordinates.longitude))
+    final cctvPositions = cctvLocations.map((loc) => loc.coordinates).toList();
+
+    final markerData = cctvLocations
+        .map((loc) => {
+              'markerType': 'cctv',
+              'name': loc.name,
+              'url': loc.url,
+              'latitude': loc.coordinates.latitude,
+              'longitude': loc.coordinates.longitude,
+            })
         .toList();
     return Scaffold(
       backgroundColor: Colors.white,
@@ -80,6 +66,7 @@ class CCTVPage extends StatelessWidget {
                   styleUri: MapboxStyles.MAPBOX_STREETS,
                   initialLocation: ll.LatLng(-6.2000, 106.8167),
                   markers: cctvPositions,
+                  markerData: markerData,
                   userLocation: null,
                   routePoints: null,
                 ),
@@ -149,16 +136,4 @@ class CCTVPage extends StatelessWidget {
       ),
     );
   }
-}
-
-class CCTVLocation {
-  final String name;
-  final String url;
-  final ll.LatLng coordinates;
-
-  CCTVLocation({
-    required this.name,
-    required this.url,
-    required this.coordinates,
-  });
 }

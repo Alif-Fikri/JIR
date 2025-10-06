@@ -1,14 +1,12 @@
+import 'package:JIR/helper/map.dart';
 import 'package:JIR/helper/mapbox_config.dart';
+import 'package:JIR/pages/home/crowd/controller/crowd_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:JIR/pages/home/crowd/controller/crowd_controller.dart';
-import 'package:JIR/helper/map.dart';
-import 'package:JIR/pages/home/crowd/widget/crowd_marker.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:latlong2/latlong.dart' as ll;
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 class CrowdMonitoringPage extends StatelessWidget {
   final CrowdController controller = Get.put(CrowdController());
@@ -57,9 +55,27 @@ class CrowdMonitoringPage extends StatelessWidget {
   }
 
   Widget _buildMapSection() {
-    final markerPositions = controller.locations.values
-        .map((p) => ll.LatLng(p.latitude, p.longitude))
+    final entries = controller.locations.entries.toList();
+    final markerPositions = entries
+        .map((entry) => ll.LatLng(entry.value.latitude, entry.value.longitude))
         .toList();
+
+    final markerData = entries.map((entry) {
+      final dynamic live = controller.liveData[entry.key];
+      final predictedValue =
+          live is Map<String, dynamic> ? live['predicted_count'] : live;
+      final count = _resolvePredictedCount(predictedValue);
+      final level = controller.getLevel(count);
+
+      return {
+        'markerType': 'cctv',
+        'location': entry.key,
+        'predicted_count': count,
+        'level': level,
+        'latitude': entry.value.latitude,
+        'longitude': entry.value.longitude,
+      };
+    }).toList();
 
     return Padding(
       padding: EdgeInsets.all(20.w),
@@ -74,33 +90,16 @@ class CrowdMonitoringPage extends StatelessWidget {
         ),
         child: MapboxReusableMap(
           accessToken: MapboxConfig.accessToken,
-          styleUri: MapboxStyles.MAPBOX_STREETS, 
+          styleUri: MapboxStyles.MAPBOX_STREETS,
           initialLocation: ll.LatLng(-6.2000, 106.8167),
           markers: markerPositions,
+          markerData: markerData,
           userLocation: null,
           routePoints: null,
+          onMarkerDataTap: _showCrowdDetails,
         ),
       ),
     );
-  }
-
-  List<Marker> _buildMarkers() {
-    return controller.locations.entries.map((entry) {
-      final data = controller.liveData[entry.key] ?? {'predicted_count': 0};
-      final count = data['predicted_count']?.toString() ?? '0';
-      final level = controller.getLevel(int.tryParse(count) ?? 0);
-
-      return Marker(
-        point: entry.value,
-        width: 60.w,
-        height: 60.h,
-        child: CrowdMarker(
-          count: count,
-          level: level,
-          color: controller.getLevelColor(level),
-        ),
-      );
-    }).toList();
   }
 
   Widget _buildDataSection() {
@@ -174,13 +173,145 @@ class CrowdMonitoringPage extends StatelessWidget {
   }
 
   Map<String, dynamic> _mapLiveData(String location) {
-    final count =
-        controller.liveData[location]?['predicted_count']?.toString() ?? '0';
+    final rawValue = controller.liveData[location]?['predicted_count'];
+    final countValue = _resolvePredictedCount(rawValue);
     return {
       'location': location,
-      'count': count,
-      'level': controller.getLevel(int.parse(count)),
+      'count': countValue.toString(),
+      'level': controller.getLevel(countValue),
     };
+  }
+
+  void _showCrowdDetails(Map<String, dynamic> data) {
+    final location = data['location']?.toString() ?? 'Lokasi';
+    final countValue = _resolvePredictedCount(data['predicted_count']);
+    final level = data['level']?.toString() ?? controller.getLevel(countValue);
+    final latitude = data['latitude'];
+    final longitude = data['longitude'];
+
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Detail Kerumunan',
+              style: GoogleFonts.publicSans(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF45557B),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0x1145557B),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.location_on, color: Color(0xFF45557B)),
+              ),
+              title: Text(
+                location,
+                style: GoogleFonts.publicSans(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: (latitude is num && longitude is num)
+                  ? Text(
+                      'Lat: ${latitude.toStringAsFixed(4)}, Lon: ${longitude.toStringAsFixed(4)}',
+                      style: GoogleFonts.publicSans(fontSize: 12.sp),
+                    )
+                  : null,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: controller.getLevelColor(level),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  level,
+                  style: GoogleFonts.publicSans(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: controller.getLevelColor(level),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '$countValue Orang',
+              style: GoogleFonts.publicSans(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: Get.back,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF45557B),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Tutup',
+                  style: GoogleFonts.publicSans(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
+  int _resolvePredictedCount(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.round();
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString()) ?? 0;
   }
 }
 

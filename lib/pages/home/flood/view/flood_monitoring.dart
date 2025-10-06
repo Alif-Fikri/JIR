@@ -52,9 +52,6 @@ class FloodMonitoringPage extends StatelessWidget {
               return ll.LatLng(lat, lng);
             }).toList();
 
-            print(
-                '[FLOOD PAGE] floodPositions length=${floodPositions.length}');
-
             final userLocation = controller.currentLocation.value;
             final userPosition = userLocation != null
                 ? ll.LatLng(userLocation.latitude, userLocation.longitude)
@@ -79,7 +76,7 @@ class FloodMonitoringPage extends StatelessWidget {
               onMarkerDataTap: controller.onMarkerDataTap,
               onMapCreated: (mbMap) {
                 controller
-                    .setMapController(mbMap);
+                    .setMapController(mbMap); 
               },
             );
           }),
@@ -133,7 +130,7 @@ class FloodMonitoringPage extends StatelessWidget {
                     const SizedBox(width: 8),
                     FloatingActionButton(
                       onPressed: () {
-                        controller.getCurrentLocation();
+                        controller.getCurrentLocation(forceRecenter: true);
                         FocusScope.of(context).unfocus();
                       },
                       backgroundColor: Colors.white,

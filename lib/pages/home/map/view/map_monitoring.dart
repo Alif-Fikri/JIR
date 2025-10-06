@@ -1,15 +1,16 @@
+import 'package:JIR/helper/map.dart';
+import 'package:JIR/helper/mapbox_config.dart';
+import 'package:JIR/pages/home/cctv/cctv_webview.dart';
+import 'package:JIR/pages/home/cctv/model/cctv_location.dart';
+import 'package:JIR/pages/home/map/controller/flood_controller.dart';
+import 'package:JIR/pages/home/map/controller/route_controller.dart';
+import 'package:JIR/pages/home/map/widget/detail_flood.dart';
+import 'package:JIR/pages/home/map/widget/menu_map_monitoring.dart';
 import 'package:JIR/pages/home/map/widget/route_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:JIR/helper/mapbox_config.dart';
 import 'package:latlong2/latlong.dart' as ll;
-import 'package:JIR/helper/map.dart';
-import 'package:JIR/pages/home/flood/view/flood_monitoring.dart';
-import 'package:JIR/pages/home/map/widget/detail_flood.dart';
-import 'package:JIR/pages/home/map/controller/flood_controller.dart';
-import 'package:JIR/pages/home/map/widget/menu_map_monitoring.dart';
-import 'package:JIR/pages/home/map/controller/route_controller.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
 
 class MapMonitoring extends StatelessWidget {
@@ -17,6 +18,8 @@ class MapMonitoring extends StatelessWidget {
   final TextEditingController _searchController = TextEditingController();
   final FloodController controller = Get.find<FloodController>();
   final FocusNode _searchFocusNode = FocusNode();
+  final List<CCTVLocation> _cctvLocations =
+      List<CCTVLocation>.from(defaultCctvLocations);
 
   MapMonitoring({super.key});
 
@@ -67,11 +70,61 @@ class MapMonitoring extends StatelessWidget {
           return ll.LatLng(lat, lng);
         }).toList();
 
+        final cctvPositions =
+            _cctvLocations.map((loc) => loc.coordinates).toList();
+
+        final floodMarkerData = floodDataList.map((item) {
+          final copy = Map<String, dynamic>.from(item);
+          copy['markerType'] = 'flood';
+          return copy;
+        }).toList();
+
+        final cctvMarkerData = _cctvLocations
+            .map((loc) => {
+                  'markerType': 'cctv',
+                  'name': loc.name,
+                  'url': loc.url,
+                  'latitude': loc.coordinates.latitude,
+                  'longitude': loc.coordinates.longitude,
+                })
+            .toList();
+
+        final combinedMarkers = [...floodPositions, ...cctvPositions];
+        final combinedMarkerData = [...floodMarkerData, ...cctvMarkerData];
+
         return GetX<RouteController>(
           builder: (routeController) {
             final routePoints = routeController.routePoints
                 .map((point) => ll.LatLng(point.latitude, point.longitude))
                 .toList();
+            final routeOptions = routeController.routeOptions;
+            final selectedRouteIndex = routeController.selectedRouteIndex.value;
+            final List<RouteLineConfig> routeLines = [];
+
+            for (var i = 0; i < routeOptions.length; i++) {
+              final option = routeOptions[i];
+              final isSelected = i == selectedRouteIndex;
+              final optionPoints = option.points
+                  .map((point) => ll.LatLng(point.latitude, point.longitude))
+                  .toList();
+
+              final config = RouteLineConfig(
+                id: option.id,
+                points: optionPoints,
+                color: isSelected
+                    ? const Color(0xFF1E3A8A)
+                    : const Color(0xFF38BDF8),
+                width: isSelected ? 6.0 : 4.0,
+                opacity: isSelected ? 1.0 : 0.72,
+              );
+
+              if (isSelected) {
+                routeLines.add(config);
+              } else {
+                routeLines.insert(0, config);
+              }
+            }
+
             final waypointPositions = routeController.optimizedWaypoints
                 .map((point) => ll.LatLng(point.latitude, point.longitude))
                 .toList();
@@ -79,21 +132,30 @@ class MapMonitoring extends StatelessWidget {
             final userPosition = userLoc != null
                 ? ll.LatLng(userLoc.latitude, userLoc.longitude)
                 : null;
+            final dest = routeController.destination.value;
+            final destinationPoint =
+                dest != null ? ll.LatLng(dest.latitude, dest.longitude) : null;
 
             return MapboxReusableMap(
               accessToken: MapboxConfig.accessToken,
               styleUri: mb.MapboxStyles.MAPBOX_STREETS,
               initialLocation: userPosition,
-              markers: floodPositions,
-              markerData: floodDataList,
+              markers: combinedMarkers,
+              markerData: combinedMarkerData,
               userLocation: userPosition,
               routePoints: routePoints,
+              routeLines: routeLines,
               waypoints: waypointPositions,
-              onMarkerTap: (index) {
-                if (index >= 0 && index < floodDataList.length) {
-                  _showDisasterDetails(floodDataList[index]);
-                }
-              },
+              destination: destinationPoint,
+              onMarkerDataTap: _handleMarkerDataTap,
+              onRouteTap: (routeId) => routeController.selectRouteById(
+                routeId,
+                showFeedback: true,
+              ),
+              enable3DBuildings: false,
+              autoPitchOnRoute: true,
+              navigationPitch: 45,
+              navigationZoom: 15.5,
             );
           },
         );
@@ -118,7 +180,7 @@ class MapMonitoring extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withAlpha(51),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -187,26 +249,21 @@ class MapMonitoring extends StatelessWidget {
             fontStyle: FontStyle.italic,
           ),
           prefixIcon: const Icon(Icons.search, color: Colors.black),
-          suffixIcon: Obx(() {
-            if (_routeController.searchSuggestions.isNotEmpty) {
+          suffixIcon: ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _searchController,
+            builder: (_, value, __) {
+              if (value.text.isEmpty) {
+                return const SizedBox.shrink();
+              }
               return IconButton(
-                icon: const Icon(Icons.clear, color: Colors.grey),
-                onPressed: _clearSearch,
-              );
-            }
-            if (_searchController.text.isNotEmpty) {
-              return IconButton(
-                icon: const Icon(Icons.close, size: 20),
+                icon: const Icon(Icons.close, size: 20, color: Colors.grey),
                 onPressed: () {
-                  _searchController.clear();
-                  _routeController.clearRoute();
-                  _routeController.searchSuggestions.clear();
+                  _clearSearch();
                   _searchFocusNode.unfocus();
                 },
               );
-            }
-            return const SizedBox.shrink();
-          }),
+            },
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             vertical: 14,
@@ -276,6 +333,16 @@ class MapMonitoring extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if ((suggestion['place_name'] ?? '').toString().isNotEmpty)
+          Text(
+            suggestion['place_name'],
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: Colors.grey[700],
+            ),
+          ),
         if (lat != null && lon != null)
           Builder(
             builder: (context) {
@@ -312,22 +379,22 @@ class MapMonitoring extends StatelessWidget {
   void _handleSuggestionTap(double? lat, double? lon, dynamic suggestion) {
     if (lat == null || lon == null) return;
 
-    _routeController.destination(ll.LatLng(lat, lon));
     _searchController.text = suggestion['display_name'] ?? '';
     _routeController.searchSuggestions.clear();
-    _routeController.fetchOptimizedRoute();
+    _routeController.selectDestinationSuggestion(suggestion);
     _searchFocusNode.unfocus();
   }
 
   Widget _buildFloatingButton() {
     return Positioned(
-      bottom: 20,
-      right: 20,
+      left: 28,
+      bottom: 120,
       child: GetX<RouteController>(
         builder: (controller) {
           return Visibility(
             visible: controller.routeSteps.isNotEmpty,
             child: FloatingActionButton(
+              heroTag: 'route-directions-fab',
               backgroundColor: const Color(0xff45557B),
               child: const Icon(Icons.directions, color: Colors.white),
               onPressed: () => Get.bottomSheet(
@@ -343,13 +410,22 @@ class MapMonitoring extends StatelessWidget {
   }
 
   Widget _buildFloodMonitoringButton() {
-    return const Positioned(bottom: 20, left: 20, child: AnimatedMenuButton());
+    return const Positioned(bottom: 50, left: 20, child: AnimatedMenuButton());
   }
 
   void _clearSearch() {
     _searchController.clear();
     _routeController.searchSuggestions.clear();
     _routeController.clearRoute();
+  }
+
+  void _handleMarkerDataTap(Map<String, dynamic> item) {
+    final markerType = item['markerType']?.toString().toLowerCase();
+    if (markerType == 'cctv') {
+      _showCctvDetails(item);
+      return;
+    }
+    _showDisasterDetails(item);
   }
 
   void _showDisasterDetails(Map<String, dynamic> item) {
@@ -367,199 +443,103 @@ class MapMonitoring extends StatelessWidget {
         status: item['STATUS_SIAGA']?.toString() ?? 'N/A',
         onViewLocation: () {
           Get.back();
-          Get.to(
-              () => FloodMonitoringPage(initialLocation: ll.LatLng(lat, lng)));
+          final context = Get.context;
+          if (context != null) {
+            controller.navigateToFloodMonitoring(context, item);
+          }
         },
       ),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
     );
   }
-}
 
-class _VehicleOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
+  void _showCctvDetails(Map<String, dynamic> item) {
+    final name = (item['name'] ?? 'CCTV').toString();
+    final url = item['url']?.toString();
+    final latitude = item['latitude'];
+    final longitude = item['longitude'];
 
-  const _VehicleOption({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue[100] : Colors.grey[200],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? const Color(0xff45557B) : Colors.transparent,
-            width: 2,
-          ),
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: Row(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon,
-                color: isSelected ? const Color(0xff45557B) : Colors.grey),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? const Color(0xff45557B) : Colors.grey,
-                fontWeight: FontWeight.bold,
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
+            const SizedBox(height: 12),
+            Text(
+              'Detail CCTV',
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xff45557B),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.videocam,
+                  color: Color(0xff45557B), size: 28),
+              title: Text(
+                name,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: (latitude is num && longitude is num)
+                  ? Text(
+                      'Lat: ${latitude.toStringAsFixed(4)}, Lon: ${longitude.toStringAsFixed(4)}',
+                      style: GoogleFonts.inter(fontSize: 12),
+                    )
+                  : null,
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: url == null
+                    ? null
+                    : () {
+                        Get.back();
+                        Get.to(() => CCTVWebView(url: url));
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff45557B),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.open_in_new),
+                label: Text(
+                  'Buka CCTV',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
-    );
-  }
-}
-
-class RouteBottomSheetContent extends StatelessWidget {
-  final RouteController controller = Get.find<RouteController>();
-
-  RouteBottomSheetContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      height: MediaQuery.of(context).size.height * 0.6,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          _buildHeader(),
-          _buildVehicleSelector(),
-          _buildRouteList(),
-          _buildCloseButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          "Petunjuk Arah",
-          style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xff45557B)),
-        ),
-        IconButton(
-          icon: Image.asset(
-            'assets/images/close_icon.png',
-            height: 15,
-            width: 15,
-          ),
-          onPressed: () => Navigator.pop(Get.context!),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVehicleSelector() {
-    return Obx(
-      () => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _VehicleOption(
-            icon: Icons.motorcycle,
-            label: "Motor",
-            isSelected: controller.selectedVehicle.value == 'motorcycle',
-            onTap: () => controller.updateVehicle('motorcycle'),
-          ),
-          _VehicleOption(
-            icon: Icons.directions_car,
-            label: "Mobil",
-            isSelected: controller.selectedVehicle.value == 'car',
-            onTap: () => controller.updateVehicle('car'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRouteList() {
-    return Expanded(
-      child: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return ListView.separated(
-          itemCount: controller.routeSteps.length,
-          separatorBuilder: (context, index) => const Divider(height: 1),
-          itemBuilder: (context, index) =>
-              _buildStepItem(controller.routeSteps[index]),
-        );
-      }),
-    );
-  }
-
-  Widget _buildStepItem(Map<String, dynamic> step) {
-    return ListTile(
-      leading: RouteController.getManeuverIcon(step['type'], step['modifier']),
-      title: Text(
-        step['instruction'],
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: const Color(0xff45557B),
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Jalan: ${step['name']}",
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: Colors.grey[700],
-            ),
-          ),
-          Text(
-            RouteController.formatDistance(step['distance']),
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: Colors.green[700],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCloseButton() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xff45557B),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          minimumSize: const Size(double.infinity, 50),
-        ),
-        onPressed: () => Navigator.pop(Get.context!),
-        child: Text(
-          'Tutup',
-          style: GoogleFonts.inter(
-              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     );
   }
 }

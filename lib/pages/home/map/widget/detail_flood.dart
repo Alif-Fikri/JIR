@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:JIR/pages/home/flood/view/flood_monitoring.dart';
+import 'package:JIR/pages/home/map/controller/flood_controller.dart';
 
 class DisasterBottomSheet extends StatelessWidget {
   final String location;
@@ -95,7 +95,7 @@ class DisasterBottomSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
+                color: statusColor.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: statusColor, width: 1),
               ),
@@ -205,7 +205,7 @@ class FloodMonitoringBottomSheet extends StatefulWidget {
   });
 
   @override
-  _FloodMonitoringBottomSheetState createState() =>
+  State<FloodMonitoringBottomSheet> createState() =>
       _FloodMonitoringBottomSheetState();
 }
 
@@ -262,19 +262,11 @@ class _FloodMonitoringBottomSheetState
                       color: Colors.black,
                       fontWeight: FontWeight.bold),
                   onTap: () {
-                    final latitude =
-                        double.tryParse(item['LATITUDE'].toString()) ?? 0.0;
-                    final longitude =
-                        double.tryParse(item['LONGITUDE'].toString()) ?? 0.0;
-
                     Navigator.pop(context);
-                    Navigator.push(
+                    final floodController = Get.find<FloodController>();
+                    floodController.navigateToFloodMonitoring(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => FloodMonitoringPage(
-                          initialLocation: LatLng(latitude, longitude),
-                        ),
-                      ),
+                      item,
                     );
                   },
                 );

@@ -24,6 +24,9 @@ class HomeController extends GetxController
   var newsIndex = 0.obs;
 
   late WeatherFactory wf;
+  Weather? _cachedWeather;
+  Placemark? _cachedPlacemark;
+  Position? _cachedPosition;
 
   @override
   void onInit() {
@@ -60,9 +63,10 @@ class HomeController extends GetxController
     } on TimeoutException catch (e) {
       debugPrint('HomeController.fetchData timeout: $e');
       _setError('Gagal memuat data cuaca (timeout)');
-    } catch (e) {
+    } catch (e, st) {
       debugPrint('HomeController.fetchData error: $e');
-      rethrow;
+      debugPrintStack(stackTrace: st);
+      _setError('Gagal memuat data cuaca');
     } finally {
       isLoading.value = false;
     }
@@ -72,29 +76,59 @@ class HomeController extends GetxController
     _setLoadingState();
 
     try {
-      if (!await _handleLocationPermission()) return;
+      if (!await _handleLocationPermission()) {
+        return;
+      }
 
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      final position = await _getPositionWithFallback();
+      if (position == null) {
+        debugPrint('HomeController: unable to obtain location');
+        _setError('Lokasi tidak tersedia');
+        return;
+      }
+      _cachedPosition = position;
 
-      final weather = await wf.currentWeatherByLocation(
-        position.latitude,
-        position.longitude,
-      );
+      late Weather weather;
+      try {
+        weather = await wf
+            .currentWeatherByLocation(position.latitude, position.longitude)
+            .timeout(const Duration(seconds: 10));
+        _cachedWeather = weather;
+      } on TimeoutException catch (e) {
+        debugPrint('HomeController weather timeout: $e');
+        if (_cachedWeather != null) {
+          weather = _cachedWeather!;
+        } else {
+          throw TimeoutException('Weather service timeout');
+        }
+      }
 
-      final placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+      List<Placemark> placemarks = const [];
+      try {
+        placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        ).timeout(const Duration(seconds: 8));
+        if (placemarks.isNotEmpty) {
+          _cachedPlacemark = placemarks.first;
+        }
+      } on TimeoutException catch (e) {
+        debugPrint('HomeController placemark timeout: $e');
+        if (_cachedPlacemark != null) {
+          placemarks = [_cachedPlacemark!];
+        }
+      }
 
-      final place =
-          placemarks.isNotEmpty ? placemarks.first : const Placemark();
+      final place = placemarks.isNotEmpty
+          ? placemarks.first
+          : _cachedPlacemark ?? const Placemark();
 
       temperature.value =
-          weather.temperature?.celsius?.toStringAsFixed(1) ?? 'N/A';
-      location.value =
-          place.locality?.replaceFirst("Kecamatan ", "") ?? 'Unknown Location';
+          weather.temperature?.celsius?.toStringAsFixed(1) ?? temperature.value;
+      location.value = place.locality?.replaceFirst('Kecamatan ', '') ??
+          (location.value.isNotEmpty && location.value != 'Loading...'
+              ? location.value
+              : 'Unknown Location');
       weatherDescription.value =
           WeatherHelper.translateWeather(weather.weatherDescription);
       weatherIcon.value =
@@ -102,9 +136,29 @@ class HomeController extends GetxController
 
       final currentHour = DateTime.now().hour;
       backgroundImage.value = WeatherHelper.getBackgroundImage(currentHour);
-    } catch (e) {
+    } catch (e, st) {
       debugPrint('Error: $e');
+      debugPrintStack(stackTrace: st);
       _setError('Failed to fetch data');
+    }
+  }
+
+  Future<Position?> _getPositionWithFallback() async {
+    try {
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      ).timeout(const Duration(seconds: 8));
+    } on TimeoutException catch (e) {
+      debugPrint('HomeController position timeout: $e');
+      return await Geolocator.getLastKnownPosition();
+    } catch (e, st) {
+      debugPrint('HomeController position error: $e');
+      debugPrintStack(stackTrace: st);
+      if (_cachedPosition != null) {
+        return _cachedPosition;
+      }
+      final last = await Geolocator.getLastKnownPosition();
+      return last;
     }
   }
 

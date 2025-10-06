@@ -5,11 +5,30 @@ import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_compass/flutter_compass.dart';
-import 'package:JIR/config.dart';
+import 'package:JIR/helper/mapbox_config.dart';
+
+class RouteOption {
+  RouteOption({
+    required this.id,
+    required this.index,
+    required this.points,
+    required this.steps,
+    required this.distance,
+    required this.duration,
+    required this.summary,
+  });
+
+  final String id;
+  final int index;
+  final List<LatLng> points;
+  final List<Map<String, dynamic>> steps;
+  final double distance;
+  final double duration;
+  final String summary;
+}
 
 class RouteController extends GetxController {
   final Dio _dio = Dio();
-  final String baseUrl = mainUrl;
   final RxList<Map<String, dynamic>> routeSteps = <Map<String, dynamic>>[].obs;
   final RxString selectedVehicle = 'motorcycle'.obs;
   final RxBool isLoading = false.obs;
@@ -17,10 +36,19 @@ class RouteController extends GetxController {
   final Rx<LatLng?> userLocation = Rx<LatLng?>(null);
   final Rx<LatLng?> destination = Rx<LatLng?>(null);
   final RxList<LatLng> optimizedWaypoints = <LatLng>[].obs;
-  final RxList<List<LatLng>> _alternativeRoutes = RxList<List<LatLng>>([]);
+  final RxList<RouteOption> routeOptions = <RouteOption>[].obs;
+  final RxInt selectedRouteIndex = 0.obs;
   final RxDouble userHeading = 0.0.obs;
   final RxList<Map<String, dynamic>> searchSuggestions =
       <Map<String, dynamic>>[].obs;
+  final RxBool routeActive = false.obs;
+  final RxDouble totalRouteDistance = 0.0.obs;
+  final RxDouble totalRouteDuration = 0.0.obs;
+  final RxDouble remainingRouteDistance = 0.0.obs;
+  final RxDouble remainingRouteDuration = 0.0.obs;
+  final RxString destinationLabel = ''.obs;
+  final RxString destinationAddress = ''.obs;
+  final RxString nextInstruction = ''.obs;
   StreamSubscription<Position>? _positionStream;
   StreamSubscription<CompassEvent>? _compassSubscription;
   Timer? _debounceTimer;
@@ -45,6 +73,7 @@ class RouteController extends GetxController {
       _positionStream = Geolocator.getPositionStream().listen((position) async {
         final currentLocation = LatLng(position.latitude, position.longitude);
         userLocation(currentLocation);
+        _updateRemainingMetrics(currentLocation);
 
         final now = DateTime.now();
         if (now.difference(_lastCheck).inSeconds.abs() > 10) {
@@ -81,6 +110,8 @@ class RouteController extends GetxController {
       if (distanceToRoute > 50) {
         await _fetchNewRoute(currentLocation, destination.value!);
       }
+
+      _updateRemainingMetrics(currentLocation);
     } catch (e, st) {
       _logError(e, st);
     }
@@ -100,6 +131,22 @@ class RouteController extends GetxController {
     return nearest;
   }
 
+  int? _findNearestPointIndex(LatLng point, List<LatLng> route) {
+    if (route.isEmpty) return null;
+
+    int nearestIndex = 0;
+    double minDistance = double.maxFinite;
+
+    for (int i = 0; i < route.length; i++) {
+      final dist = calculateDistance(point, route[i]);
+      if (dist < minDistance) {
+        minDistance = dist;
+        nearestIndex = i;
+      }
+    }
+    return nearestIndex;
+  }
+
   void selectVehicle(String vehicleKey) {
     if (vehicleKey != 'motorcycle' && vehicleKey != 'car') return;
     selectedVehicle.value = vehicleKey;
@@ -116,46 +163,14 @@ class RouteController extends GetxController {
   }
 
   Future<void> _fetchNewRoute(LatLng start, LatLng end) async {
-    try {
-      final response = await _dio.post(
-        '$baseUrl/api/routing/optimized-route',
-        data: {
-          'start_lat': start.latitude,
-          'start_lon': start.longitude,
-          'end_lat': end.latitude,
-          'end_lon': end.longitude,
-          'vehicle': selectedVehicle.value,
-        },
-        options: Options(validateStatus: (_) => true),
-      );
-
-      if (response.statusCode == null ||
-          response.statusCode! < 200 ||
-          response.statusCode! >= 300) {
-        _logError('Bad status', StackTrace.current);
-        _showUserMessage(
-          'Tidak dapat memperbarui rute',
-          'Rute tidak tersedia saat ini. Silakan coba lagi nanti.',
-        );
-        return;
-      }
-
-      final data = response.data;
-      _parseOptimizedRouteDataSafely(data);
-      _showUserMessage('Rute diperbarui', 'Rute telah diperbarui.');
-    } on DioException catch (e) {
-      _logError(e, e.stackTrace);
-      _showUserMessage(
-        'Gagal memperbarui rute',
-        'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
-      );
-    } catch (e, st) {
-      _logError(e, st);
-      _showUserMessage(
-        'Gagal memperbarui rute',
-        'Terjadi kesalahan saat memperbarui rute. Silakan coba lagi.',
-      );
-    }
+    await _requestMapboxRoute(
+      start: start,
+      end: end,
+      successTitle: 'Rute diperbarui',
+      successMessage: 'Rute telah diperbarui.',
+      failureTitle: 'Tidak dapat memperbarui rute',
+      failureMessage: 'Rute tidak tersedia saat ini. Silakan coba lagi nanti.',
+    );
   }
 
   void _startCompassUpdates() {
@@ -203,6 +218,7 @@ class RouteController extends GetxController {
 
       Position position = await Geolocator.getCurrentPosition();
       userLocation(LatLng(position.latitude, position.longitude));
+      _updateRemainingMetrics(userLocation.value);
     } catch (e, st) {
       _logError(e, st);
       _showUserMessage(
@@ -224,62 +240,131 @@ class RouteController extends GetxController {
       return;
     }
 
+    if (selectedVehicle.value.isEmpty) {
+      selectedVehicle.value = 'motorcycle';
+    }
+
     routePoints.clear();
     routeSteps.clear();
     optimizedWaypoints.clear();
+    routeOptions.clear();
+    selectedRouteIndex.value = 0;
     isLoading(true);
 
     try {
-      final response = await _dio.post(
-        '$baseUrl/api/routing/optimized-route',
-        data: {
-          'start_lat': userLocation.value!.latitude,
-          'start_lon': userLocation.value!.longitude,
-          'end_lat': destination.value!.latitude,
-          'end_lon': destination.value!.longitude,
-          'vehicle': selectedVehicle.value,
-        },
-        options: Options(
-          contentType: Headers.jsonContentType,
-          sendTimeout: const Duration(seconds: 30),
-          validateStatus: (_) => true,
-        ),
-      );
-
-      if (response.statusCode == null ||
-          response.statusCode! < 200 ||
-          response.statusCode! >= 300) {
-        _logError('fetchOptimizedRoute bad status ${response.statusCode}',
-            StackTrace.current);
-        final userMsg = response.statusCode == 404
-            ? 'Rute tidak ditemukan. Coba cek lokasi tujuan Anda.'
-            : 'Gagal memuat rute. Silakan coba lagi.';
-        _showUserMessage('Gagal memuat rute', userMsg);
-        return;
-      }
-
-      final data = response.data;
-      _parseOptimizedRouteDataSafely(data);
-    } on DioException catch (e) {
-      _logError(e, e.stackTrace);
-      _showUserMessage(
-        'Gagal memuat rute',
-        'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
-      );
-    } catch (e, st) {
-      _logError(e, st);
-      _showUserMessage(
-        'Terjadi Kesalahan',
-        'Terjadi kesalahan saat memuat rute. Silakan coba lagi.',
+      await _requestMapboxRoute(
+        start: userLocation.value!,
+        end: destination.value!,
+        failureTitle: 'Gagal memuat rute',
+        failureMessage: 'Gagal memuat rute. Silakan coba lagi.',
       );
     } finally {
       isLoading(false);
     }
   }
 
+  Future<void> _requestMapboxRoute({
+    required LatLng start,
+    required LatLng end,
+    String? successTitle,
+    String? successMessage,
+    String? failureTitle,
+    String? failureMessage,
+  }) async {
+    if (!MapboxConfig.isTokenValid()) {
+      _showUserMessage(
+        'Token Mapbox tidak tersedia',
+        'Pastikan MAPBOX_ACCESS_TOKEN sudah dikonfigurasi pada aplikasi.',
+      );
+      return;
+    }
+
+    final vehicle =
+        selectedVehicle.value.isEmpty ? 'motorcycle' : selectedVehicle.value;
+    final profile = _mapboxProfileForVehicle(vehicle);
+    final url =
+        'https://api.mapbox.com/directions/v5/mapbox/$profile/${start.longitude},${start.latitude};${end.longitude},${end.latitude}';
+
+    final baseQuery = <String, dynamic>{
+      'alternatives': 'true',
+      'geometries': 'geojson',
+      'overview': 'full',
+      'steps': 'true',
+      'annotations': 'distance,duration',
+      'language': 'id',
+      'voice_instructions': 'false',
+      'banner_instructions': 'false',
+      'access_token': MapboxConfig.accessToken,
+    };
+
+    final shouldAvoidHighways = vehicle == 'motorcycle';
+    if (shouldAvoidHighways) {
+      baseQuery['exclude'] = 'toll,ferry';
+    }
+
+    try {
+      final response = await _dio.get(
+        url,
+        queryParameters: Map<String, dynamic>.from(baseQuery),
+        options: Options(responseType: ResponseType.json),
+      );
+
+      Map<String, dynamic>? data;
+      if (response.statusCode == 200) {
+        data = response.data as Map<String, dynamic>?;
+      }
+
+      if ((data?['routes'] as List?)?.isEmpty ?? true) {
+        if (shouldAvoidHighways) {
+          final fallbackQuery = Map<String, dynamic>.from(baseQuery)
+            ..remove('exclude');
+          final fallbackResponse = await _dio.get(
+            url,
+            queryParameters: fallbackQuery,
+            options: Options(responseType: ResponseType.json),
+          );
+
+          if (fallbackResponse.statusCode == 200) {
+            data = fallbackResponse.data as Map<String, dynamic>?;
+          }
+        }
+      }
+
+      if (data == null || ((data['routes'] as List?)?.isEmpty ?? true)) {
+        _logError(
+            'Mapbox route status ${response.statusCode}', StackTrace.current);
+        _showUserMessage(
+          failureTitle ?? 'Gagal memuat rute',
+          failureMessage ??
+              'Rute tidak tersedia saat ini. Silakan coba lagi nanti.',
+        );
+        return;
+      }
+
+      _parseOptimizedRouteDataSafely(data);
+      if (successTitle != null && successMessage != null) {
+        _showUserMessage(successTitle, successMessage);
+      }
+    } on DioException catch (e) {
+      _logError(e, e.stackTrace);
+      _showUserMessage(
+        failureTitle ?? 'Gagal memuat rute',
+        failureMessage ??
+            'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
+      );
+    } catch (e, st) {
+      _logError(e, st);
+      _showUserMessage(
+        failureTitle ?? 'Gagal memuat rute',
+        failureMessage ??
+            'Terjadi kesalahan saat memuat rute. Silakan coba lagi.',
+      );
+    }
+  }
+
   void _parseOptimizedRouteDataSafely(dynamic data) {
     try {
-      _parseOptimizedRouteDataInternal(data);
+      _parseMapboxRouteData(data as Map<String, dynamic>);
     } catch (e, st) {
       _logError(e, st);
       _showUserMessage(
@@ -289,89 +374,193 @@ class RouteController extends GetxController {
     }
   }
 
-  void _parseOptimizedRouteDataInternal(dynamic data) {
-    final Map<String, dynamic> map = data as Map<String, dynamic>;
+  void _parseMapboxRouteData(Map<String, dynamic> map) {
     final waypoints = map['waypoints'] as List? ?? [];
-    optimizedWaypoints.value = waypoints.map<LatLng>((wp) {
-      if (wp is List && wp.length >= 2) {
-        return LatLng(
-          (wp[0] as num).toDouble(),
-          (wp[1] as num).toDouble(),
-        );
-      } else {
-        throw Exception('Invalid waypoint format: $wp');
-      }
-    }).toList();
+    optimizedWaypoints.value = waypoints
+        .whereType<Map<String, dynamic>>()
+        .map<LatLng?>((wp) {
+          final location = wp['location'];
+          if (location is List && location.length >= 2) {
+            final lng = double.tryParse(location[0].toString());
+            final lat = double.tryParse(location[1].toString());
+            if (lat != null && lng != null) {
+              return LatLng(lat, lng);
+            }
+          }
+          return null;
+        })
+        .whereType<LatLng>()
+        .toList();
 
-    final routeData = map['route'] as Map<String, dynamic>?;
-    if (routeData == null) {
-      throw Exception('Route data is null');
-    }
-
-    final routes = routeData['routes'] as List?;
+    final routes = map['routes'] as List?;
     if (routes == null || routes.isEmpty) {
-      throw Exception('No routes found in response');
+      throw Exception('No routes found in Mapbox response');
     }
 
-    final mainRoute = routes[0] as Map<String, dynamic>;
-    final geometry = mainRoute['geometry'] as Map<String, dynamic>?;
-    if (geometry == null) {
-      throw Exception('Geometry data is null');
+    routes.sort((a, b) {
+      final durationA = (a as Map<String, dynamic>)['duration'] as num?;
+      final durationB = (b as Map<String, dynamic>)['duration'] as num?;
+      return (durationA ?? double.infinity)
+          .compareTo(durationB ?? double.infinity);
+    });
+
+    final parsedOptions = <RouteOption>[];
+    final maxRoutes = routes.length < 2 ? routes.length : 2;
+    for (int i = 0; i < maxRoutes; i++) {
+      final route = routes[i] as Map<String, dynamic>;
+      final summaryRaw = (route['summary'] ?? '').toString().trim();
+      parsedOptions.add(
+        RouteOption(
+          id: 'route_$i',
+          index: i,
+          points: _extractRouteCoordinates(route),
+          steps: _extractRouteSteps(route),
+          distance: (route['distance'] as num?)?.toDouble() ?? 0.0,
+          duration: (route['duration'] as num?)?.toDouble() ?? 0.0,
+          summary: summaryRaw.isNotEmpty ? summaryRaw : 'Rute ${i + 1}',
+        ),
+      );
     }
 
-    final coordinates = geometry['coordinates'] as List? ?? [];
-    routePoints.value = coordinates.map<LatLng>((coord) {
-      if (coord is List && coord.length >= 2) {
-        return LatLng(
-          (coord[1] as num).toDouble(),
-          (coord[0] as num).toDouble(),
-        );
-      } else {
-        throw Exception('Invalid coordinate format: $coord');
+    routeOptions.assignAll(parsedOptions);
+
+    if (routeOptions.isEmpty) {
+      routePoints.clear();
+      routeSteps.clear();
+      totalRouteDistance.value = 0.0;
+      totalRouteDuration.value = 0.0;
+      remainingRouteDistance.value = 0.0;
+      remainingRouteDuration.value = 0.0;
+      nextInstruction.value = '';
+      routeActive.value = false;
+      return;
+    }
+
+    _applyRouteSelection(0);
+  }
+
+  void _applyRouteSelection(int index, {bool triggerFeedback = false}) {
+    if (index < 0 || index >= routeOptions.length) {
+      if (triggerFeedback) {
+        _showUserMessage('Rute tidak tersedia',
+            'Pilihan rute tidak dapat digunakan saat ini.');
       }
-    }).toList();
-
-    final legs = mainRoute['legs'] as List?;
-    if (legs != null && legs.isNotEmpty) {
-      final leg = legs[0] as Map<String, dynamic>;
-      final steps = leg['steps'] as List? ?? [];
-
-      routeSteps.value = steps.map<Map<String, dynamic>>((step) {
-        final stepMap = step as Map<String, dynamic>;
-        final maneuver = stepMap['maneuver'] as Map<String, dynamic>?;
-
-        return {
-          'instruction': parseManeuver(maneuver),
-          'name': stepMap['name'] as String? ?? 'Jalan tanpa nama',
-          'distance': (stepMap['distance'] as num?)?.toDouble() ?? 0.0,
-          'type': maneuver?['type'] as String?,
-          'modifier': maneuver?['modifier'] as String?,
-        };
-      }).toList();
+      return;
     }
 
-    final alternatives = routeData['alternatives'] as List? ?? [];
-    _alternativeRoutes.value = alternatives.map<List<LatLng>>((alt) {
-      final altMap = alt as Map<String, dynamic>;
-      final altGeometry = altMap['geometry'] as Map<String, dynamic>?;
-      final altCoordinates = altGeometry?['coordinates'] as List? ?? [];
+    final alreadySelected = selectedRouteIndex.value == index;
+    final label = index == 0 ? 'Rute tercepat' : 'Rute ${index + 1}';
+    final option = routeOptions[index];
 
-      return altCoordinates.map<LatLng>((coord) {
-        if (coord is List && coord.length >= 2) {
-          return LatLng(
-            (coord[1] as num).toDouble(),
-            (coord[0] as num).toDouble(),
-          );
-        } else {
-          throw Exception('Invalid alternative coordinate format: $coord');
-        }
-      }).toList();
+    if (alreadySelected) {
+      selectedRouteIndex.refresh();
+    } else {
+      selectedRouteIndex.value = index;
+    }
+    routePoints.value = List<LatLng>.from(option.points);
+    routeSteps.value = option.steps
+        .map<Map<String, dynamic>>((step) => Map<String, dynamic>.from(step))
+        .toList();
+    totalRouteDistance.value = option.distance;
+    totalRouteDuration.value = option.duration;
+    remainingRouteDistance.value = option.distance;
+    remainingRouteDuration.value = option.duration;
+    nextInstruction.value = routeSteps.isNotEmpty
+        ? routeSteps.first['instruction']?.toString() ?? ''
+        : '';
+    routeActive.value = routePoints.isNotEmpty;
+
+    if (triggerFeedback) {
+      if (alreadySelected) {
+        _showUserMessage('Rute diperbarui', '$label diperbarui.');
+      } else {
+        _showUserMessage('Rute diperbarui', '$label kini aktif.');
+      }
+    }
+
+    if (userLocation.value != null) {
+      _updateRemainingMetrics(userLocation.value);
+    }
+
+    update();
+  }
+
+  List<LatLng> _extractRouteCoordinates(Map<String, dynamic> route) {
+    final geometry = route['geometry'];
+    if (geometry is Map<String, dynamic>) {
+      final coordinates = geometry['coordinates'] as List? ?? [];
+      return coordinates
+          .map<LatLng?>((coord) {
+            if (coord is List && coord.length >= 2) {
+              final lng = double.tryParse(coord[0].toString());
+              final lat = double.tryParse(coord[1].toString());
+              if (lat != null && lng != null) {
+                return LatLng(lat, lng);
+              }
+            }
+            return null;
+          })
+          .whereType<LatLng>()
+          .toList();
+    }
+
+    throw Exception('Geometry data is missing');
+  }
+
+  List<Map<String, dynamic>> _extractRouteSteps(Map<String, dynamic> route) {
+    final legs = route['legs'] as List? ?? [];
+    if (legs.isEmpty) return <Map<String, dynamic>>[];
+
+    final steps = (legs.first as Map<String, dynamic>)['steps'] as List? ?? [];
+    return steps.map<Map<String, dynamic>>((step) {
+      final stepMap = step as Map<String, dynamic>;
+      final maneuver = stepMap['maneuver'] as Map<String, dynamic>?;
+      final instruction = (maneuver?['instruction'] ?? '').toString();
+      final modifier = (maneuver?['modifier'] ?? '').toString();
+      final type = (maneuver?['type'] ?? '').toString();
+      final name = (stepMap['name'] ?? '').toString();
+      return {
+        'instruction':
+            instruction.isEmpty ? parseManeuver(maneuver) : instruction,
+        'distance': (stepMap['distance'] as num?)?.toDouble() ?? 0.0,
+        'duration': (stepMap['duration'] as num?)?.toDouble() ?? 0.0,
+        'type': type,
+        'modifier': modifier,
+        'name': name.isEmpty ? 'Jalan tanpa nama' : name,
+      };
     }).toList();
   }
 
+  String _mapboxProfileForVehicle(String vehicle) {
+    switch (vehicle) {
+      case 'car':
+        return 'driving-traffic';
+      case 'motorcycle':
+        return 'driving';
+      default:
+        return 'driving';
+    }
+  }
+
   void useAlternativeRoute(int index) {
-    if (index < _alternativeRoutes.length) {
-      routePoints(_alternativeRoutes[index]);
+    selectRouteByIndex(index, showFeedback: true);
+  }
+
+  void selectRouteByIndex(int index, {bool showFeedback = false}) {
+    _applyRouteSelection(index, triggerFeedback: showFeedback);
+  }
+
+  void selectRouteById(String routeId, {bool showFeedback = false}) {
+    final idx = routeOptions.indexWhere(
+      (option) => option.id.toLowerCase() == routeId.toLowerCase(),
+    );
+    if (idx != -1) {
+      _applyRouteSelection(idx, triggerFeedback: showFeedback);
+    } else if (showFeedback) {
+      _showUserMessage(
+        'Rute tidak ditemukan',
+        'Rute yang dipilih tidak tersedia. Silakan pilih rute lain.',
+      );
     }
   }
 
@@ -384,31 +573,99 @@ class RouteController extends GetxController {
         return;
       }
 
+      if (!MapboxConfig.isTokenValid()) {
+        searchSuggestions.clear();
+        _showUserMessage(
+          'Token Mapbox tidak tersedia',
+          'Pastikan MAPBOX_ACCESS_TOKEN sudah dikonfigurasi pada aplikasi.',
+        );
+        return;
+      }
+
       try {
-        final params = {'query': query, 'limit': 5};
+        final encodedQuery = Uri.encodeComponent(query.trim());
+        final params = <String, dynamic>{
+          'access_token': MapboxConfig.accessToken,
+          'autocomplete': 'true',
+          'limit': '6',
+          'language': 'id',
+          'country': 'ID',
+          'types': 'address,poi,place,neighborhood,locality',
+          'bbox':
+              '$_jakartaMinLon,$_jakartaMinLat,$_jakartaMaxLon,$_jakartaMaxLat',
+        };
 
         if (userLocation.value != null) {
-          params['lat'] = userLocation.value!.latitude;
-          params['lon'] = userLocation.value!.longitude;
+          params['proximity'] =
+              '${userLocation.value!.longitude},${userLocation.value!.latitude}';
         }
 
         final response = await _dio.get(
-          '$baseUrl/api/search',
+          'https://api.mapbox.com/geocoding/v5/mapbox.places/$encodedQuery.json',
           queryParameters: params,
-          options: Options(sendTimeout: const Duration(seconds: 5)),
+          options: Options(
+            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
+          ),
         );
 
-        searchSuggestions.value =
-            (response.data as List).map<Map<String, dynamic>>((item) {
-          return {
-            'display_name': item['display_name'] as String,
-            'lat': item['lat'] as double,
-            'lon': item['lon'] as double,
-            'type': item['type'] as String? ?? 'unknown',
-            'address': item['address'] as Map<String, dynamic>? ?? {},
-            'distance': item['distance'] as double?,
-          };
-        }).toList();
+        final features = (response.data['features'] as List?) ?? [];
+        final suggestions = features
+            .whereType<Map<String, dynamic>>()
+            .where(_isFeatureWithinJakarta)
+            .map<Map<String, dynamic>>((feature) {
+              final center = feature['center'] as List?;
+              if (center == null || center.length < 2) {
+                return {};
+              }
+
+              final lon = double.tryParse(center[0].toString());
+              final lat = double.tryParse(center[1].toString());
+              if (lat == null || lon == null) {
+                return {};
+              }
+
+              final placeName = (feature['place_name'] ?? '').toString();
+              final textPrimary = (feature['text'] ?? '').toString();
+              final placeTypes =
+                  (feature['place_type'] as List?)?.map((e) => e.toString()) ??
+                      [];
+
+              return {
+                'id': feature['id'],
+                'display_name':
+                    textPrimary.isNotEmpty ? textPrimary : placeName,
+                'place_name': placeName,
+                'lat': lat,
+                'lon': lon,
+                'type': placeTypes.isNotEmpty ? placeTypes.first : 'unknown',
+                'context': feature['context'],
+              };
+            })
+            .where((item) => item.isNotEmpty)
+            .toList();
+
+        final currentLocation = userLocation.value;
+        if (currentLocation != null) {
+          suggestions.sort((a, b) {
+            final latA = (a['lat'] as num).toDouble();
+            final lonA = (a['lon'] as num).toDouble();
+            final latB = (b['lat'] as num).toDouble();
+            final lonB = (b['lon'] as num).toDouble();
+
+            final distanceA = calculateDistance(
+              currentLocation,
+              LatLng(latA, lonA),
+            );
+            final distanceB = calculateDistance(
+              currentLocation,
+              LatLng(latB, lonB),
+            );
+            return distanceA.compareTo(distanceB);
+          });
+        }
+
+        searchSuggestions.value = suggestions;
       } on DioException catch (e) {
         _logError(e, e.stackTrace);
         _showUserMessage('Pencarian gagal',
@@ -631,6 +888,21 @@ class RouteController extends GetxController {
       'road': 'Jalan',
       'shop': 'Toko',
       'amenity': 'Fasilitas Umum',
+      'address': 'Alamat',
+      'neighborhood': 'Lingkungan',
+      'locality': 'Area Lokal',
+      'place': 'Tempat',
+      'region': 'Provinsi/Wilayah',
+      'district': 'Kecamatan',
+      'postcode': 'Kode Pos',
+      'poi': 'Titik Menarik',
+      'poi.landmark': 'Landmark',
+      'country': 'Negara',
+      'airport': 'Bandara',
+      'suburb': 'Kawasan',
+      'street': 'Jalan',
+      'park': 'Taman',
+      'natural_feature': 'Objek Alam',
     };
     return typeTranslations[type] ?? 'Lokasi Umum';
   }
@@ -652,13 +924,111 @@ class RouteController extends GetxController {
     });
   }
 
+  void selectDestinationSuggestion(Map<String, dynamic> suggestion) {
+    final latValue = suggestion['lat'];
+    final lonValue = suggestion['lon'];
+    if (latValue == null || lonValue == null) return;
+
+    final lat = double.tryParse(latValue.toString());
+    final lon = double.tryParse(lonValue.toString());
+    if (lat == null || lon == null) return;
+
+    destination.value = LatLng(lat, lon);
+    destinationLabel.value =
+        suggestion['display_name']?.toString() ?? 'Tujuan perjalanan';
+    destinationAddress.value =
+        suggestion['place_name']?.toString() ?? destinationLabel.value;
+    if (selectedVehicle.value.isEmpty) {
+      selectedVehicle.value = 'motorcycle';
+    }
+    fetchOptimizedRoute();
+  }
+
   void clearRoute() {
     routePoints.clear();
     routeSteps.clear();
     optimizedWaypoints.clear();
     destination.value = null;
+    routeOptions.clear();
+    selectedRouteIndex.value = 0;
     searchSuggestions.clear();
+    totalRouteDistance.value = 0;
+    totalRouteDuration.value = 0;
+    remainingRouteDistance.value = 0;
+    remainingRouteDuration.value = 0;
+    nextInstruction.value = '';
+    destinationLabel.value = '';
+    destinationAddress.value = '';
+    routeActive.value = false;
     update();
+  }
+
+  void _updateRemainingMetrics(LatLng? currentLocation) {
+    if (currentLocation == null || routePoints.isEmpty) {
+      return;
+    }
+
+    final index = _findNearestPointIndex(currentLocation, routePoints);
+    if (index == null) {
+      return;
+    }
+
+    double distanceToNextPoint =
+        calculateDistance(currentLocation, routePoints[index]);
+
+    double remainingDistance = distanceToNextPoint;
+    for (int i = index; i < routePoints.length - 1; i++) {
+      remainingDistance +=
+          calculateDistance(routePoints[i], routePoints[i + 1]);
+    }
+
+    remainingRouteDistance.value =
+        remainingDistance.clamp(0, totalRouteDistance.value).toDouble();
+
+    if (totalRouteDistance.value > 0) {
+      final ratio = remainingRouteDistance.value / totalRouteDistance.value;
+      remainingRouteDuration.value = (totalRouteDuration.value * ratio)
+          .clamp(0, totalRouteDuration.value)
+          .toDouble();
+    } else {
+      remainingRouteDuration.value = 0;
+    }
+
+    final distanceCovered =
+        (totalRouteDistance.value - remainingRouteDistance.value)
+            .clamp(0, totalRouteDistance.value);
+    double accumulated = 0;
+    String instruction = '';
+
+    for (final step in routeSteps) {
+      final stepDistance = (step['distance'] as num?)?.toDouble() ?? 0.0;
+      accumulated += stepDistance;
+      if (accumulated >= distanceCovered) {
+        instruction = step['instruction']?.toString() ?? '';
+        break;
+      }
+    }
+
+    nextInstruction.value = instruction;
+
+    if (remainingRouteDistance.value <= 30) {
+      remainingRouteDistance.value = 0;
+      remainingRouteDuration.value = 0;
+      nextInstruction.value = 'Anda telah tiba di tujuan';
+      if (routePoints.isNotEmpty) {
+        routePoints.clear();
+      }
+      if (optimizedWaypoints.isNotEmpty) {
+        optimizedWaypoints.clear();
+      }
+      if (routeOptions.isNotEmpty) {
+        routeOptions.clear();
+        selectedRouteIndex.value = 0;
+      }
+      routeActive.value = false;
+    } else {
+      routeActive.value = true;
+    }
   }
 
   @override
@@ -666,7 +1036,6 @@ class RouteController extends GetxController {
     _positionStream?.cancel();
     _debounceTimer?.cancel();
     _compassSubscription?.cancel();
-    _alternativeRoutes.close();
     super.onClose();
   }
 
@@ -680,6 +1049,65 @@ class RouteController extends GetxController {
       margin: const EdgeInsets.all(12),
       duration: const Duration(seconds: 4),
     );
+  }
+
+  static const double _jakartaMinLon = 106.4;
+  static const double _jakartaMaxLon = 107.3;
+  static const double _jakartaMinLat = -6.6;
+  static const double _jakartaMaxLat = -5.8;
+  static const List<String> _jakartaKeywords = [
+    'jakarta',
+    'dki',
+    'kepulauan seribu',
+    'tangerang',
+    'tangerang selatan',
+    'bekasi',
+    'depok',
+    'bogor',
+  ];
+
+  bool _isFeatureWithinJakarta(Map<String, dynamic> feature) {
+    final center = feature['center'] as List?;
+    if (center == null || center.length < 2) {
+      return false;
+    }
+
+    final lon = double.tryParse(center[0].toString());
+    final lat = double.tryParse(center[1].toString());
+    if (lat == null || lon == null) {
+      return false;
+    }
+
+    final withinBounds = lon >= _jakartaMinLon &&
+        lon <= _jakartaMaxLon &&
+        lat >= _jakartaMinLat &&
+        lat <= _jakartaMaxLat;
+    if (!withinBounds) {
+      return false;
+    }
+
+    final placeName = (feature['place_name'] ?? '').toString().toLowerCase();
+    final primaryText = (feature['text'] ?? '').toString().toLowerCase();
+    if (_jakartaKeywords.any((keyword) =>
+        placeName.contains(keyword) || primaryText.contains(keyword))) {
+      return true;
+    }
+
+    final contexts =
+        (feature['context'] as List?)?.whereType<Map<String, dynamic>>() ?? [];
+    for (final ctx in contexts) {
+      final ctxText = (ctx['text'] ?? '').toString().toLowerCase();
+      final ctxPlace = (ctx['place_name'] ?? '').toString().toLowerCase();
+      final ctxId = (ctx['id'] ?? '').toString().toLowerCase();
+      final matchesKeyword = _jakartaKeywords.any(
+        (keyword) => ctxText.contains(keyword) || ctxPlace.contains(keyword),
+      );
+      if (matchesKeyword || ctxId.contains('id-jk')) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   void _logError(Object e, StackTrace? st) {

@@ -4,414 +4,569 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/pages/home/map/controller/route_controller.dart';
 
 class RouteBottomSheetWidget extends StatelessWidget {
-  final RouteController controller = Get.find<RouteController>();
-
   RouteBottomSheetWidget({super.key});
+
+  final RouteController controller = Get.find<RouteController>();
 
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
       expand: false,
       maxChildSize: 0.95,
-      initialChildSize: 0.72,
-      minChildSize: 0.4,
+      initialChildSize: 0.3,
+      minChildSize: 0.2,
       builder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Container(
-                            width: 80,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Petunjuk Arah',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xff45557B),
-                              ),
-                            ),
-                            Obx(() {
-                              final stepCount = controller.routeSteps.length;
-                              return Text(
-                                stepCount > 0
-                                    ? '$stepCount langkah'
-                                    : '0 langkah',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              );
-                            }),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Obx(() {
-                          final totalRaw =
-                              controller.routeSteps.fold<double>(0.0, (sum, s) {
-                            final raw = s['distance'];
-                            if (raw == null) return sum;
-                            if (raw is num) return sum + raw.toDouble();
-                            if (raw is String) {
-                              return sum + (double.tryParse(raw) ?? 0.0);
-                            }
-                            return sum;
-                          });
+        final mediaQuery = MediaQuery.of(context);
+        final bottomPadding =
+            mediaQuery.viewPadding.bottom + mediaQuery.viewInsets.bottom + 24;
 
-                          double maxStep = 0.0;
-                          for (final s in controller.routeSteps) {
-                            final raw = s['distance'];
-                            if (raw == null) continue;
-                            double v = 0.0;
-                            if (raw is num) v = raw.toDouble();
-                            if (raw is String) v = double.tryParse(raw) ?? 0.0;
-                            if (v > maxStep) maxStep = v;
-                          }
-
-                          double totalMeters = totalRaw;
-                          if (controller.routeSteps.isNotEmpty &&
-                              maxStep <= 10) {
-                            totalMeters = totalRaw * 1000.0;
-                          }
-
-                          if (totalMeters <= 0) {
-                            return Row(
-                              children: [
-                                Expanded(
-                                  child: Text('Estimasi belum tersedia',
-                                      style: GoogleFonts.inter(fontSize: 14)),
-                                ),
-                                Chip(
-                                  label: Text('—',
-                                      style: GoogleFonts.inter(
-                                          color: Colors.black)),
-                                  backgroundColor: Colors.grey[100],
-                                ),
-                              ],
-                            );
-                          }
-
-                          const motorKmH = 30.0;
-                          const carKmH = 40.0;
-                          final selected = controller.selectedVehicle.value;
-                          final kmh = selected == 'car' ? carKmH : motorKmH;
-                          final metersPerMinute = (kmh * 1000.0) / 60.0;
-                          final estimatedMinutes =
-                              (totalMeters / metersPerMinute).ceil();
-                          final distanceKm = totalMeters / 1000.0;
-
-                          return Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  selected == 'car'
-                                      ? 'Estimasi perjalanan dengan Mobil'
-                                      : 'Estimasi perjalanan dengan Motor',
-                                  style: GoogleFonts.inter(fontSize: 14),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              _InfoChip(
-                                  icon: Icons.access_time,
-                                  label: '$estimatedMinutes mnt',
-                                  color: Colors.green[700]!),
-                              const SizedBox(width: 8),
-                              _InfoChip(
-                                  icon: Icons.place,
-                                  label: '${distanceKm.toStringAsFixed(2)} km',
-                                  color: Colors.blueGrey),
-                            ],
-                          );
-                        }),
-                        const SizedBox(height: 12),
-                        Obx(() {
-                          final selected = controller.selectedVehicle.value;
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _VehicleOption(
-                                iconAsset: 'assets/images/icon_motor.png',
-                                label: 'Motor',
-                                isSelected: selected == 'motorcycle',
-                                onTap: () =>
-                                    controller.updateVehicle('motorcycle'),
-                              ),
-                              const SizedBox(width: 12),
-                              _VehicleOption(
-                                iconAsset: 'assets/images/icon_car.png',
-                                label: 'Mobil',
-                                isSelected: selected == 'car',
-                                onTap: () => controller.updateVehicle('car'),
-                              ),
-                            ],
-                          );
-                        }),
-                        const SizedBox(height: 12),
-                        const Divider(),
-                        const SizedBox(height: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Rute yang dilalui',
-                                style: GoogleFonts.inter(
-                                    fontSize: 16, fontWeight: FontWeight.w700)),
-                            const SizedBox(height: 4),
-                            Text('Rute tercepat lewat perumahan',
-                                style: GoogleFonts.inter(
-                                    fontSize: 12, color: Colors.grey)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Obx(() {
-                          if (controller.isLoading.value) {
-                            return const SizedBox(
-                                height: 180,
-                                child:
-                                    Center(child: CircularProgressIndicator()));
-                          }
-                          if (controller.routeSteps.isEmpty) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              child: Center(
-                                  child: Text('Tidak ada langkah rute',
-                                      style: GoogleFonts.inter(
-                                          color: Colors.grey))),
-                            );
-                          }
-                          return ListView.separated(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: controller.routeSteps.length,
-                            separatorBuilder: (_, __) =>
-                                const Divider(height: 1),
-                            itemBuilder: (context, index) {
-                              final step = controller.routeSteps[index];
-                              return _RouteStepItem(index: index, step: step);
-                            },
-                          );
-                        }),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
+        return SafeArea(
+          top: false,
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 12,
+                  offset: Offset(0, -4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                Container(
+                  width: 58,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(3),
                   ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                color: Colors.white,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff45557B),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                const SizedBox(height: 6),
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      12,
+                      16,
+                      bottomPadding,
                     ),
-                    onPressed: () => Navigator.pop(Get.context!),
-                    child: Text('Tutup',
-                        style: GoogleFonts.inter(
-                            color: Colors.white, fontWeight: FontWeight.bold)),
+                    children: [
+                      _buildDestinationRow(),
+                      const SizedBox(height: 12),
+                      _buildSummaryCard(),
+                      const SizedBox(height: 12),
+                      _buildVehicleSelector(),
+                      const SizedBox(height: 8),
+                      _buildRouteChoices(),
+                      const SizedBox(height: 12),
+                      const Divider(height: 32),
+                      _buildSectionHeader(),
+                      const SizedBox(height: 8),
+                      _buildRouteList(),
+                    ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
-}
 
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
+  Widget _buildDestinationRow() {
+    return Obx(() {
+      final title = controller.destinationLabel.value.isNotEmpty
+          ? controller.destinationLabel.value
+          : 'Petunjuk arah';
 
-  const _InfoChip(
-      {required this.icon, required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Chip(
-      backgroundColor: color.withOpacity(0.12),
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
+      return Row(
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
-          Text(label,
-              style: GoogleFonts.inter(
-                  color: color, fontSize: 13, fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-}
-
-class _VehicleOption extends StatelessWidget {
-  final String iconAsset;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _VehicleOption({
-    required this.iconAsset,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xffEEF4FF) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isSelected ? const Color(0xff45557B) : Colors.transparent,
-          width: 2,
-        ),
-        boxShadow: [
-          if (isSelected)
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 6),
-            ),
-        ],
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Row(
-          children: [
-            AnimatedScale(
-              scale: isSelected ? 1.06 : 1.0,
-              duration: const Duration(milliseconds: 200),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color:
-                      isSelected ? const Color(0xff45557B) : Colors.grey[100],
-                  shape: BoxShape.circle,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Image.asset(
-                    iconAsset,
-                    color: isSelected ? Colors.white : null,
-                    width: 22,
-                    height: 22,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color:
-                        isSelected ? const Color(0xff45557B) : Colors.grey[800],
-                  ),
-                ),
-                const SizedBox(height: 2),
-                if (isSelected)
-                  Text(
-                    'Direkomendasikan',
-                    style: GoogleFonts.inter(
-                        fontSize: 10, color: Colors.green[700]),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RouteStepItem extends StatelessWidget {
-  final int index;
-  final Map<String, dynamic> step;
-
-  const _RouteStepItem({required this.index, required this.step});
-
-  @override
-  Widget build(BuildContext context) {
-    final instruction = step['instruction'] as String? ?? '';
-    final name = step['name'] as String? ?? '';
-    final raw = step['distance'];
-    final distanceNum =
-        raw is num ? raw : (raw is String ? double.tryParse(raw) ?? 0.0 : 0.0);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: SizedBox(
-                width: 36,
-                child: Center(
-                    child: RouteController.getManeuverIcon(
-                        step['type'], step['modifier']))),
-          ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(instruction,
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xff111827),
+                  ),
+                ),
+                if (controller.destinationAddress.value.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      controller.destinationAddress.value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: const Color(0xff6B7280),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => Navigator.pop(Get.context!),
+            icon: const Icon(Icons.close, size: 20, color: Color(0xff6B7280)),
+            tooltip: 'Tutup',
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildSummaryCard() {
+    return Obx(() {
+      final durationSeconds = controller.totalRouteDuration.value;
+      final distanceMeters = controller.totalRouteDistance.value;
+      final remaining = controller.remainingRouteDuration.value;
+      final isActive = controller.routeActive.value;
+      final durationText =
+          durationSeconds > 0 ? _formatDuration(durationSeconds) : '-';
+      final distanceText = distanceMeters > 0
+          ? RouteController.formatDistance(distanceMeters)
+          : '-';
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xffEEF2FF),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isActive) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xff1D4ED8).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.check_circle,
+                            size: 16,
+                            color: Color(0xff1D4ED8),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Rute diperbarui',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xff1D4ED8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                  Text(
+                    durationText,
                     style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xff45557B))),
-                const SizedBox(height: 6),
-                Text('Jalan: $name',
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xff1D4ED8),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Perjalanan $distanceText',
                     style: GoogleFonts.inter(
-                        fontSize: 12, color: Colors.grey[700])),
-                const SizedBox(height: 4),
-                Text(RouteController.formatDistance(distanceNum),
+                      fontSize: 13,
+                      color: const Color(0xff4B5563),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xffE0E7FF)),
+              ),
+              child: Text(
+                remaining <= 0
+                    ? 'Sedang di lokasi'
+                    : 'Sisa ${_formatDuration(remaining)}',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: const Color(0xff1D4ED8),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildVehicleSelector() {
+    return Obx(() {
+      final selected = controller.selectedVehicle.value;
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildVehicleChip(
+            vehicle: 'motorcycle',
+            icon: Icons.motorcycle,
+            label: 'Motor',
+            selected: selected == 'motorcycle' || selected.isEmpty,
+          ),
+          const SizedBox(width: 12),
+          _buildVehicleChip(
+            vehicle: 'car',
+            icon: Icons.directions_car,
+            label: 'Mobil',
+            selected: selected == 'car',
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildVehicleChip({
+    required String vehicle,
+    required IconData icon,
+    required String label,
+    required bool selected,
+  }) {
+    return ChoiceChip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: selected ? Colors.white : const Color(0xff1F2937),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : const Color(0xff1F2937),
+            ),
+          ),
+        ],
+      ),
+      pressElevation: 0,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      shape: const StadiumBorder(),
+      selected: selected,
+      selectedColor: const Color(0xff1D4ED8),
+      backgroundColor: const Color(0xffF3F4F6),
+      side: BorderSide(
+        color: selected ? const Color(0xff1D4ED8) : Colors.transparent,
+      ),
+      onSelected: (_) => controller.updateVehicle(vehicle),
+    );
+  }
+
+  Widget _buildRouteChoices() {
+    return Obx(() {
+      final options = controller.routeOptions;
+      if (options.length <= 1) {
+        return const SizedBox.shrink();
+      }
+
+      return SizedBox(
+        height: 68,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 50),
+          separatorBuilder: (_, __) => const SizedBox(width: 10),
+          itemCount: options.length,
+          itemBuilder: (context, index) {
+            final option = options[index];
+            final isSelected = controller.selectedRouteIndex.value == index;
+            final label = index == 0 ? 'Tercepat' : 'Rute ${index + 1}';
+            final subtitle = _formatDifferenceLabel(
+              option.duration,
+              options.first.duration,
+              index,
+            );
+
+            return GestureDetector(
+              onTap: () =>
+                  controller.selectRouteByIndex(index, showFeedback: true),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xffE0ECFF) : Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xff3B82F6)
+                        : const Color(0xffE5E7EB),
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          const BoxShadow(
+                            color: Color(0x263B82F6),
+                            blurRadius: 12,
+                            offset: Offset(0, 6),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected
+                            ? const Color(0xff1D4ED8)
+                            : const Color(0xff1F2937),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${_formatDuration(option.duration)} • ${RouteController.formatDistance(option.distance)}',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: const Color(0xff4B5563),
+                      ),
+                    ),
+                    if (subtitle.isNotEmpty)
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: const Color(0xff6B7280),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  Widget _buildSectionHeader() {
+    return Obx(() {
+      final stepCount = controller.routeSteps.length;
+      final nextInstruction = controller.nextInstruction.value;
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Langkah perjalanan',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xff111827),
+                  ),
+                ),
+                if (nextInstruction.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      nextInstruction,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: const Color(0xff2563EB),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Text(
+            '$stepCount langkah',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: const Color(0xff6B7280),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildRouteList() {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 32),
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      if (controller.routeSteps.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Center(
+            child: Text(
+              'Tidak ada langkah rute',
+              style: GoogleFonts.inter(color: Colors.grey[600]),
+            ),
+          ),
+        );
+      }
+
+      final children = <Widget>[];
+
+      for (var i = 0; i < controller.routeSteps.length; i++) {
+        if (i != 0) {
+          children.add(Divider(
+            height: 1,
+            color: Colors.grey.shade200,
+          ));
+        }
+        children.add(_buildStepItem(controller.routeSteps[i], i));
+      }
+
+      return Column(children: children);
+    });
+  }
+
+  Widget _buildStepItem(Map<String, dynamic> step, int index) {
+    final instruction = step['instruction']?.toString() ?? '';
+    final streetName = step['name']?.toString() ?? '';
+    final distance = RouteController.formatDistance(
+      (step['distance'] as num?)?.toDouble() ?? 0,
+    );
+
+    return Padding(
+      padding: EdgeInsets.only(
+        top: index == 0 ? 4 : 12,
+        bottom: 12,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xffE0E7FF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: RouteController.getManeuverIcon(
+                step['type']?.toString(),
+                step['modifier']?.toString(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  instruction,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xff111827),
+                  ),
+                ),
+                if (streetName.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      streetName,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: const Color(0xff6B7280),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    distance,
                     style: GoogleFonts.inter(
-                        fontSize: 12, color: Colors.green[700])),
+                      fontSize: 12,
+                      color: const Color(0xff2563EB),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _formatDuration(double seconds) {
+    final totalMinutes = (seconds / 60).round();
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    if (hours > 0) {
+      if (minutes == 0) {
+        return '$hours jam';
+      }
+      return '$hours jam $minutes menit';
+    }
+
+    return '$minutes menit';
+  }
+
+  String _formatDifferenceLabel(
+    double routeDuration,
+    double baseDuration,
+    int index,
+  ) {
+    if (index == 0) {
+      return '';
+    }
+
+    final diffSeconds = routeDuration - baseDuration;
+    if (diffSeconds.abs() < 30) {
+      return 'Perkiraan sama';
+    }
+
+    final diffMinutes = (diffSeconds.abs() / 60).round();
+    final sign = diffSeconds > 0 ? '+' : '-';
+    return '$sign$diffMinutes menit dari tercepat';
   }
 }

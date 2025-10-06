@@ -26,8 +26,6 @@
 		<string>Allow tracking to provide personalized content and improve app features. We will not sell your data.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
-		<key>MGLMapboxAccessToken</key>
-		<string>pk.eyJ1IjoiYWxpZmZpa3JpaSIsImEiOiJjbWdhbnQ2M2YwNnptMmtxODdhb3h1dXA0In0.bkDLBhUy_d7-GYTlRNyt_w</string>
 		<key>CFBundleDisplayName</key>
 		<string>JIR</string>
 		<key>CFBundleExecutable</key>

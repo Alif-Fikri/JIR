@@ -15,6 +15,7 @@ import 'package:JIR/pages/home/main/widget/home_warning_section.dart';
 import 'package:JIR/pages/home/main/widget/news_carousel.dart';
 import 'package:JIR/pages/home/main/widget/weather_card.dart';
 import 'package:JIR/pages/notifications/controller/notification_controller.dart';
+import 'package:JIR/pages/home/map/controller/route_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,6 +26,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late final HomeController controller;
   late final NotificationController nc;
+  late final RouteController _routeController;
   Timer? _fallbackTimer;
 
   String _username = '';
@@ -36,6 +38,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     controller = Get.find<HomeController>();
     nc = Get.find<NotificationController>();
+    _routeController = Get.find<RouteController>();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _fallbackTimer = Timer(const Duration(seconds: 12), () {
         try {
@@ -388,24 +391,217 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            AnimatedBuilder(
-              animation: controller.animationController,
-              builder: (context, child) {
-                double bounce = math.sin(
-                        controller.animationController.value * 2 * math.pi) *
-                    5.h;
-                return Positioned(
-                    bottom: 50.h + bounce,
+            _buildNavigationStatusSheet(),
+            Obx(() {
+              final hasActiveRoute = _routeController.routeActive.value &&
+                  _routeController.remainingRouteDistance.value > 0;
+              final extraOffset = hasActiveRoute ? 100.h : 0.0;
+
+              return AnimatedBuilder(
+                animation: controller.animationController,
+                builder: (context, child) {
+                  final bounce = math.sin(
+                          controller.animationController.value * 2 * math.pi) *
+                      5.h;
+                  return Positioned(
+                    bottom: 50.h + extraOffset + bounce,
                     right: 25.w,
                     child: GestureDetector(
-                        onTap: () => Get.toNamed(AppRoutes.chatbot),
-                        child: Image.asset('assets/images/robot.png',
-                            width: 70.w, height: 70.w)));
-              },
-            ),
+                      onTap: () => Get.toNamed(AppRoutes.chatbot),
+                      child: Image.asset(
+                        'assets/images/robot.png',
+                        width: 70.w,
+                        height: 70.w,
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildNavigationStatusSheet() {
+    return Obx(() {
+      final isActive = _routeController.routeActive.value &&
+          _routeController.remainingRouteDistance.value > 0;
+      if (!isActive) {
+        return const SizedBox.shrink();
+      }
+
+      final title = _routeController.destinationLabel.value.isNotEmpty
+          ? _routeController.destinationLabel.value
+          : 'Perjalanan aktif';
+      final subtitle = _routeController.destinationAddress.value;
+      final distanceText = RouteController.formatDistance(
+        _routeController.remainingRouteDistance.value,
+      );
+      final durationText = _formatDuration(
+        _routeController.remainingRouteDuration.value,
+      );
+      final instruction = _routeController.nextInstruction.value;
+
+      return Positioned(
+        left: 16.w,
+        right: 16.w,
+        bottom: 16.h,
+        child: SafeArea(
+          top: false,
+          child: GestureDetector(
+            onTap: () => Get.toNamed(AppRoutes.peta),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x16000000),
+                    blurRadius: 12,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 44.w,
+                    height: 44.w,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xffE2E8F0),
+                    ),
+                    child: const Icon(
+                      Icons.navigation_outlined,
+                      color: Color(0xff1E293B),
+                    ),
+                  ),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.lexend(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xff0F172A),
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          '$distanceText • $durationText',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            color: const Color(0xff475569),
+                          ),
+                        ),
+                        if (instruction.isNotEmpty) ...[
+                          SizedBox(height: 2.h),
+                          Text(
+                            instruction,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              fontSize: 11.sp,
+                              color: const Color(0xff2563EB),
+                            ),
+                          ),
+                        ] else if (subtitle.isNotEmpty) ...[
+                          SizedBox(height: 2.h),
+                          Text(
+                            subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              fontSize: 11.sp,
+                              color: const Color(0xff94A3B8),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  GestureDetector(
+                    onTap: _cancelActiveRoute,
+                    child: Container(
+                      width: 36.w,
+                      height: 36.w,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffF1F5F9),
+                        borderRadius: BorderRadius.circular(18.r),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x11000000),
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Color(0xff334155),
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Color(0xff94A3B8),
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  String _formatDuration(double seconds) {
+    if (seconds <= 0) {
+      return 'Tiba sebentar lagi';
+    }
+
+    final totalMinutes = (seconds / 60).round();
+    if (totalMinutes <= 1) {
+      return 'Sekitar 1 menit';
+    }
+
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return '$hours jam $minutes menit';
+    }
+    if (hours > 0) {
+      return '$hours jam';
+    }
+    return '$totalMinutes menit';
+  }
+
+  void _cancelActiveRoute() {
+    if (!_routeController.routeActive.value) {
+      return;
+    }
+    _routeController.clearRoute();
+    Get.snackbar(
+      'Perjalanan dibatalkan',
+      'Rute aktif telah dihentikan.',
+      snackPosition: SnackPosition.BOTTOM,
     );
   }
 }
