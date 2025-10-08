@@ -9,6 +9,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:JIR/config.dart';
+import 'package:JIR/pages/auth/service/auth_api_service.dart';
+import 'package:get/get.dart';
 
 class GoogleSignInResult {
   const GoogleSignInResult._({
@@ -42,10 +44,12 @@ class GoogleAuthService {
               ? googleIosClientId
               : null,
         ),
-        _firebaseAuth = FirebaseAuth.instance;
+        _firebaseAuth = FirebaseAuth.instance,
+        _authService = Get.find<AuthService>();
 
   final GoogleSignIn _googleSignIn;
   final FirebaseAuth _firebaseAuth;
+  final AuthService _authService;
 
   Future<GoogleSignInResult> signInWithGoogle() async {
     if (kIsWeb) {
@@ -111,6 +115,10 @@ class GoogleAuthService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final payload = jsonDecode(response.body);
         if (payload is Map<String, dynamic>) {
+          final token = _extractToken(payload);
+          if (token != null) {
+            await _authService.persistToken(token);
+          }
           return GoogleSignInResult.success(payload);
         }
         return GoogleSignInResult.failure(
@@ -156,9 +164,13 @@ class GoogleAuthService {
       return GoogleSignInResult.failure(
         'Permintaan ke server terlalu lama. Periksa koneksi internet Anda.',
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Google sign-in unexpected error: $e');
+        debugPrint(stackTrace.toString());
+      }
       return GoogleSignInResult.failure(
-        'Terjadi kesalahan saat login dengan Google: ${e.toString()}',
+        'Terjadi kesalahan saat login dengan Google. Silakan coba lagi.',
       );
     }
   }
@@ -181,8 +193,10 @@ class GoogleAuthService {
     }
 
     final detail = exception.message?.trim() ?? '';
-    final detailSuffix = detail.isNotEmpty ? ' Detail: $detail' : '';
-    return 'Login Google gagal$suffix.$detailSuffix';
+    if (kDebugMode && detail.isNotEmpty) {
+      debugPrint('Google sign-in platform detail: $detail');
+    }
+    return 'Login Google gagal$suffix. Silakan coba lagi.';
   }
 
   String _mapFirebaseAuthException(FirebaseAuthException exception) {
@@ -200,9 +214,27 @@ class GoogleAuthService {
         return 'Kredensial Google tidak valid atau akun dinonaktifkan$suffix.';
       default:
         final message = exception.message?.trim();
-        final detailSuffix =
-            message != null && message.isNotEmpty ? ' Detail: $message' : '';
-        return 'Login Google via Firebase gagal$suffix.$detailSuffix';
+        if (kDebugMode && message != null && message.isNotEmpty) {
+          debugPrint('Firebase auth detail: $message');
+        }
+        return 'Login Google via Firebase gagal$suffix. Silakan coba lagi.';
     }
+  }
+
+  String? _extractToken(Map<String, dynamic> payload) {
+    final directToken = payload['access_token'] ?? payload['token'];
+    if (directToken is String && directToken.isNotEmpty) {
+      return directToken;
+    }
+
+    final data = payload['data'];
+    if (data is Map<String, dynamic>) {
+      final nestedToken = data['access_token'] ?? data['token'];
+      if (nestedToken is String && nestedToken.isNotEmpty) {
+        return nestedToken;
+      }
+    }
+
+    return null;
   }
 }

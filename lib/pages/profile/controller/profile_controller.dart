@@ -19,10 +19,27 @@ class ProfileController extends GetxController {
     try {
       isLoading(true);
       final data = await _auth.fetchProfile();
-      name.value = data['username'] ?? data['name'] ?? '';
-      email.value = data['email'] ?? '';
+      final rawName =
+          (data['username'] ?? data['name'] ?? '').toString().trim();
+      final rawEmail = (data['email'] ?? '').toString().trim();
+
+      if (rawEmail.isNotEmpty && rawName.isEmpty) {
+        name.value = rawEmail.split('@').first;
+      } else if (rawName.isNotEmpty) {
+        name.value = rawName;
+      } else {
+        name.value = 'Pengguna';
+      }
+
+      email.value = rawEmail;
+      error.value = '';
     } catch (e) {
-      error.value = e.toString();
+      error.value = 'Gagal memuat profil. Silakan coba lagi.';
+      if (Get.isLogEnable) {
+        Get.log('ProfileController loadProfile error: $e');
+      }
+      name.value = 'Pengguna';
+      email.value = '';
     } finally {
       isLoading(false);
     }

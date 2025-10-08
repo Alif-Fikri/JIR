@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   late final RouteController _routeController;
   Timer? _fallbackTimer;
 
-  String _username = '';
+  String _username = 'Pengguna';
   String _email = '';
   bool _profileLoading = true;
 
@@ -70,10 +70,21 @@ class _HomePageState extends State<HomePage> {
       final profile = await auth.fetchProfile();
       final name = (profile['username'] ?? profile['name'] ?? '') as String?;
       final email = (profile['email'] ?? '') as String?;
+      var resolvedEmail = (email ?? '').trim();
+      var resolvedName = (name ?? '').trim();
+
+      if (resolvedName.isEmpty && resolvedEmail.isNotEmpty) {
+        resolvedName = resolvedEmail.split('@').first;
+      }
+
+      if (resolvedName.isEmpty) {
+        resolvedName = 'Pengguna';
+      }
+
       if (mounted) {
         setState(() {
-          _username = (name ?? '').toString();
-          _email = (email ?? '').toString();
+          _username = resolvedName;
+          _email = resolvedEmail;
           _profileLoading = false;
         });
       }
@@ -81,7 +92,7 @@ class _HomePageState extends State<HomePage> {
       debugPrint('[HomePage] failed to load profile: $e');
       if (mounted) {
         setState(() {
-          _username = '';
+          _username = 'Pengguna';
           _email = '';
           _profileLoading = false;
         });

@@ -391,6 +391,12 @@ class AuthService {
     await box.put('token', token);
   }
 
+  Future<void> persistToken(String token) async {
+    final trimmed = token.trim();
+    if (trimmed.isEmpty) return;
+    await _saveToken(trimmed);
+  }
+
   Future<String?> _getToken() async {
     var box = await Hive.openBox('authBox');
     return box.get('token');

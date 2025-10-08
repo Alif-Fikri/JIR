@@ -29,25 +29,37 @@ class _MenuState extends State<Menu> {
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus();
+    _refreshLoginStatus();
   }
 
-  Future<void> _checkLoginStatus() async {
+  Future<bool> _refreshLoginStatus() async {
     var box = await Hive.openBox('authBox');
     final token = box.get('token');
-    setState(() {
-      isLoggedIn = token != null && token.isNotEmpty;
-    });
+    final loggedIn = token != null && token.toString().isNotEmpty;
+    if (mounted) {
+      setState(() {
+        isLoggedIn = loggedIn;
+      });
+    } else {
+      isLoggedIn = loggedIn;
+    }
+    return loggedIn;
   }
 
-  void _onItemTapped(int index) {
-    if ((index == 1 || index == 3) && !isLoggedIn) {
-      _showLoginDialog();
-    } else {
-      setState(() {
-        _selectedIndex = index;
-      });
+  void _onItemTapped(int index) async {
+    if (index == 1 || index == 3) {
+      final loggedIn = await _refreshLoginStatus();
+      if (!loggedIn) {
+        _showLoginDialog();
+        return;
+      }
     }
+
+    if (!mounted) return;
+
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   void _showLoginDialog() {
