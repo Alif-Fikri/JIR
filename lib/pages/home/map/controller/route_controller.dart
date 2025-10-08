@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:JIR/helper/mapbox_config.dart';
+import 'package:JIR/services/navigation_service/navigation_foreground_service.dart';
 
 class RouteOption {
   RouteOption({
@@ -16,6 +18,8 @@ class RouteOption {
     required this.distance,
     required this.duration,
     required this.summary,
+    this.durationTypical = 0.0,
+    this.trafficDelay = 0.0,
   });
 
   final String id;
@@ -25,6 +29,8 @@ class RouteOption {
   final double distance;
   final double duration;
   final String summary;
+  final double durationTypical;
+  final double trafficDelay;
 }
 
 class RouteController extends GetxController {
@@ -38,6 +44,7 @@ class RouteController extends GetxController {
   final RxList<LatLng> optimizedWaypoints = <LatLng>[].obs;
   final RxList<RouteOption> routeOptions = <RouteOption>[].obs;
   final RxInt selectedRouteIndex = 0.obs;
+  final RxList<LatLng> activeRoutePolyline = <LatLng>[].obs;
   final RxDouble userHeading = 0.0.obs;
   final RxList<Map<String, dynamic>> searchSuggestions =
       <Map<String, dynamic>>[].obs;
@@ -54,6 +61,8 @@ class RouteController extends GetxController {
   Timer? _debounceTimer;
   DateTime _lastCheck = DateTime.now();
   LatLng? startPoint;
+  bool _foregroundServiceActive = false;
+  DateTime? _lastForegroundUpdate;
 
   @override
   void onInit() {
@@ -290,7 +299,7 @@ class RouteController extends GetxController {
       'geometries': 'geojson',
       'overview': 'full',
       'steps': 'true',
-      'annotations': 'distance,duration',
+      'annotations': 'distance,duration,congestion',
       'language': 'id',
       'voice_instructions': 'false',
       'banner_instructions': 'false',
@@ -409,6 +418,10 @@ class RouteController extends GetxController {
     for (int i = 0; i < maxRoutes; i++) {
       final route = routes[i] as Map<String, dynamic>;
       final summaryRaw = (route['summary'] ?? '').toString().trim();
+      final durationValue = (route['duration'] as num?)?.toDouble() ?? 0.0;
+      final typicalDuration =
+          (route['duration_typical'] as num?)?.toDouble() ?? durationValue;
+      final trafficDelay = math.max(durationValue - typicalDuration, 0.0);
       parsedOptions.add(
         RouteOption(
           id: 'route_$i',
@@ -416,7 +429,9 @@ class RouteController extends GetxController {
           points: _extractRouteCoordinates(route),
           steps: _extractRouteSteps(route),
           distance: (route['distance'] as num?)?.toDouble() ?? 0.0,
-          duration: (route['duration'] as num?)?.toDouble() ?? 0.0,
+          duration: durationValue,
+          durationTypical: typicalDuration,
+          trafficDelay: trafficDelay,
           summary: summaryRaw.isNotEmpty ? summaryRaw : 'Rute ${i + 1}',
         ),
       );
@@ -433,6 +448,8 @@ class RouteController extends GetxController {
       remainingRouteDuration.value = 0.0;
       nextInstruction.value = '';
       routeActive.value = false;
+      activeRoutePolyline.clear();
+      _syncForegroundNotification();
       return;
     }
 
@@ -461,10 +478,15 @@ class RouteController extends GetxController {
     routeSteps.value = option.steps
         .map<Map<String, dynamic>>((step) => Map<String, dynamic>.from(step))
         .toList();
+    activeRoutePolyline.assignAll(routePoints);
     totalRouteDistance.value = option.distance;
-    totalRouteDuration.value = option.duration;
+    final adjustedTotal = adjustedDuration(
+      option.duration,
+      vehicle: selectedVehicle.value,
+    );
+    totalRouteDuration.value = adjustedTotal;
     remainingRouteDistance.value = option.distance;
-    remainingRouteDuration.value = option.duration;
+    remainingRouteDuration.value = adjustedTotal;
     nextInstruction.value = routeSteps.isNotEmpty
         ? routeSteps.first['instruction']?.toString() ?? ''
         : '';
@@ -481,6 +503,8 @@ class RouteController extends GetxController {
     if (userLocation.value != null) {
       _updateRemainingMetrics(userLocation.value);
     }
+
+    _syncForegroundNotification(forceStart: true);
 
     update();
   }
@@ -536,10 +560,30 @@ class RouteController extends GetxController {
       case 'car':
         return 'driving-traffic';
       case 'motorcycle':
-        return 'driving';
+        return 'driving-traffic';
       default:
-        return 'driving';
+        return 'driving-traffic';
     }
+  }
+
+  double _vehicleDurationMultiplier(String vehicle) {
+    switch (vehicle) {
+      case 'car':
+        return 1.25;
+      case 'motorcycle':
+        return 0.88;
+      default:
+        return 1.0;
+    }
+  }
+
+  double adjustedDuration(num baseSeconds, {String? vehicle}) {
+    final key = (vehicle ?? selectedVehicle.value).isEmpty
+        ? 'motorcycle'
+        : (vehicle ?? selectedVehicle.value);
+    final multiplier = _vehicleDurationMultiplier(key);
+    final raw = baseSeconds.toDouble();
+    return (raw * multiplier).clamp(0, double.maxFinite);
   }
 
   void useAlternativeRoute(int index) {
@@ -880,6 +924,24 @@ class RouteController extends GetxController {
     return '${(distance / 1000).toStringAsFixed(1)} km';
   }
 
+  static String formatDuration(num seconds) {
+    if (seconds.isNaN || seconds.isInfinite || seconds <= 0) {
+      return 'Tiba sebentar lagi';
+    }
+
+    final totalMinutes = (seconds / 60).round().clamp(1, 1000000);
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return '$hours jam $minutes menit';
+    }
+    if (hours > 0) {
+      return '$hours jam';
+    }
+    return '$minutes menit';
+  }
+
   static String getLocationType(String type) {
     const typeTranslations = {
       'administrative': 'Wilayah Administratif',
@@ -960,6 +1022,8 @@ class RouteController extends GetxController {
     destinationLabel.value = '';
     destinationAddress.value = '';
     routeActive.value = false;
+    activeRoutePolyline.clear();
+    _syncForegroundNotification();
     update();
   }
 
@@ -1026,9 +1090,87 @@ class RouteController extends GetxController {
         selectedRouteIndex.value = 0;
       }
       routeActive.value = false;
+      activeRoutePolyline.clear();
     } else {
       routeActive.value = true;
+      _trimActivePolyline(currentLocation);
     }
+
+    _syncForegroundNotification();
+  }
+
+  void _trimActivePolyline(LatLng currentLocation) {
+    if (activeRoutePolyline.length <= 2) {
+      return;
+    }
+
+    final nearestIndex =
+        _findNearestPointIndex(currentLocation, activeRoutePolyline);
+    if (nearestIndex == null || nearestIndex <= 0) {
+      return;
+    }
+
+    final removeCount = math.min(nearestIndex, activeRoutePolyline.length - 2);
+    if (removeCount <= 0) {
+      return;
+    }
+
+    activeRoutePolyline.removeRange(0, removeCount);
+    activeRoutePolyline.refresh();
+  }
+
+  void _syncForegroundNotification({bool forceStart = false}) {
+    if (!GetPlatform.isAndroid) {
+      return;
+    }
+
+    final isActive = routeActive.value && remainingRouteDistance.value > 0;
+    if (!isActive) {
+      if (_foregroundServiceActive) {
+        unawaited(NavigationForegroundBridge.stop());
+        _foregroundServiceActive = false;
+        _lastForegroundUpdate = null;
+      }
+      return;
+    }
+
+    final now = DateTime.now();
+    if (!forceStart &&
+        _lastForegroundUpdate != null &&
+        now.difference(_lastForegroundUpdate!).inSeconds < 3) {
+      return;
+    }
+
+    final title = destinationLabel.value.isNotEmpty
+        ? destinationLabel.value
+        : 'Perjalanan aktif';
+    final subtitle = destinationAddress.value;
+    final instruction = nextInstruction.value.isNotEmpty
+        ? nextInstruction.value
+        : (subtitle.isNotEmpty ? subtitle : 'Ikuti arah di aplikasi');
+    final distanceText = formatDistance(remainingRouteDistance.value);
+    final durationText = formatDuration(remainingRouteDuration.value);
+
+    if (!_foregroundServiceActive || forceStart) {
+      unawaited(NavigationForegroundBridge.start(
+        title: title,
+        subtitle: subtitle,
+        distance: distanceText,
+        duration: durationText,
+        instruction: instruction,
+      ));
+      _foregroundServiceActive = true;
+    } else {
+      unawaited(NavigationForegroundBridge.update(
+        title: title,
+        subtitle: subtitle,
+        distance: distanceText,
+        duration: durationText,
+        instruction: instruction,
+      ));
+    }
+
+    _lastForegroundUpdate = now;
   }
 
   @override
@@ -1036,6 +1178,11 @@ class RouteController extends GetxController {
     _positionStream?.cancel();
     _debounceTimer?.cancel();
     _compassSubscription?.cancel();
+    if (_foregroundServiceActive) {
+      unawaited(NavigationForegroundBridge.stop());
+      _foregroundServiceActive = false;
+      _lastForegroundUpdate = null;
+    }
     super.onClose();
   }
 

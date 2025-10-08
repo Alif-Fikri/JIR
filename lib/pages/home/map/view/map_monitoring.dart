@@ -99,7 +99,12 @@ class MapMonitoring extends StatelessWidget {
                 .toList();
             final routeOptions = routeController.routeOptions;
             final selectedRouteIndex = routeController.selectedRouteIndex.value;
+            final trimmedActivePolyline = routeController.activeRoutePolyline
+                .map((point) => ll.LatLng(point.latitude, point.longitude))
+                .toList();
             final List<RouteLineConfig> routeLines = [];
+            const Color selectedRouteColor = Color(0xFF2563EB);
+            const Color alternativeRouteColor = Color(0xFFF97316);
 
             for (var i = 0; i < routeOptions.length; i++) {
               final option = routeOptions[i];
@@ -107,15 +112,17 @@ class MapMonitoring extends StatelessWidget {
               final optionPoints = option.points
                   .map((point) => ll.LatLng(point.latitude, point.longitude))
                   .toList();
+              final pointsForRender =
+                  isSelected && trimmedActivePolyline.length >= 2
+                      ? trimmedActivePolyline
+                      : optionPoints;
 
               final config = RouteLineConfig(
                 id: option.id,
-                points: optionPoints,
-                color: isSelected
-                    ? const Color(0xFF1E3A8A)
-                    : const Color(0xFF38BDF8),
-                width: isSelected ? 6.0 : 4.0,
-                opacity: isSelected ? 1.0 : 0.72,
+                points: pointsForRender,
+                color: isSelected ? selectedRouteColor : alternativeRouteColor,
+                width: isSelected ? 6.5 : 4.5,
+                opacity: isSelected ? 0.95 : 0.65,
               );
 
               if (isSelected) {
@@ -152,7 +159,7 @@ class MapMonitoring extends StatelessWidget {
                 routeId,
                 showFeedback: true,
               ),
-              enable3DBuildings: false,
+              enable3DBuildings: true,
               autoPitchOnRoute: true,
               navigationPitch: 45,
               navigationZoom: 15.5,
@@ -401,6 +408,9 @@ class MapMonitoring extends StatelessWidget {
                 RouteBottomSheetWidget(),
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
+                isDismissible: false,
+                enableDrag: false,
+                barrierColor: Colors.transparent,
               ),
             ),
           );

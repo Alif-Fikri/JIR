@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:JIR/pages/home/map/controller/flood_controller.dart';
+import 'package:JIR/pages/home/map/widget/cctv_bottom_sheet.dart';
 
 class AnimatedMenuButton extends StatefulWidget {
   const AnimatedMenuButton({super.key});
@@ -19,14 +20,18 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
   final List<Map<String, dynamic>> _menuItems = [
     {
       'icon': Icons.water,
-      'label': 'Status Banjir',
+      'label': 'Banjir',
       'onPressed': () => Get.find<FloodController>().showFloodMonitoringSheet(),
     },
-    // {
-    //   'icon': Icons.history,
-    //   'label': 'testing',
-    //   'onPressed': () => print('Riwayat diklik'),
-    // },
+    {
+      'icon': Icons.connected_tv,
+      'label': 'CCTV',
+      'onPressed': () => Get.bottomSheet(
+            const CctvBottomSheet(),
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+          ),
+    },
     // {
     //   'icon': Icons.history,
     //   'label': 'testing',
@@ -82,7 +87,7 @@ class _AnimatedMenuButtonState extends State<AnimatedMenuButton>
                 child: FloatingActionButton(
                   heroTag: null,
                   mini: false,
-                  backgroundColor: Colors.grey[400],
+                  backgroundColor: Colors.white,
                   onPressed: () {
                     _toggleMenu();
                     item['onPressed']();

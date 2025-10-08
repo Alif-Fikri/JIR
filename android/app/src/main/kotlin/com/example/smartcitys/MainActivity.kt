@@ -12,53 +12,73 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity: FlutterActivity() {
 	private val CHANNEL = "jir/native/email"
 	private val MAPBOX_CHANNEL = "jir/mapbox/token"
+	private val NAVIGATION_CHANNEL = "jir/navigation/service"
 
 	override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
 		super.configureFlutterEngine(flutterEngine)
 
 		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-			if (call.method == "openEmail") {
-				val to = call.argument<String>("to")
-				val subject = call.argument<String>("subject")
-				val body = call.argument<String>("body")
-				try {
-					openEmailIntent(to, subject, body)
-					result.success(true)
-				} catch (e: Exception) {
-					result.error("ERROR", e.message, null)
+			when (call.method) {
+				"openEmail" -> {
+					val to = call.argument<String>("to")
+					val subject = call.argument<String>("subject")
+					val body = call.argument<String>("body")
+					try {
+						openEmailIntent(to, subject, body)
+						result.success(true)
+					} catch (e: Exception) {
+						result.error("ERROR", e.message, null)
+					}
 				}
-			} else {
-				result.notImplemented()
+				else -> result.notImplemented()
 			}
 		}
 
 		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, MAPBOX_CHANNEL).setMethodCallHandler { call, result ->
-			if (call.method == "getToken") {
-				try {
-					result.success(null)
-				} catch (e: Exception) {
-					result.error("ERROR", e.message, null)
+			when (call.method) {
+				"getToken" -> {
+					try {
+						result.success(null)
+					} catch (e: Exception) {
+						result.error("ERROR", e.message, null)
+					}
 				}
-			} else {
-				result.notImplemented()
+				else -> result.notImplemented()
 			}
 		}
 
-		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-			if (call.method == "openEmail") {
-				val to = call.argument<String>("to")
-				val subject = call.argument<String>("subject")
-				val body = call.argument<String>("body")
-				try {
-					openEmailIntent(to, subject, body)
+		MethodChannel(flutterEngine.dartExecutor.binaryMessenger, NAVIGATION_CHANNEL).setMethodCallHandler { call, result ->
+			when (call.method) {
+				"startNavigation" -> {
+					val args = call.arguments as? Map<String, Any?>
+					val bundle = buildNavigationBundle(args)
+					NavigationForegroundService.start(applicationContext, bundle)
 					result.success(true)
-				} catch (e: Exception) {
-					result.error("ERROR", e.message, null)
 				}
-			} else {
-				result.notImplemented()
+				"updateNavigation" -> {
+					val args = call.arguments as? Map<String, Any?>
+					val bundle = buildNavigationBundle(args)
+					NavigationForegroundService.update(applicationContext, bundle)
+					result.success(true)
+				}
+				"stopNavigation" -> {
+					NavigationForegroundService.stop(applicationContext)
+					result.success(true)
+				}
+				else -> result.notImplemented()
 			}
 		}
+	}
+
+	private fun buildNavigationBundle(data: Map<String, Any?>?): Bundle {
+		val args = data ?: emptyMap()
+		val bundle = Bundle()
+		bundle.putString(NavigationForegroundService.EXTRA_TITLE, args["title"]?.toString() ?: "")
+		bundle.putString(NavigationForegroundService.EXTRA_SUBTITLE, args["subtitle"]?.toString() ?: "")
+		bundle.putString(NavigationForegroundService.EXTRA_DISTANCE, args["distance"]?.toString() ?: "")
+		bundle.putString(NavigationForegroundService.EXTRA_DURATION, args["duration"]?.toString() ?: "")
+		bundle.putString(NavigationForegroundService.EXTRA_INSTRUCTION, args["instruction"]?.toString() ?: "")
+		return bundle
 	}
 
 	private fun openEmailIntent(to: String?, subject: String?, body: String?) {

@@ -40,12 +40,34 @@ class LoginController extends GetxController {
   void googleSignIn() async {
     try {
       isLoading.value = true;
+      errorMessage.value = '';
+
       final result = await _googleAuthService.signInWithGoogle();
-      if (result != null) {
-        Get.offAllNamed(AppRoutes.home);
-      } else {
-        errorMessage.value = 'Login dengan Google gagal.';
+
+      if (result.success) {
+        final data = result.data ?? {};
+        final dynamic successFlag = data['success'];
+        final bool backendSuccess = successFlag == null || successFlag == true;
+
+        if (backendSuccess) {
+          Get.offAllNamed(AppRoutes.home);
+          return;
+        }
+
+        final backendMessage = data['message']?.toString();
+        errorMessage.value = backendMessage?.isNotEmpty == true
+            ? backendMessage!
+            : 'Login dengan Google gagal.';
+        return;
       }
+
+      if (result.cancelled) {
+        errorMessage.value = 'Login Google dibatalkan.';
+        return;
+      }
+
+      errorMessage.value =
+          result.message ?? 'Terjadi kesalahan saat login dengan Google.';
     } catch (e) {
       errorMessage.value = 'Terjadi kesalahan saat login dengan Google.';
     } finally {

@@ -107,8 +107,7 @@ class _NewsCarouselState extends State<NewsCarousel> {
                   ),
                   errorWidget: (c, s, e) => Container(
                     color: Colors.grey[200],
-                    child:
-                        Center(child: Icon(Icons.broken_image, size: 48.r)),
+                    child: Center(child: Icon(Icons.broken_image, size: 48.r)),
                   ),
                 )
               else
@@ -196,8 +195,8 @@ class _NewsCarouselState extends State<NewsCarousel> {
                     onTap: () => _openNewsUrl(item.url),
                     borderRadius: BorderRadius.circular(20.r),
                     child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 12.w, vertical: 8.h),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                       child: Row(
                         children: [
                           Icon(Icons.article, size: 16.r, color: Colors.white),
@@ -228,8 +227,7 @@ class _NewsCarouselState extends State<NewsCarousel> {
         return GestureDetector(
           onTap: () {
             _pageController.animateToPage(i,
-                duration: Duration(milliseconds: 450),
-                curve: Curves.easeInOut);
+                duration: Duration(milliseconds: 450), curve: Curves.easeInOut);
             _startAutoPlay();
           },
           child: AnimatedContainer(
@@ -264,7 +262,10 @@ class _NewsCarouselState extends State<NewsCarousel> {
       if (isLoading) {
         return SizedBox(
           height: widget.height.h,
-          child: _ShimmerNewsList(height: widget.height, count: 3,),
+          child: _ShimmerNewsList(
+            height: widget.height,
+            count: 3,
+          ),
         );
       }
 
@@ -337,63 +338,69 @@ class _ShimmerNewsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardWidth = 0.86.sw;
-    return ListView.separated(
-      scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      itemCount: count,
-      separatorBuilder: (_, __) => SizedBox(width: 12.w),
-      itemBuilder: (context, index) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(14.r),
-          child: Stack(
-            children: [
-              HomeShimmer.rect(
-                height: height,
-                width: cardWidth,
-                radius: BorderRadius.circular(14.r),
-              ),
-              Padding(
-                padding: EdgeInsets.all(12.w),
-                child: Column(
-                  children: [
-                    Row(
+    return SizedBox(
+      height: height.h,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        itemCount: count,
+        separatorBuilder: (_, __) => SizedBox(width: 12.w),
+        itemBuilder: (context, index) {
+          return SizedBox(
+            width: cardWidth,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14.r),
+              child: Stack(
+                children: [
+                  HomeShimmer.rect(
+                    height: height,
+                    width: cardWidth,
+                    radius: BorderRadius.circular(14.r),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(12.w),
+                    child: Column(
                       children: [
-                        HomeShimmer.rect(
-                          height: 20.h,
-                          width: 70.w,
-                          radius: BorderRadius.circular(12.r),
+                        Row(
+                          children: [
+                            HomeShimmer.rect(
+                              height: 20.h,
+                              width: 70.w,
+                              radius: BorderRadius.circular(12.r),
+                            ),
+                            const Spacer(),
+                            HomeShimmer.circle(size: 28.sp),
+                          ],
                         ),
-                        Spacer(),
-                        HomeShimmer.circle(size: 28.sp),
+                        const Spacer(),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              HomeShimmer.rect(
+                                height: 16.h,
+                                width: cardWidth * 0.6,
+                                radius: BorderRadius.circular(6.r),
+                              ),
+                              SizedBox(height: 8.h),
+                              HomeShimmer.rect(
+                                height: 14.h,
+                                width: cardWidth * 0.45,
+                                radius: BorderRadius.circular(6.r),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                    Spacer(),
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          HomeShimmer.rect(
-                            height: 16.h,
-                            width: cardWidth * 0.6,
-                            radius: BorderRadius.circular(6.r),
-                          ),
-                          SizedBox(height: 8.h),
-                          HomeShimmer.rect(
-                            height: 14.h,
-                            width: cardWidth * 0.45,
-                            radius: BorderRadius.circular(6.r),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
-      },
+            ),
+          );
+        },
+      ),
     );
   }
 }
