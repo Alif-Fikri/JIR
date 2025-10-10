@@ -3,6 +3,85 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/pages/home/map/controller/flood_controller.dart';
 
+enum _FloodStatusLevel { normal, caution, alert, danger, unknown }
+
+class _FloodStatusHelper {
+  static _FloodStatusLevel classify(String rawStatus) {
+    final cleaned = rawStatus
+        .replaceAll(RegExp(r'status\s*:?', caseSensitive: false), '')
+        .trim()
+        .toLowerCase();
+    if (cleaned.isEmpty || cleaned == 'n/a') {
+      return _FloodStatusLevel.normal;
+    }
+    if (_containsAny(cleaned, ['siaga 1', 'merah', 'bahaya'])) {
+      return _FloodStatusLevel.danger;
+    }
+    if (_containsAny(cleaned, ['siaga 2', 'jingga', 'orange', 'sedang'])) {
+      return _FloodStatusLevel.alert;
+    }
+    if (_containsAny(cleaned, ['siaga 3', 'kuning', 'yellow'])) {
+      return _FloodStatusLevel.caution;
+    }
+    if (_containsAny(cleaned, ['normal', 'hijau', 'green', 'aman'])) {
+      return _FloodStatusLevel.normal;
+    }
+    return _FloodStatusLevel.unknown;
+  }
+
+  static Color color(String rawStatus) {
+    switch (classify(rawStatus)) {
+      case _FloodStatusLevel.danger:
+        return const Color(0xFFD32F2F);
+      case _FloodStatusLevel.alert:
+        return const Color(0xFFFF9800);
+      case _FloodStatusLevel.caution:
+        return const Color(0xFFFFC107);
+      case _FloodStatusLevel.normal:
+        return const Color(0xFF4CAF50);
+      case _FloodStatusLevel.unknown:
+        return const Color(0xFFE53935);
+    }
+  }
+
+  static String detailLabel(String rawStatus) {
+    switch (classify(rawStatus)) {
+      case _FloodStatusLevel.danger:
+        return 'Siaga 1 (Bahaya)';
+      case _FloodStatusLevel.alert:
+        return 'Siaga 2 (Siaga Tinggi)';
+      case _FloodStatusLevel.caution:
+        return 'Siaga 3 (Waspada)';
+      case _FloodStatusLevel.normal:
+        return 'Normal (Aman)';
+      case _FloodStatusLevel.unknown:
+        return 'Status Tidak Diketahui';
+    }
+  }
+
+  static String shortLabel(String rawStatus) {
+    switch (classify(rawStatus)) {
+      case _FloodStatusLevel.danger:
+        return 'Siaga 1';
+      case _FloodStatusLevel.alert:
+        return 'Siaga 2';
+      case _FloodStatusLevel.caution:
+        return 'Siaga 3';
+      case _FloodStatusLevel.normal:
+        return 'Normal';
+      case _FloodStatusLevel.unknown:
+        return 'Tidak Diketahui';
+    }
+  }
+
+  static bool _containsAny(String source, List<String> keywords) {
+    for (final keyword in keywords) {
+      if (source.contains(keyword)) return true;
+    }
+    return false;
+  }
+}
+
 class DisasterBottomSheet extends StatelessWidget {
   final String location;
   final String status;
@@ -15,44 +94,10 @@ class DisasterBottomSheet extends StatelessWidget {
     required this.onViewLocation,
   });
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Normal':
-        return Colors.green;
-      case 'Sedang':
-        return Colors.yellow[700]!;
-      case 'Siaga 1':
-        return Colors.orange[700]!;
-      case 'Siaga 2':
-        return Colors.orange[700]!;
-      case 'Siaga 3':
-        return Colors.red[700]!;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getStatusText(String status) {
-    switch (status) {
-      case 'Normal':
-        return 'Normal (Aman)';
-      case 'Sedang':
-        return 'Sedang (Aman)';
-      case 'Siaga 1':
-        return 'Siaga 1 (Waspada)';
-      case 'Siaga 2':
-        return 'Siaga 2 (Bahaya)';
-      case 'Siaga 3':
-        return 'Siaga 3 (Darurat)';
-      default:
-        return 'Status Tidak Diketahui';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(status);
-    final statusText = _getStatusText(status);
+    final statusColor = _FloodStatusHelper.color(status);
+    final statusText = _FloodStatusHelper.detailLabel(status);
 
     return Container(
       decoration: const BoxDecoration(
@@ -295,40 +340,8 @@ class _FloodMonitoringBottomSheetState
   }
 
   Widget _statusIndicator(String status) {
-    final raw = status;
-    final cleaned = raw
-        .replaceAll(RegExp(r'status\s*:?\s*', caseSensitive: false), '')
-        .trim();
-    final lower = cleaned.toLowerCase();
-
-    Color statusColor;
-    String displayText;
-
-    if (lower.contains('siaga 3') || lower == '3') {
-      statusColor = Colors.red;
-      displayText = 'Siaga 3';
-    } else if (lower.contains('siaga 2') || lower == '2') {
-      statusColor = Colors.orange;
-      displayText = 'Siaga 2';
-    } else if (lower.contains('siaga 1') || lower == '1') {
-      statusColor = Colors.orange;
-      displayText = 'Siaga 1';
-    } else if (lower.contains('sedang')) {
-      statusColor = Colors.orange;
-      displayText = 'Sedang';
-    } else if (lower.contains('normal') || cleaned.isEmpty || lower == 'n/a') {
-      statusColor = Colors.green;
-      displayText = 'Normal';
-    } else {
-      statusColor = Colors.grey;
-      displayText = cleaned
-          .split(RegExp(r'\s+'))
-          .map((w) => w.isEmpty
-              ? w
-              : (w[0].toUpperCase() + w.substring(1).toLowerCase()))
-          .join(' ');
-      if (displayText.isEmpty) displayText = 'Tidak Diketahui';
-    }
+    final statusColor = _FloodStatusHelper.color(status);
+    final displayText = _FloodStatusHelper.shortLabel(status);
 
     return Row(
       mainAxisSize: MainAxisSize.min,

@@ -1,5 +1,4 @@
-import 'package:JIR/helper/map.dart';
-import 'package:JIR/helper/mapbox_config.dart';
+import 'package:JIR/helper/google_map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,15 +6,12 @@ import 'package:latlong2/latlong.dart';
 import 'package:JIR/pages/home/flood/controller/flood_controller.dart';
 import 'package:JIR/pages/home/map/controller/route_controller.dart';
 import 'package:latlong2/latlong.dart' as ll;
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 class FloodMonitoringPage extends StatelessWidget {
   final LatLng? initialLocation;
   final FloodMonitoringController controller =
       Get.put(FloodMonitoringController());
-  final RouteController routeController = Get.isRegistered<RouteController>()
-      ? Get.find<RouteController>()
-      : Get.put(RouteController());
+  final RouteController routeController = Get.find<RouteController>();
 
   FloodMonitoringPage({super.key, this.initialLocation});
 
@@ -57,27 +53,37 @@ class FloodMonitoringPage extends StatelessWidget {
                 ? ll.LatLng(userLocation.latitude, userLocation.longitude)
                 : null;
 
-            final routePoints = routeController.routePoints
-                .map((p) => ll.LatLng(p.latitude, p.longitude))
-                .toList();
             final waypoints = routeController.optimizedWaypoints
                 .map((p) => ll.LatLng(p.latitude, p.longitude))
                 .toList();
 
-            return MapboxReusableMap(
-              accessToken: MapboxConfig.accessToken,
-              styleUri: MapboxStyles.MAPBOX_STREETS,
-              initialLocation: userPosition,
+            final routePolyline = routeController.routePoints
+                .map((p) => ll.LatLng(p.latitude, p.longitude))
+                .toList();
+
+            final routeLines = routePolyline.length >= 2
+                ? [
+                    RouteLineConfig(
+                      id: 'active-route',
+                      points: routePolyline,
+                      color: const Color(0xFF2563EB),
+                      width: 5.0,
+                      opacity: 0.9,
+                    ),
+                  ]
+                : const <RouteLineConfig>[];
+
+            return JirMapView(
+              initialLocation: userPosition ??
+                  (floodPositions.isNotEmpty ? floodPositions.first : null),
               markers: floodPositions,
               markerData: floodDataList,
               userLocation: userPosition,
-              routePoints: routePoints,
+              routeLines: routeLines,
               waypoints: waypoints,
+              enableMyLocation: true,
               onMarkerDataTap: controller.onMarkerDataTap,
-              onMapCreated: (mbMap) {
-                controller
-                    .setMapController(mbMap); 
-              },
+              onMapCreated: controller.setMapController,
             );
           }),
           Positioned(

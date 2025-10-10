@@ -3,21 +3,21 @@ import 'dart:math' as math;
 import 'package:JIR/pages/home/flood/widgets/flood_item_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmap;
+import 'package:latlong2/latlong.dart' as ll;
 import 'package:JIR/services/flood_service/flood_api_service.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
 
 class FloodMonitoringController extends GetxController {
-  final currentLocation = Rxn<LatLng>();
-  LatLng? _pendingCenter;
+  final currentLocation = Rxn<ll.LatLng>();
+  ll.LatLng? _pendingCenter;
   double? _pendingZoom;
   bool _manualCenterRequested = false;
   final floodData = <Map<String, dynamic>>[].obs;
   final suggestions = <Map<String, dynamic>>[].obs;
 
-  mb.MapboxMap? _mapboxMap;
+  gmap.GoogleMapController? _mapController;
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocus = FocusNode();
 
@@ -40,8 +40,8 @@ class FloodMonitoringController extends GetxController {
     });
   }
 
-  void setMapController(mb.MapboxMap map) {
-    _mapboxMap = map;
+  void setMapController(gmap.GoogleMapController map) {
+    _mapController = map;
     if (_pendingCenter != null) {
       final target = _pendingCenter!;
       final zoom = _pendingZoom ?? 15.0;
@@ -108,7 +108,7 @@ class FloodMonitoringController extends GetxController {
     _manualCenterRequested = true;
     final lat = item["LATITUDE"] as double;
     final lon = item["LONGITUDE"] as double;
-    final target = LatLng(lat, lon);
+    final target = ll.LatLng(lat, lon);
     _moveCamera(target, zoom: 15.0);
     _openFloodInfo(item, history: _historyForLocation(item));
     suggestions.clear();
@@ -121,7 +121,7 @@ class FloodMonitoringController extends GetxController {
     final lat = _coerceDouble(item["LATITUDE"]);
     final lon = _coerceDouble(item["LONGITUDE"]);
     if (lat != null && lon != null) {
-      _moveCamera(LatLng(lat, lon), zoom: 15.0);
+      _moveCamera(ll.LatLng(lat, lon), zoom: 15.0);
     }
     _openFloodInfo(item, history: _historyForLocation(item));
   }
@@ -155,7 +155,7 @@ class FloodMonitoringController extends GetxController {
   Future<void> getCurrentLocation({bool forceRecenter = false}) async {
     try {
       final pos = await Geolocator.getCurrentPosition();
-      final latlng = LatLng(pos.latitude, pos.longitude);
+      final latlng = ll.LatLng(pos.latitude, pos.longitude);
       currentLocation.value = latlng;
       if (forceRecenter) {
         _manualCenterRequested = false;
@@ -192,7 +192,7 @@ class FloodMonitoringController extends GetxController {
       if (found.isNotEmpty) {
         final lat = found["LATITUDE"] as double;
         final lon = found["LONGITUDE"] as double;
-        final target = LatLng(lat, lon);
+        final target = ll.LatLng(lat, lon);
         _manualCenterRequested = true;
         _moveCamera(target, zoom: 15.0);
         _openFloodInfo(found, history: _historyForLocation(found));
@@ -206,7 +206,7 @@ class FloodMonitoringController extends GetxController {
       final locations = await locationFromAddress(q);
       if (locations.isNotEmpty) {
         final loc = locations.first;
-        final target = LatLng(loc.latitude, loc.longitude);
+        final target = ll.LatLng(loc.latitude, loc.longitude);
         _manualCenterRequested = true;
         _moveCamera(target, zoom: 15.0);
         return;
@@ -226,13 +226,13 @@ class FloodMonitoringController extends GetxController {
     super.onClose();
   }
 
-  void gotoLocation(LatLng loc, {double zoom = 15.0}) {
+  void gotoLocation(ll.LatLng loc, {double zoom = 15.0}) {
     try {
       debugPrint(
-          '[FloodController] gotoLocation requested: $loc (mapReady=${_mapboxMap != null})');
+          '[FloodController] gotoLocation requested: $loc (mapReady=${_mapController != null})');
       _manualCenterRequested = true;
       _moveCamera(loc, zoom: zoom);
-      if (_mapboxMap == null) {
+      if (_mapController == null) {
         _pendingCenter = loc;
         _pendingZoom = zoom;
       } else {
@@ -244,8 +244,8 @@ class FloodMonitoringController extends GetxController {
     }
   }
 
-  Future<void> _moveCamera(LatLng target, {double zoom = 15.0}) async {
-    final map = _mapboxMap;
+  Future<void> _moveCamera(ll.LatLng target, {double zoom = 15.0}) async {
+    final map = _mapController;
     if (map == null) {
       _pendingCenter = target;
       _pendingZoom = zoom;
@@ -254,18 +254,25 @@ class FloodMonitoringController extends GetxController {
     _pendingCenter = null;
     _pendingZoom = null;
     try {
-      await map.flyTo(
-        mb.CameraOptions(center: _toPoint(target), zoom: zoom),
-        mb.MapAnimationOptions(duration: 700),
+      final update = gmap.CameraUpdate.newCameraPosition(
+        gmap.CameraPosition(
+          target: gmap.LatLng(target.latitude, target.longitude),
+          zoom: zoom,
+        ),
       );
+      await map.animateCamera(update);
     } catch (e, stack) {
+      try {
+        final update = gmap.CameraUpdate.newLatLngZoom(
+          gmap.LatLng(target.latitude, target.longitude),
+          zoom,
+        );
+        await map.moveCamera(update);
+      } catch (_) {}
       debugPrint('[FloodController] _moveCamera error: $e');
       debugPrint(stack.toString());
     }
   }
-
-  mb.Point _toPoint(LatLng value) =>
-      mb.Point(coordinates: mb.Position(value.longitude, value.latitude));
 
   String _formatStatus(dynamic statusRaw) {
     if (statusRaw == null) return 'Normal';
@@ -401,6 +408,6 @@ class FloodMonitoringController extends GetxController {
 
   int _generateDelta(int seed, int step) {
     final random = math.Random((seed + step).abs());
-    return random.nextInt(5) - 2; 
+    return random.nextInt(5) - 2;
   }
 }

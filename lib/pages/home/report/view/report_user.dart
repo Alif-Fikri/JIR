@@ -3,7 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:JIR/pages/home/report/controller/report_controller.dart';
+import 'package:image_picker/image_picker.dart' as picker;
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart' as p;
 
 class ReportFormPage extends StatelessWidget {
   final ReportController controller = Get.find();
@@ -119,7 +122,7 @@ class ReportFormPage extends StatelessWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildImagePreview(context),
+                    _buildAttachmentsSection(context),
                     SizedBox(height: 16.h),
                     _buildTypeAndSeverity(),
                     SizedBox(height: 12.h),
@@ -157,6 +160,23 @@ class ReportFormPage extends StatelessWidget {
             onPressed: () => Get.back()),
       );
 
+  Widget _buildAttachmentsSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Lampiran Foto',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+        SizedBox(height: 6.h),
+        _buildImagePreview(context),
+        SizedBox(height: 12.h),
+        Text('Lampiran Dokumen (opsional)',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+        SizedBox(height: 6.h),
+        _buildDocumentAttachment(),
+      ],
+    );
+  }
+
   Widget _buildImagePreview(BuildContext context) {
     final file = controller.imageFile.value;
     if (file == null) {
@@ -181,14 +201,30 @@ class ReportFormPage extends StatelessWidget {
         Positioned(
           top: 8.h,
           right: 8.w,
-          child: GestureDetector(
-            onTap: () => _showFullImage(context),
-            child: Container(
-              padding: EdgeInsets.all(6.w),
-              decoration: const BoxDecoration(
-                  color: Colors.black54, shape: BoxShape.circle),
-              child: Icon(Icons.fullscreen, color: Colors.white, size: 24.sp),
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: () => _showFullImage(context),
+                child: Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: const BoxDecoration(
+                      color: Colors.black54, shape: BoxShape.circle),
+                  child:
+                      Icon(Icons.fullscreen, color: Colors.white, size: 22.sp),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              GestureDetector(
+                onTap: () => controller.pickImage(picker.ImageSource.gallery),
+                child: Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: const BoxDecoration(
+                      color: Colors.black54, shape: BoxShape.circle),
+                  child: Icon(Icons.refresh, color: Colors.white, size: 20.sp),
+                ),
+              ),
+            ],
           ),
         ),
       ]),
@@ -196,79 +232,177 @@ class ReportFormPage extends StatelessWidget {
     ]);
   }
 
+  Widget _buildDocumentAttachment() {
+    return Obx(() {
+      final file = controller.documentFile.value;
+      if (file == null) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            OutlinedButton.icon(
+              onPressed: controller.pickDocument,
+              icon: const Icon(Icons.attach_file),
+              label: Text('Tambah Dokumen', style: GoogleFonts.inter()),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xff45557B),
+                side: const BorderSide(color: Color(0xff45557B)),
+                minimumSize: Size(double.infinity, 48.h),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text('Format yang didukung: PDF, Word, Excel, PPT, TXT',
+                style:
+                    GoogleFonts.inter(fontSize: 11.sp, color: Colors.black54)),
+          ],
+        );
+      }
+      final fileName = p.basename(file.path);
+      return InkWell(
+        onTap: () async {
+          final result = await OpenFilex.open(file.path);
+          if (result.type != ResultType.done) {
+            Get.snackbar('Lampiran', 'Tidak dapat membuka dokumen');
+          }
+        },
+        borderRadius: BorderRadius.circular(12.r),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: const Color(0xffF5F7FB),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: const Color(0xff45557B).withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xff45557B),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: const Icon(Icons.description, color: Colors.white),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(fileName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                            fontWeight: FontWeight.w600, fontSize: 14.sp)),
+                    SizedBox(height: 4.h),
+                    Text('Ketuk untuk membuka',
+                        style: GoogleFonts.inter(
+                            fontSize: 12.sp, color: Colors.black54)),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                color: Colors.black54,
+                onPressed: controller.removeDocument,
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
   Widget _buildTypeAndSeverity() {
-    return Row(
+    final showSeverity = controller.shouldShowSeverity;
+    final severityOptions = controller.currentSeverityOptions;
+    if (showSeverity && severityOptions.isNotEmpty) {
+      final current = controller.severity.value;
+      if (current.isEmpty || !severityOptions.contains(current)) {
+        controller.severity.value = severityOptions.first;
+      }
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Tipe Laporan',
-                style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-            SizedBox(height: 6.h),
-            DropdownButtonFormField<String>(
-              dropdownColor: Colors.white,
-              value: controller.reportType.value,
-              items: [
-                'Banjir',
-                'Pohon Tumbang',
-                'Kecelakaan',
-                'Kebakaran',
-                'Kerusakan Jalan',
-                'Lainnya'
-              ]
-                  .map((e) => DropdownMenuItem(
-                        value: e,
-                        child: Text(e,
-                            style: GoogleFonts.inter(
-                                fontSize: 14.sp, fontWeight: FontWeight.w500)),
-                      ))
-                  .toList(),
-              onChanged: (v) => controller.reportType.value =
-                  v ?? controller.reportType.value,
-              isExpanded: true,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r)),
-              ),
-            ),
-          ]),
+        Text('Tipe Laporan',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+        SizedBox(height: 6.h),
+        DropdownButtonFormField<String>(
+          dropdownColor: Colors.white,
+          value: controller.reportType.value,
+          items: controller.reportTypes
+              .map((e) => DropdownMenuItem(
+                    value: e,
+                    child: Text(e,
+                        style: GoogleFonts.inter(
+                            fontSize: 14.sp, fontWeight: FontWeight.w500)),
+                  ))
+              .toList(),
+          onChanged: (v) {
+            if (v != null) controller.onReportTypeSelected(v);
+          },
+          isExpanded: true,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            border:
+                OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+          ),
         ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Keparahan',
-                style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-            SizedBox(height: 6.h),
-            DropdownButtonFormField<String>(
-              dropdownColor: Colors.white,
-              value: controller.severity.value,
-              items: ['Rendah', 'Sedang', 'Tinggi']
-                  .map((e) => DropdownMenuItem(
-                        value: e,
-                        child: Text(e,
-                            style: GoogleFonts.inter(
-                                fontSize: 14.sp, fontWeight: FontWeight.w500)),
-                      ))
-                  .toList(),
-              onChanged: (v) =>
-                  controller.severity.value = v ?? controller.severity.value,
-              isExpanded: true,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.r)),
-              ),
+        if (showSeverity) ...[
+          SizedBox(height: 12.h),
+          Text(controller.currentSeverityLabel,
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+          SizedBox(height: 6.h),
+          DropdownButtonFormField<String>(
+            dropdownColor: Colors.white,
+            value: controller.severity.value.isEmpty
+                ? severityOptions.first
+                : controller.severity.value,
+            items: severityOptions
+                .map((e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(e,
+                          style: GoogleFonts.inter(
+                              fontSize: 14.sp, fontWeight: FontWeight.w500)),
+                    ))
+                .toList(),
+            onChanged: (v) {
+              if (v != null) controller.severity.value = v;
+            },
+            isExpanded: true,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
             ),
-          ]),
-        ),
+          ),
+        ],
+        if (controller.reportType.value == 'Lainnya') ...[
+          SizedBox(height: 12.h),
+          Text('Detail Jenis Laporan',
+              style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+          SizedBox(height: 6.h),
+          TextFormField(
+            initialValue: controller.customTypeDetail.value,
+            onChanged: (v) => controller.customTypeDetail.value = v,
+            decoration: InputDecoration(
+              hintText: 'Contoh: Kebisingan, fasilitas rusak, dsb.',
+              filled: true,
+              fillColor: Colors.white,
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            ),
+          ),
+        ],
       ],
     );
   }

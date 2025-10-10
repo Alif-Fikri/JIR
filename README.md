@@ -1,1 +1,0 @@
-Frontend flutter & Backend python

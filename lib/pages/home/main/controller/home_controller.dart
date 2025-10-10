@@ -1,12 +1,11 @@
 import 'dart:async';
+import 'package:JIR/pages/home/weather/service/weather_service.dart';
+import 'package:JIR/pages/home/weather/widget/weather_helper.dart';
 import 'package:JIR/services/news_service/news_service.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:JIR/pages/home/weather/widget/weather_helper.dart';
-import 'package:weather/weather.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 
 class HomeController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -17,21 +16,40 @@ class HomeController extends GetxController
   var weatherDescription = 'Loading...'.obs;
   var weatherIcon = ''.obs;
   var backgroundImage = ''.obs;
+  var weatherConditionType = ''.obs;
   var isLoading = true.obs;
 
   var newsList = <NewsItem>[].obs;
   var isNewsLoading = false.obs;
   var newsIndex = 0.obs;
 
-  late WeatherFactory wf;
-  Weather? _cachedWeather;
+  late final WeatherService _weatherService;
+  WeatherCurrent? _cachedWeather;
   Placemark? _cachedPlacemark;
   Position? _cachedPosition;
+
+  Position? get lastKnownPosition => _cachedPosition;
+
+  Future<Position?> ensurePosition({bool forceRefresh = false}) async {
+    if (!forceRefresh && _cachedPosition != null) {
+      return _cachedPosition;
+    }
+
+    if (!await _handleLocationPermission()) {
+      return null;
+    }
+
+    final position = await _getPositionWithFallback();
+    if (position != null) {
+      _cachedPosition = position;
+    }
+    return position;
+  }
 
   @override
   void onInit() {
     super.onInit();
-    wf = WeatherFactory(dotenv.env['WEATHER_API_KEY']!);
+    _weatherService = WeatherService();
     _initAnimation();
     fetchData();
     fetchNews();
@@ -88,10 +106,10 @@ class HomeController extends GetxController
       }
       _cachedPosition = position;
 
-      late Weather weather;
+      late WeatherCurrent weather;
       try {
-        weather = await wf
-            .currentWeatherByLocation(position.latitude, position.longitude)
+        weather = await _weatherService
+            .fetchCurrent(lat: position.latitude, lon: position.longitude)
             .timeout(const Duration(seconds: 10));
         _cachedWeather = weather;
       } on TimeoutException catch (e) {
@@ -123,16 +141,29 @@ class HomeController extends GetxController
           ? placemarks.first
           : _cachedPlacemark ?? const Placemark();
 
-      temperature.value =
-          weather.temperature?.celsius?.toStringAsFixed(1) ?? temperature.value;
+      if (!weather.temperatureCelsius.isNaN) {
+        temperature.value = weather.temperatureCelsius.toStringAsFixed(1);
+      } else if (temperature.value.isEmpty ||
+          temperature.value == 'Loading...' ||
+          temperature.value == 'N/A') {
+        temperature.value = 'N/A';
+      }
       location.value = place.locality?.replaceFirst('Kecamatan ', '') ??
           (location.value.isNotEmpty && location.value != 'Loading...'
               ? location.value
               : 'Unknown Location');
-      weatherDescription.value =
-          WeatherHelper.translateWeather(weather.weatherDescription);
-      weatherIcon.value =
-          WeatherHelper.getImageForWeather(weather.weatherDescription);
+      final rawDescription = weather.description.isNotEmpty
+          ? weather.description
+          : weather.conditionType;
+      weatherConditionType.value = weather.conditionType;
+      weatherDescription.value = WeatherHelper.translateWeather(
+        rawDescription,
+        conditionType: weather.conditionType,
+      );
+      weatherIcon.value = WeatherHelper.getImageForWeather(
+        rawDescription,
+        conditionType: weather.conditionType,
+      );
 
       final currentHour = DateTime.now().hour;
       backgroundImage.value = WeatherHelper.getBackgroundImage(currentHour);
@@ -168,6 +199,7 @@ class HomeController extends GetxController
     weatherDescription.value = 'Loading...';
     weatherIcon.value = '';
     backgroundImage.value = '';
+    weatherConditionType.value = '';
   }
 
   Future<bool> _handleLocationPermission() async {
@@ -195,6 +227,7 @@ class HomeController extends GetxController
     temperature.value = 'N/A';
     weatherDescription.value = 'N/A';
     weatherIcon.value = 'assets/images/Cuaca Smart City Icon-01.png';
+    weatherConditionType.value = '';
     final currentHour = DateTime.now().hour;
     backgroundImage.value = WeatherHelper.getBackgroundImage(currentHour);
   }

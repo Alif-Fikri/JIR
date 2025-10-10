@@ -1,5 +1,4 @@
-import 'package:JIR/helper/map.dart';
-import 'package:JIR/helper/mapbox_config.dart';
+import 'package:JIR/helper/google_map_view.dart';
 import 'package:JIR/pages/home/cctv/cctv_webview.dart';
 import 'package:JIR/pages/home/cctv/model/cctv_location.dart';
 import 'package:JIR/pages/home/map/controller/flood_controller.dart';
@@ -11,10 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart' as ll;
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mb;
 
 class MapMonitoring extends StatelessWidget {
-  final RouteController _routeController = Get.put(RouteController());
+  final RouteController _routeController = Get.find<RouteController>();
   final TextEditingController _searchController = TextEditingController();
   final FloodController controller = Get.find<FloodController>();
   final FocusNode _searchFocusNode = FocusNode();
@@ -94,14 +92,13 @@ class MapMonitoring extends StatelessWidget {
 
         return GetX<RouteController>(
           builder: (routeController) {
-            final routePoints = routeController.routePoints
-                .map((point) => ll.LatLng(point.latitude, point.longitude))
-                .toList();
             final routeOptions = routeController.routeOptions;
             final selectedRouteIndex = routeController.selectedRouteIndex.value;
             final trimmedActivePolyline = routeController.activeRoutePolyline
                 .map((point) => ll.LatLng(point.latitude, point.longitude))
                 .toList();
+            final bool navigationMode = routeController.routeActive.value &&
+                routeController.remainingRouteDistance.value > 0;
             final List<RouteLineConfig> routeLines = [];
             const Color selectedRouteColor = Color(0xFF2563EB);
             const Color alternativeRouteColor = Color(0xFFF97316);
@@ -143,26 +140,23 @@ class MapMonitoring extends StatelessWidget {
             final destinationPoint =
                 dest != null ? ll.LatLng(dest.latitude, dest.longitude) : null;
 
-            return MapboxReusableMap(
-              accessToken: MapboxConfig.accessToken,
-              styleUri: mb.MapboxStyles.MAPBOX_STREETS,
-              initialLocation: userPosition,
+            return JirMapView(
+              initialLocation: userPosition ??
+                  (combinedMarkers.isNotEmpty ? combinedMarkers.first : null),
               markers: combinedMarkers,
               markerData: combinedMarkerData,
               userLocation: userPosition,
-              routePoints: routePoints,
+              userHeading: routeController.userHeading.value,
               routeLines: routeLines,
               waypoints: waypointPositions,
               destination: destinationPoint,
+              navigationMode: navigationMode,
               onMarkerDataTap: _handleMarkerDataTap,
               onRouteTap: (routeId) => routeController.selectRouteById(
                 routeId,
                 showFeedback: true,
               ),
-              enable3DBuildings: true,
-              autoPitchOnRoute: true,
-              navigationPitch: 45,
-              navigationZoom: 15.5,
+              enableMyLocation: true,
             );
           },
         );
@@ -324,23 +318,22 @@ class MapMonitoring extends StatelessWidget {
 
   Widget _buildSuggestionItem(int index) {
     final suggestion = _routeController.searchSuggestions[index];
-    final lat = double.tryParse(suggestion['lat']?.toString() ?? '');
-    final lon = double.tryParse(suggestion['lon']?.toString() ?? '');
 
     return ListTile(
       leading: const Icon(Icons.location_on, size: 20),
       title: Text(suggestion['display_name'] ?? 'Lokasi'),
-      subtitle: _buildSuggestionSubtitle(lat, lon, suggestion),
-      onTap: () => _handleSuggestionTap(lat, lon, suggestion),
+      subtitle: _buildSuggestionSubtitle(suggestion),
+      onTap: () => _handleSuggestionTap(suggestion),
     );
   }
 
-  Widget _buildSuggestionSubtitle(
-      double? lat, double? lon, dynamic suggestion) {
+  Widget _buildSuggestionSubtitle(dynamic suggestion) {
+    final displayName = suggestion['display_name']?.toString() ?? '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if ((suggestion['place_name'] ?? '').toString().isNotEmpty)
+        if ((suggestion['place_name'] ?? '').toString().isNotEmpty &&
+            suggestion['place_name'] != displayName)
           Text(
             suggestion['place_name'],
             maxLines: 2,
@@ -350,30 +343,9 @@ class MapMonitoring extends StatelessWidget {
               color: Colors.grey[700],
             ),
           ),
-        if (lat != null && lon != null)
-          Builder(
-            builder: (context) {
-              final distance = _routeController.userLocation.value != null
-                  ? RouteController.calculateDistance(
-                        _routeController.userLocation.value!,
-                        ll.LatLng(lat, lon),
-                      ) /
-                      1000
-                  : null;
-
-              return distance != null
-                  ? Text(
-                      '${distance.toStringAsFixed(1)} km dari lokasi Anda',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    )
-                  : const SizedBox.shrink();
-            },
-          ),
         Text(
-          RouteController.getLocationType(suggestion['type']),
+          RouteController.getLocationType(
+              (suggestion['type'] ?? '').toString()),
           style: GoogleFonts.inter(
             fontSize: 12,
             color: Colors.blue,
@@ -383,12 +355,10 @@ class MapMonitoring extends StatelessWidget {
     );
   }
 
-  void _handleSuggestionTap(double? lat, double? lon, dynamic suggestion) {
-    if (lat == null || lon == null) return;
-
+  Future<void> _handleSuggestionTap(dynamic suggestion) async {
     _searchController.text = suggestion['display_name'] ?? '';
     _routeController.searchSuggestions.clear();
-    _routeController.selectDestinationSuggestion(suggestion);
+    await _routeController.selectDestinationSuggestion(suggestion);
     _searchFocusNode.unfocus();
   }
 

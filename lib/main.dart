@@ -8,7 +8,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' as mapbox;
 import 'firebase_options.dart';
 import 'package:JIR/app/routes/app_routes.dart';
 import 'package:JIR/bindings/initial_binding.dart';
@@ -20,12 +19,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   if (!kIsWeb) {
-    final mapboxToken = dotenv.env['MAPBOX_ACCESS_TOKEN'] ?? '';
-    if (mapboxToken.isNotEmpty) {
-      mapbox.MapboxOptions.setAccessToken(mapboxToken);
-      debugPrint('Mapbox token initialized for ${defaultTargetPlatform.name}');
-    } else {
-      debugPrint('MAPBOX_ACCESS_TOKEN not found in .env');
+    final mapsKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+    if (mapsKey.isEmpty) {
+      debugPrint('GOOGLE_MAPS_API_KEY not found in .env');
     }
   }
 

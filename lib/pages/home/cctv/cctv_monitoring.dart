@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:JIR/helper/map.dart';
-import 'package:JIR/helper/mapbox_config.dart';
+import 'package:JIR/helper/google_map_view.dart';
 import 'package:JIR/pages/home/cctv/cctv_webview.dart';
 import 'package:JIR/pages/home/cctv/model/cctv_location.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart' as ll;
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:get/get.dart';
 
 class CCTVPage extends StatelessWidget {
   final List<CCTVLocation> cctvLocations =
@@ -16,7 +15,10 @@ class CCTVPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cctvPositions = cctvLocations.map((loc) => loc.coordinates).toList();
+    final markerPositions = cctvLocations
+        .map((loc) =>
+            ll.LatLng(loc.coordinates.latitude, loc.coordinates.longitude))
+        .toList();
 
     final markerData = cctvLocations
         .map((loc) => {
@@ -27,14 +29,22 @@ class CCTVPage extends StatelessWidget {
               'longitude': loc.coordinates.longitude,
             })
         .toList();
+
+    final initialLocation = markerPositions.isNotEmpty
+        ? markerPositions.first
+        : ll.LatLng(-6.2000, 106.8167);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("CCTV",
-            style: GoogleFonts.inter(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white)),
+        title: Text(
+          "CCTV",
+          style: GoogleFonts.inter(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
         backgroundColor: const Color(0xFF45557B),
         elevation: 10,
         shadowColor: Colors.black,
@@ -61,14 +71,25 @@ class CCTVPage extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20.r),
-                child: MapboxReusableMap(
-                  accessToken: MapboxConfig.accessToken,
-                  styleUri: MapboxStyles.MAPBOX_STREETS,
-                  initialLocation: ll.LatLng(-6.2000, 106.8167),
-                  markers: cctvPositions,
+                child: JirMapView(
+                  initialLocation: initialLocation,
+                  markers: markerPositions,
                   markerData: markerData,
-                  userLocation: null,
-                  routePoints: null,
+                  enableMyLocation: false,
+                  autoFitBounds: true,
+                  onMarkerDataTap: (item) {
+                    final name = item['name']?.toString() ?? 'CCTV';
+                    final url = item['url'];
+                    if (url == null) {
+                      Get.snackbar(
+                        'Tidak dapat membuka',
+                        'Link CCTV tidak tersedia',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                      return;
+                    }
+                    _openCCTV(context, name, url.toString());
+                  },
                 ),
               ),
             ),
@@ -77,14 +98,16 @@ class CCTVPage extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 15.w),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text("Ayo Pantau !",
-                  style: GoogleFonts.inter(
-                      fontSize: 20.sp, fontWeight: FontWeight.bold)),
+              child: Text(
+                "Ayo Pantau !",
+                style: GoogleFonts.inter(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
-          Expanded(
-            child: _buildLocationGrid(),
-          ),
+          Expanded(child: _buildLocationGrid()),
         ],
       ),
     );
@@ -133,6 +156,15 @@ class CCTVPage extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => CCTVWebView(url: url),
+      ),
+    );
+  }
+
+  void _openCCTV(BuildContext context, String name, String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CCTVWebView(url: url),
       ),
     );
   }

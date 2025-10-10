@@ -1,12 +1,10 @@
-import 'package:JIR/helper/map.dart';
-import 'package:JIR/helper/mapbox_config.dart';
+import 'package:JIR/helper/google_map_view.dart';
 import 'package:JIR/pages/home/crowd/controller/crowd_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart' as ll;
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 class CrowdMonitoringPage extends StatelessWidget {
   final CrowdController controller = Get.put(CrowdController());
@@ -88,15 +86,13 @@ class CrowdMonitoringPage extends StatelessWidget {
                 color: Colors.black26, blurRadius: 5.r, spreadRadius: 2.r),
           ],
         ),
-        child: MapboxReusableMap(
-          accessToken: MapboxConfig.accessToken,
-          styleUri: MapboxStyles.MAPBOX_STREETS,
+        child: JirMapView(
           initialLocation: ll.LatLng(-6.2000, 106.8167),
           markers: markerPositions,
           markerData: markerData,
           userLocation: null,
-          routePoints: null,
           onMarkerDataTap: _showCrowdDetails,
+          enableMyLocation: false,
         ),
       ),
     );

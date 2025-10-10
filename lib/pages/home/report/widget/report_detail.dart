@@ -1,10 +1,16 @@
 import 'dart:io';
+import 'package:JIR/pages/home/report/controller/report_controller.dart';
+import 'package:JIR/pages/home/report/widget/url_network.dart';
+import 'package:JIR/utils/file_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart' as p;
 import 'package:shimmer/shimmer.dart';
-import 'package:JIR/pages/home/report/widget/url_network.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ReportDetailPage extends StatefulWidget {
   final Map<String, dynamic> report;
@@ -82,6 +88,64 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
     );
   }
 
+  String _resolveDocumentSource(Map<String, dynamic> report) {
+    final candidates = [
+      report['documentPath'],
+      report['document_path'],
+      report['documentUrl'],
+      report['document_url'],
+    ];
+    for (final candidate in candidates) {
+      final value = (candidate ?? '').toString();
+      if (value.isNotEmpty) return value;
+    }
+    return '';
+  }
+
+  Future<void> _openDocumentAttachment(String source) async {
+    if (source.isEmpty) return;
+
+    if (source.startsWith('http')) {
+      final uri = Uri.tryParse(source);
+      if (uri != null && await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        Get.snackbar('Lampiran', 'Tidak dapat membuka tautan dokumen',
+            snackPosition: SnackPosition.BOTTOM);
+      }
+      return;
+    }
+
+    final file = resolveLocalFile(source);
+    if (file != null) {
+      final result = await OpenFilex.open(file.path);
+      if (result.type != ResultType.done) {
+        Get.snackbar('Lampiran', 'Gagal membuka dokumen: ${result.message}',
+            snackPosition: SnackPosition.BOTTOM);
+      }
+      return;
+    }
+
+    final uri = Uri.tryParse(source);
+    if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    }
+
+    Get.snackbar('Lampiran', 'Lampiran dokumen tidak ditemukan',
+        snackPosition: SnackPosition.BOTTOM);
+  }
+
+  String _documentDisplayName(String source) {
+    try {
+      return p.basename(source);
+    } catch (_) {
+      return 'Lampiran';
+    }
+  }
+
   Widget _buildField(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,6 +209,13 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
     final address = (report['address'] ?? '').toString();
     final status = (report['status'] ?? 'Menunggu').toString();
     final severity = (report['severity'] ?? '').toString();
+    final severityLabel = ReportController.severityLabelForType(
+        (report['type'] ?? '').toString());
+    final customTypeDetail =
+        (report['customTypeDetail'] ?? report['custom_type_detail'] ?? '')
+            .toString();
+    final documentSource = _resolveDocumentSource(report);
+    final hasDocument = documentSource.isNotEmpty;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -296,7 +367,8 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                                 child: isLoading
                                     ? _shimmerBox(
                                         height: 36, width: double.infinity)
-                                    : _buildField('Keparahan', severity),
+                                    : _buildField(severityLabel,
+                                        severity.isNotEmpty ? severity : '-'),
                               ),
                             ],
                           ),
@@ -339,6 +411,70 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                                                 color: Colors.black87)),
                                       ),
                               ]),
+                          SizedBox(height: 12.h),
+                          if (!isLoading && customTypeDetail.isNotEmpty)
+                            _buildField('Detail Laporan', customTypeDetail),
+                          if (isLoading && hasDocument)
+                            _shimmerBox(height: 48, width: double.infinity),
+                          if (!isLoading && hasDocument)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Lampiran Dokumen',
+                                    style: GoogleFonts.inter(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF45557B))),
+                                SizedBox(height: 6.h),
+                                GestureDetector(
+                                  onTap: () =>
+                                      _openDocumentAttachment(documentSource),
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 12.w, vertical: 14.h),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                          color: Colors.grey.shade300),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 40.w,
+                                          height: 40.w,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFEEF2FF),
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                          ),
+                                          child: Icon(Icons.insert_drive_file,
+                                              color: const Color(0xFF45557B),
+                                              size: 22.sp),
+                                        ),
+                                        SizedBox(width: 12.w),
+                                        Expanded(
+                                          child: Text(
+                                            _documentDisplayName(
+                                                documentSource),
+                                            style: GoogleFonts.inter(
+                                                fontSize: 13.sp,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black87),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Icon(Icons.open_in_new,
+                                            color: const Color(0xFF45557B),
+                                            size: 20.sp),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                         ],
                       ),
                     ),

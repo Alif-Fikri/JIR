@@ -9,12 +9,48 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:JIR/config.dart';
 import 'package:JIR/utils/file_utils.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ReportController extends GetxController {
+  static const List<String> _reportTypes = [
+    'Banjir',
+    'Pohon Tumbang',
+    'Kecelakaan',
+    'Kebakaran',
+    'Kerusakan Jalan',
+    'Demo',
+    'Kemacetan',
+    'Kriminalitas',
+    'Lainnya'
+  ];
+
+  static const Map<String, List<String>> _severityOptions = {
+    'Banjir': ['Genangan', 'Sedang', 'Parah', 'Kritis'],
+    'Pohon Tumbang': ['Sebagian', 'Total'],
+    'Kecelakaan': ['Ringan', 'Sedang', 'Berat', 'Fatal'],
+    'Kebakaran': ['Kecil', 'Menengah', 'Besar'],
+    'Kerusakan Jalan': ['Retak', 'Berlubang', 'Rusak Berat'],
+    'Demo': ['Terkendali', 'Meningkat', 'Kacau'],
+    'Kemacetan': ['Lancar', 'Padat', 'Macet Total'],
+    'Kriminalitas': ['Percobaan', 'Ringan', 'Berbahaya']
+  };
+
+  static const Map<String, String> _severityLabels = {
+    'Banjir': 'Level Banjir',
+    'Pohon Tumbang': 'Tingkat Kerusakan',
+    'Kecelakaan': 'Skala Insiden',
+    'Kebakaran': 'Skala Api',
+    'Kerusakan Jalan': 'Tingkat Kerusakan',
+    'Demo': 'Situasi Massa',
+    'Kemacetan': 'Kondisi Lalu Lintas',
+    'Kriminalitas': 'Level Ancaman'
+  };
+
   final imageFile = Rxn<File>();
+  final documentFile = Rxn<File>();
   final description = ''.obs;
   final reportType = 'Banjir'.obs;
-  final severity = 'Rendah'.obs;
+  final severity = ''.obs;
   final address = ''.obs;
   final latitude = 0.0.obs;
   final longitude = 0.0.obs;
@@ -22,6 +58,7 @@ class ReportController extends GetxController {
   final contactPhone = ''.obs;
   final dateTime = DateTime.now().obs;
   final isAnonymous = false.obs;
+  final customTypeDetail = ''.obs;
 
   final _picker = ImagePicker();
   final reports = <Map<String, dynamic>>[].obs;
@@ -29,7 +66,40 @@ class ReportController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _syncSeverityWithType('Banjir');
     loadReportsFromHive();
+  }
+
+  List<String> get reportTypes => _reportTypes;
+
+  List<String> get currentSeverityOptions =>
+      _severityOptions[reportType.value] ?? const [];
+
+  String get currentSeverityLabel =>
+      _severityLabels[reportType.value] ?? 'Keparahan';
+
+  bool get shouldShowSeverity => currentSeverityOptions.isNotEmpty;
+
+  static String severityLabelForType(String type) {
+    return _severityLabels[type] ?? 'Keparahan';
+  }
+
+  void onReportTypeSelected(String type) {
+    reportType.value = type;
+    _syncSeverityWithType(type);
+    if (type != 'Lainnya') {
+      customTypeDetail.value = '';
+    }
+  }
+
+  void _syncSeverityWithType(String type) {
+    final options = _severityOptions[type];
+    if (options == null || options.isEmpty) {
+      severity.value = '';
+    } else {
+      final current = severity.value;
+      severity.value = options.contains(current) ? current : options.first;
+    }
   }
 
   Map<String, dynamic> _normalizeReport(dynamic raw) {
@@ -102,6 +172,37 @@ class ReportController extends GetxController {
     }
   }
 
+  Future<void> pickDocument() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const [
+          'pdf',
+          'doc',
+          'docx',
+          'xls',
+          'xlsx',
+          'ppt',
+          'pptx',
+          'txt'
+        ],
+      );
+      if (result != null && result.files.isNotEmpty) {
+        final filePath = result.files.single.path;
+        if (filePath != null) {
+          final saved = await savePickedFilePermanently(File(filePath));
+          documentFile.value = saved;
+        }
+      }
+    } catch (e) {
+      Get.snackbar('Lampiran', 'Gagal memilih dokumen: ${e.toString()}');
+    }
+  }
+
+  void removeDocument() {
+    documentFile.value = null;
+  }
+
   Future<void> fillLocationFromGPS() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -152,40 +253,55 @@ class ReportController extends GetxController {
       return;
     }
 
+    if (reportType.value == 'Lainnya' &&
+        customTypeDetail.value.trim().isEmpty) {
+      Get.snackbar('Error', 'Jelaskan detail laporan untuk kategori Lainnya');
+      return;
+    }
+
     Get.toNamed(AppRoutes.reportLoading);
     final now = DateTime.now();
     final report = {
       'id': now.millisecondsSinceEpoch,
       'type': reportType.value,
-      'severity': severity.value,
+      'severity': shouldShowSeverity ? severity.value : '',
       'address': address.value,
       'latitude': latitude.value,
       'longitude': longitude.value,
       'description': description.value,
       'imagePath': imageFile.value!.path,
+      'documentPath': documentFile.value?.path ?? '',
       'contactName': isAnonymous.value ? 'Anonim' : contactName.value,
       'contactPhone': isAnonymous.value ? '' : contactPhone.value,
       'dateTime': dateTime.value.toIso8601String(),
       'isAnonymous': isAnonymous.value,
+      'customTypeDetail': customTypeDetail.value,
       'status': 'Menunggu'
     };
 
     final imagePath =
         (report['imagePath'] is String) ? report['imagePath'] as String : '';
+    final documentPath = (report['documentPath'] is String)
+        ? report['documentPath'] as String
+        : '';
 
     bool uploaded = false;
     if (imagePath.isNotEmpty) {
       final file = File(imagePath);
-      uploaded = await _uploadReportToServer(report, file);
+      uploaded = await _uploadReportToServer(report, file,
+          documentAttachment:
+              documentPath.isNotEmpty ? File(documentPath) : null);
     }
 
     reports.insert(0, Map<String, dynamic>.from(report));
     await saveReportsToHive();
     imageFile.value = null;
+    documentFile.value = null;
     description.value = '';
     contactName.value = '';
     contactPhone.value = '';
     isAnonymous.value = false;
+    customTypeDetail.value = '';
     Get.offNamed(AppRoutes.home, arguments: 1);
 
     if (uploaded) {
@@ -195,8 +311,8 @@ class ReportController extends GetxController {
     }
   }
 
-  Future<bool> _uploadReportToServer(
-      Map<String, dynamic> report, File image) async {
+  Future<bool> _uploadReportToServer(Map<String, dynamic> report, File image,
+      {File? documentAttachment}) async {
     try {
       final uri = Uri.parse("$mainUrl/api/reports/");
       final request = http.MultipartRequest('POST', uri);
@@ -213,6 +329,10 @@ class ReportController extends GetxController {
       request.fields['date_time'] = (report['dateTime'] ?? '').toString();
       request.fields['is_anonymous'] =
           (report['isAnonymous'] == true) ? 'true' : 'false';
+      if ((report['customTypeDetail'] ?? '').toString().isNotEmpty) {
+        request.fields['custom_type_detail'] =
+            (report['customTypeDetail'] ?? '').toString();
+      }
       if (Hive.isBoxOpen('authBox')) {
         final authBox = Hive.box('authBox');
         final token = authBox.get('fcm_token');
@@ -228,6 +348,18 @@ class ReportController extends GetxController {
         filename: path.basename(image.path),
       );
       request.files.add(multipartFile);
+
+      if (documentAttachment != null && await documentAttachment.exists()) {
+        final docStream = http.ByteStream(documentAttachment.openRead());
+        final docLength = await documentAttachment.length();
+        final docFile = http.MultipartFile(
+          'document',
+          docStream,
+          docLength,
+          filename: path.basename(documentAttachment.path),
+        );
+        request.files.add(docFile);
+      }
 
       final streamedResponse =
           await request.send().timeout(const Duration(seconds: 30));
@@ -287,6 +419,8 @@ class ReportController extends GetxController {
         'description': serverReport['description'],
         'imagePath':
             serverReport['image_path'] ?? serverReport['imagePath'] ?? '',
+        'documentPath':
+            serverReport['document_path'] ?? serverReport['documentPath'] ?? '',
         'contactName': serverReport['contact_name'] ??
             serverReport['contactName'] ??
             'Anonim',
@@ -298,6 +432,9 @@ class ReportController extends GetxController {
             false,
         'status': serverReport['status'] ?? 'Menunggu',
         'reject_reason': serverReport['reject_reason'] ?? '',
+        'customTypeDetail': serverReport['custom_type_detail'] ??
+            serverReport['customTypeDetail'] ??
+            '',
       };
 
       if (idx >= 0) {
